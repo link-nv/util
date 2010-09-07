@@ -1,0 +1,65 @@
+#! /usr/bin/env bash
+# ___________________________________________________________________________ #
+#                                                                             #
+#       JarDiff -- Compare two Java Archives to find relevant differences.    #
+#                                                                             #
+#                                                                             #
+#    Licensed under the Apache License, Version 2.0 (the "License");          #
+#    you may not use this file except in compliance with the License.         #
+#    You may obtain a copy of the License at                                  #
+#                                                                             #
+#        http://www.apache.org/licenses/LICENSE-2.0                           #
+#                                                                             #
+#    Unless required by applicable law or agreed to in writing, software      #
+#    distributed under the License is distributed on an "AS IS" BASIS,        #
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. #
+#    See the License for the specific language governing permissions and      #
+#    limitations under the License.                                           #
+# ___________________________________________________________________________ #
+#                                                                             #
+#                                                                             #
+# Copyright 2007, lhunath                                                     #
+#   * http://lhunath.lyndir.com                                               #
+#   * Maarten Billemont.                                                      #
+#                                                                             #
+source "${0%/*}/bashlib"                                                      #
+
+
+# Configuration.
+workdir=$(mktemp -d)
+trap 'rm -rf "$workdir"' EXIT
+
+
+# Parse command-line arguments.
+old=$1; [[ $old = /* ]] || old=$PWD/$old
+new=$2; [[ $new = /* ]] || new=$PWD/$new
+
+
+# Recursively extract all archives within the old and new archives.
+"${0%/*}"/jarextract "$old" "old" "$workdir"
+"${0%/*}"/jarextract "$new" "new" "$workdir"
+
+# Enumerate the files and their file sizes.
+emit "Recording comparison heuristics" --
+    cd "$workdir/old" && find . -type f ! -name '*.?ar' -printf "%s old %p\0" > "$workdir/old.ls" || \
+        { emit -$?; exit $?; }
+    cd "$workdir/new" && find . -type f ! -name '*.?ar' -printf "%s new %p\0" > "$workdir/new.ls" || \
+        { emit -$?; exit $?; }
+emit -0
+
+# Scanning for differences in the heuristics.
+emit "Scanning heuristics for changes"
+    prevFile=; prevType=; prevSize=
+    while read -d '' size type file; do
+        if [[ $prevFile ]]; then
+            if [[ $file != $prevFile ]]; then
+                emit -y "$prevFile only found in $prevType archive."
+            else
+                [[ $size != $prevSize ]] \
+                    && emit -Y "$prevSize\t->\t$size\t: $file"
+                prevFile=; continue
+            fi
+        fi
+
+        prevFile=$file; prevType=$type; prevSize=$size
+    done < <(cat "$workdir/old.ls" "$workdir/new.ls" | sort -z -k 3 -k 2 -k 1 | tee >(tr '\0' '\n' > "$HOME/jardiff"))
