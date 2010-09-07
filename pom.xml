@@ -65,25 +65,85 @@
     <distributionManagement>
         <repository>
             <id>buildserver-release-repository</id>
-            <url>scpexe://buildserver/home/devel/maven2/repositories/release
-            </url>
+            <url>scpexe://buildserver/home/devel/maven2/repositories/release</url>
         </repository>
         <snapshotRepository>
-            <id>buildserver-snapshot-repository
-            </id>
-            <url>scpexe://buildserver/home/devel/maven2/repositories/snapshot
-            </url>
+            <id>buildserver-snapshot-repository</id>
+            <url>scpexe://buildserver/home/devel/maven2/repositories/snapshot</url>
             <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
         <site>
             <id>buildserver-site-repository</id>
-            <url>scpexe://buildserver/home/devel/maven2/site/util
-            </url>
+            <url>scpexe://buildserver/home/devel/maven2/site/util</url>
         </site>
     </distributionManagement>
     <reporting>
         <outputDirectory>target/site</outputDirectory>
     </reporting>
+
+    <profiles>
+        <!-- Profile for exporting to linkid's public repository -->
+        <profile>
+            <id>dep:export</id>
+            <distributionManagement>
+                <repository>
+                    <id>repo.linkid.be</id>
+                    <url>scpexe://repo.linkid.be/home/maven/repository/releases</url>
+                </repository>
+                <snapshotRepository>
+                    <id>repo.linkid.be</id>
+                    <url>scpexe://repo.linkid.be/home/maven/repository/snapshots</url>
+                </snapshotRepository>
+            </distributionManagement>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.stackoverflow</groupId>
+                        <artifactId>maven-export-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>output</id>
+                                <goals>
+                                    <goal>output-project</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <modules>
+                <module>util-jpa</module>
+                <module>util-test</module>
+                <module>util-j2ee</module>
+                <module>util-wicket</module>
+            </modules>
+        </profile>
+    </profiles>
 
     <!-- MODULES -->
     <modules>
