@@ -20,7 +20,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.ejb.EJB;
-import net.link.safeonline.util.j2ee.NamingStrategy;
+import net.link.util.j2ee.NamingStrategy;
 import org.apache.wicket.injection.IFieldValueFactory;
 import org.apache.wicket.proxy.IProxyTargetLocator;
 import org.apache.wicket.proxy.LazyInitProxyFactory;

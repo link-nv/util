@@ -16,7 +16,7 @@
  */
 package org.wicketstuff.javaee.injection;
 
-import net.link.safeonline.util.j2ee.NamingStrategy;
+import net.link.util.j2ee.NamingStrategy;
 import org.apache.wicket.injection.ComponentInjector;
 import org.apache.wicket.injection.web.InjectorHolder;
 
