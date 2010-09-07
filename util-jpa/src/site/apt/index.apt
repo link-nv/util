@@ -1,0 +1,8 @@
+SafeOnline Java Persistence API Utility library
+
+ This utility library contains helper classes to ease the working with JPA named queries.
+ 
+ The problem with JPA named queries is that you don't have a strongly-typed interface that
+ expresses what goes in and what comes out from the named queries.
+ 
+ Via the <<<QueryObjectFactory>>> we have solved this problem.
