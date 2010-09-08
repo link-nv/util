@@ -6,7 +6,7 @@
  */
 package net.link.util.wicket.util;
 
-import net.link.util.j2ee.FieldNamingStrategy;
+import net.link.util.j2ee.NamingStrategy;
 import net.link.util.wicket.behaviour.FocusOnReady;
 import net.link.util.wicket.component.WicketPage;
 import org.apache.commons.collections.CollectionUtils;
@@ -22,7 +22,6 @@ import org.apache.wicket.protocol.http.WebRequest;
 import org.apache.wicket.protocol.http.WebResponse;
 import org.wicketstuff.javaee.injection.AnnotJavaEEInjector;
 
-import javax.ejb.EJB;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -88,18 +87,18 @@ public abstract class WicketUtils {
     }
 
     /**
-     * Add an injector to the given Wicket web application that will resolve fields with the {@link EJB} annotation.
+     * Add an injector to the given Wicket web application that will resolve fields according the specified {@link NamingStrategy}.
      *
-     * @see FieldNamingStrategy
+     * @see NamingStrategy
      */
-    public static void addInjector(WebApplication application) {
+    public static void addInjector(WebApplication application, final NamingStrategy namingStrategy) {
 
         application.addComponentInstantiationListener(new ComponentInjector() {
 
             @Override
             public void onInstantiation(Component component) {
 
-                inject(component);
+                inject(component, namingStrategy);
             }
         });
     }
@@ -107,10 +106,10 @@ public abstract class WicketUtils {
     /**
      * Perform Java EE injections on the given objects.
      */
-    public static void inject(Object injectee) {
+    public static void inject(Object injectee, NamingStrategy namingStrategy) {
 
         if (eeInjector == null)
-            eeInjector = new AnnotJavaEEInjector(new FieldNamingStrategy());
+            eeInjector = new AnnotJavaEEInjector(namingStrategy);
 
         eeInjector.inject(injectee);
     }

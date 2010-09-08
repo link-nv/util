@@ -23,7 +23,10 @@
         <dependency>
             <groupId>net.lin-k.util</groupId>
             <artifactId>util-j2ee</artifactId>
-            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.lin-k.util</groupId>
+            <artifactId>util-j2ee-jboss4</artifactId>
         </dependency>
 
         <!-- Specific Dependencies: External -->

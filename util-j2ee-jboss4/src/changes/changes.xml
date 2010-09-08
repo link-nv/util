@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+
+    <properties>
+        <title>Changes</title>
+        <author email="frank@lin-k.net">Frank Cornelis</author>
+    </properties>
+
+    <body>
+
+        <release version="1.0-SNAPSHOT" date="in SVN" desc="Initial release.">
+            <action type="add" dev="fcorneli">
+                JNDI lookup in EJBUtils.
+            </action>
+            <action type="add" dev="fcorneli">
+                Credential cache flush method in SecurityManagerUtils.
+            </action>
+        </release>
+
+    </body>
+
+</document>

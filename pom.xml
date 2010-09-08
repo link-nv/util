@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <!-- PROJECT METADATA -->
@@ -150,6 +151,7 @@
         <module>util-test</module>
         <module>util-j2ee</module>
         <module>util-wicket</module>
+        <module>util-j2ee-jboss4</module>
     </modules>
 
     <!-- DEFAULT PROPERTIES -->
@@ -333,7 +335,7 @@
                     <version>${maven-javadoc-plugin.version}
                     </version>
                 </plugin>
-               <plugin>
+                <plugin>
                     <groupId>com.stackoverflow</groupId>
                     <artifactId>maven-export-plugin</artifactId>
                     <version>${maven-export-plugin.version}</version>
@@ -403,6 +405,31 @@
         <dependencies>
 
             <!-- Util -->
+            <dependency>
+                <groupId>net.lin-k.util</groupId>
+                <artifactId>util-j2ee</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.lin-k.util</groupId>
+                <artifactId>util-j2ee-jboss4</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.lin-k.util</groupId>
+                <artifactId>util-jpa</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.lin-k.util</groupId>
+                <artifactId>util-test</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.lin-k.util</groupId>
+                <artifactId>util-wicket</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!-- External -->
             <dependency>

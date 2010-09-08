@@ -7,12 +7,13 @@
 package net.link.util.j2ee;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 
 
 /**
  * <h2>{@link NamingStrategy}<br>
  * <sub>Strategy which resolves the JNDI name of the given type.</sub></h2>
- *
+ * <p/>
  * <p>
  * <i>Mar 3, 2009</i>
  * </p>
@@ -22,4 +23,6 @@ import java.io.Serializable;
 public interface NamingStrategy extends Serializable {
 
     public String calculateName(Class<?> ejbType);
+
+    public boolean isSupported(Field field);
 }

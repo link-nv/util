@@ -22,7 +22,7 @@ import org.apache.wicket.injection.IFieldValueFactory;
 
 
 /**
- * Injector that injects ejb references based on {@link javax.ejb.EJB} annotation
+ * Injector that injects ejb references based on {@link NamingStrategy}.
  *
  * @author Filippo Diotalevi
  */
@@ -37,12 +37,12 @@ public class AnnotJavaEEInjector extends ConfigurableInjector {
      */
     public AnnotJavaEEInjector(NamingStrategy namingStrategy) {
 
-        initFactory( namingStrategy );
+        initFactory(namingStrategy);
     }
 
     private void initFactory(NamingStrategy namingStrategy) {
 
-        factory = new JavaEEProxyFieldValueFactory( namingStrategy );
+        factory = new JavaEEProxyFieldValueFactory(namingStrategy);
     }
 
     @Override

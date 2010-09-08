@@ -16,19 +16,19 @@
  */
 package org.wicketstuff.javaee.injection;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.concurrent.ConcurrentHashMap;
-import javax.ejb.EJB;
 import net.link.util.j2ee.NamingStrategy;
 import org.apache.wicket.injection.IFieldValueFactory;
 import org.apache.wicket.proxy.IProxyTargetLocator;
 import org.apache.wicket.proxy.LazyInitProxyFactory;
 import org.wicketstuff.javaee.JavaEEBeanLocator;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.concurrent.ConcurrentHashMap;
+
 
 /**
- * {@link IFieldValueFactory} that creates proxies of EJBs based on the {@link javax.ejb.EJB} annotation applied to a field.
+ * {@link IFieldValueFactory} that creates proxies of EJBs based on the {@link NamingStrategy}.
  *
  * @author Filippo Diotalevi
  */
@@ -52,8 +52,8 @@ public class JavaEEProxyFieldValueFactory implements IFieldValueFactory {
      */
     public Object getFieldValue(Field field, Object fieldOwner) {
 
-        IProxyTargetLocator locator = getProxyTargetLocator( field );
-        return getCachedProxy( field.getType(), locator );
+        IProxyTargetLocator locator = getProxyTargetLocator(field);
+        return getCachedProxy(field.getType(), locator);
     }
 
     /**
@@ -61,7 +61,7 @@ public class JavaEEProxyFieldValueFactory implements IFieldValueFactory {
      */
     public boolean supportsField(Field field) {
 
-        return field.isAnnotationPresent( EJB.class );
+        return namingStrategy.isSupported(field);
     }
 
     private Object getCachedProxy(Class<?> type, IProxyTargetLocator locator) {
@@ -72,23 +72,23 @@ public class JavaEEProxyFieldValueFactory implements IFieldValueFactory {
         // if (cache.containsKey(locator))
         // return cache.get(locator);
 
-        if (!Modifier.isFinal( type.getModifiers() )) {
-            Object proxy = LazyInitProxyFactory.createProxy( type, locator );
-            cache.put( locator, proxy );
+        if (!Modifier.isFinal(type.getModifiers())) {
+            Object proxy = LazyInitProxyFactory.createProxy(type, locator);
+            cache.put(locator, proxy);
 
             return proxy;
         }
 
         Object value = locator.locateProxyTarget();
-        cache.put( locator, value );
+        cache.put(locator, value);
 
         return value;
     }
 
     private IProxyTargetLocator getProxyTargetLocator(Field field) {
 
-        if (field.isAnnotationPresent( EJB.class ))
-            return new JavaEEBeanLocator( field.getType(), namingStrategy );
+        if (namingStrategy.isSupported(field))
+            return new JavaEEBeanLocator(field.getType(), namingStrategy);
 
         return null;
     }

@@ -19,7 +19,6 @@
         <dependency>
             <groupId>net.lin-k.util</groupId>
             <artifactId>util-j2ee</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <!-- Specific Dependencies: External -->
