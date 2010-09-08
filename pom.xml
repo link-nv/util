@@ -164,6 +164,8 @@
         <maven-jar-plugin.version>2.1</maven-jar-plugin.version>
         <maven-dependency-plugin.version>2.1</maven-dependency-plugin.version>
         <maven-javadoc-plugin.version>2.5</maven-javadoc-plugin.version>
+        <maven-export-plugin.version>1.4</maven-export-plugin.version>
+
 
         <!-- DEFAULT VERSIONS, SEE DEPENDENCIES -->
         <release.version>1.0</release.version>
@@ -275,16 +277,6 @@
                 </configuration>
                 <inherited>true</inherited>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-idea-plugin</artifactId>
-                <configuration>
-                    <downloadSources>true</downloadSources>
-                    <downloadJavadocs>true</downloadJavadocs>
-                    <jdkName>1.6 (Soylatte)</jdkName>
-                </configuration>
-                <inherited>true</inherited>
-            </plugin>
 
         </plugins>
 
@@ -340,6 +332,11 @@
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>${maven-javadoc-plugin.version}
                     </version>
+                </plugin>
+               <plugin>
+                    <groupId>com.stackoverflow</groupId>
+                    <artifactId>maven-export-plugin</artifactId>
+                    <version>${maven-export-plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
