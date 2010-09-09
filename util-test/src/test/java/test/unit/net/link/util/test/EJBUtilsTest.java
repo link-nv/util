@@ -8,7 +8,7 @@
 package test.unit.net.link.util.test;
 
 import junit.framework.TestCase;
-import net.link.util.j2ee.EJBUtils;
+import net.link.util.j2ee.JNDIUtils;
 import net.link.util.test.j2ee.JNDITestUtils;
 
 import java.util.List;
@@ -44,7 +44,7 @@ public class EJBUtilsTest extends TestCase {
         String jndiPrefix = "test/prefix/" + getName();
 
         // Test
-        Map<String, TestType> result = EJBUtils.getComponentNames(jndiPrefix, TestType.class);
+        Map<String, TestType> result = JNDIUtils.getComponentNames(jndiPrefix, TestType.class);
 
         // Verify
         assertNotNull(result);
@@ -61,7 +61,7 @@ public class EJBUtilsTest extends TestCase {
         jndiTestUtils.bindComponent(jndiPrefix + "/" + objectName, testObject);
 
         // Test
-        Map<String, TestType> result = EJBUtils.getComponentNames(jndiPrefix, TestType.class);
+        Map<String, TestType> result = JNDIUtils.getComponentNames(jndiPrefix, TestType.class);
 
         // Verify
         assertEquals(1, result.size());
@@ -75,7 +75,7 @@ public class EJBUtilsTest extends TestCase {
         String jndiPrefix = "test/prefix/" + getName();
 
         // Test
-        List<TestType> result = EJBUtils.getComponents(jndiPrefix, TestType.class);
+        List<TestType> result = JNDIUtils.getComponents(jndiPrefix, TestType.class);
 
         // Verify
         assertNotNull(result);
@@ -92,7 +92,7 @@ public class EJBUtilsTest extends TestCase {
         jndiTestUtils.bindComponent(jndiPrefix + "/" + objectName, testObject);
 
         // Test
-        List<TestType> result = EJBUtils.getComponents(jndiPrefix, TestType.class);
+        List<TestType> result = JNDIUtils.getComponents(jndiPrefix, TestType.class);
 
         // Verify
         assertEquals(1, result.size());
