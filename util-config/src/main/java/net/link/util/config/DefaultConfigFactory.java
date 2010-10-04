@@ -449,8 +449,8 @@ public class DefaultConfigFactory<A extends AppConfig> {
         public Object invoke(Object proxy, Method method, Object[] args)
                 throws Throwable {
 
-            if ("toString".equals( method.getName() ) && (args == null || args.length == 0))
-                return toString();
+            if (method.getDeclaringClass().equals( Object.class ))
+                return method.invoke( this, args );
 
             if ("app".equals( method.getName() ) && method.getDeclaringClass().equals( Config.class ))
                 return getAppConfig();
@@ -483,8 +483,8 @@ public class DefaultConfigFactory<A extends AppConfig> {
         public Object invoke(Object proxy, Method method, Object[] args)
                 throws Throwable {
 
-            if ("toString".equals( method.getName() ) && (args == null || args.length == 0))
-                return toString();
+            if (method.getDeclaringClass().equals(Object.class ))
+                return method.invoke( this, args );
 
             Object value = method.invoke( config, args );
 
