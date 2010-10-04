@@ -280,7 +280,7 @@ emit() {
         spinPid=$!
 
         # Execute the command for the spinner if one is given.
-        #sleep .01 # Let the spinner initialize itself properly first. # Can probably remove this now that we echo > spinPipe?
+        #sleep 1 # Let the spinner initialize itself properly first. # Can probably remove this now that we echo > spinPipe?
         if   (( $# == 1 )); then command=$1
         elif (( $# >  1 )); then command=$(printf '%q ' "$@")
         else return 0; fi
@@ -331,6 +331,15 @@ spinner() {
         emit -y 'Please specify a message as argument or a status option.'
         return 1
     }
+
+    # Initialize spinner vars.
+    # Make sure monitor mode is off or we won't be able to trap INT properly.
+    local monitor=0; [[ $- = *m* ]] && monitor=1
+    local done=
+
+    # Place the trap for interrupt signals.
+    trap 'done="${red}failed"' USR2
+    trap 'done="${green}done"' USR1
 
     # Initialize the vars.
     local pid=${spinPid:-$!}
@@ -384,15 +393,6 @@ spinner() {
     [[ ${styles[2]} ]] && textstyle=${styles[2]}
     [[ ${styles[3]} ]] && textcolor=${styles[3]}
 
-    # Initialize spinner vars.
-    # Make sure monitor mode is off or we won't be able to trap INT properly.
-    local monitor=0; [[ $- = *m* ]] && monitor=1
-    local done="${green}done"
-
-    # Place the trap for interrupt signals.
-    trap 'done="${red}failed"; break' USR2
-    trap 'break' USR1
-
     # Figure out what FD to use for our messages.
     [[ -t 1 ]]; local fd=$(( $? + 1 ))
 
@@ -408,7 +408,7 @@ spinner() {
     # Render the spinner.
     set +m
     local i=0
-    while true; do
+    while [[ ! $done ]]; do
         IFS= read -r -d '' newtext || true
         newtext=${newtext%%$'\n'}; newtext=${newtext##*$'\n'}
         if [[ $newtext = +* ]]; then
@@ -434,7 +434,7 @@ spinner() {
         sleep .25 # Four iterations make one second.
 
         # Cancel when calling script disappears.
-        kill -0 $$ >/dev/null || { done="${red}aborted"; break; }
+        kill -0 $$ >/dev/null || done="${red}aborted"
     done
 
     # Get rid of the spinner traps.

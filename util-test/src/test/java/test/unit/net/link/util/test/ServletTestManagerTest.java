@@ -19,6 +19,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import net.link.util.test.web.ContainerSetup;
+import net.link.util.test.web.FilterSetup;
+import net.link.util.test.web.ServletSetup;
 import net.link.util.test.web.ServletTestManager;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -124,7 +127,8 @@ public class ServletTestManagerTest {
             throws Exception {
 
         ServletTestManager servletTestManager = new ServletTestManager();
-        servletTestManager.setUp( TestServlet.class );
+        servletTestManager.setUp( new ContainerSetup( //
+                new ServletSetup( TestServlet.class ) ) );
         try {
             TestServlet.reset();
             String location = servletTestManager.getServletLocation();
@@ -145,10 +149,10 @@ public class ServletTestManagerTest {
             throws Exception {
 
         ServletTestManager servletTestManager = new ServletTestManager();
-        Map<String, String> initParams = new HashMap<String, String>();
-        initParams.put( "param1", "value1" );
-        initParams.put( "param2", "value2" );
-        servletTestManager.setUp( TestServlet.class, initParams );
+        servletTestManager.setUp( new ContainerSetup( //
+                new ServletSetup( TestServlet.class ) //
+                        .addInitParameter( "param1", "value1" ) //
+                        .addInitParameter( "param2", "value2" ) ) );
         try {
             TestServlet.reset();
             String location = servletTestManager.getServletLocation();
@@ -220,7 +224,7 @@ public class ServletTestManagerTest {
         ServletTestManager servletTestManager = new ServletTestManager();
         TestServlet.reset();
         TestFilter.reset();
-        servletTestManager.setUp( TestServlet.class, TestFilter.class );
+        servletTestManager.setUp( new ContainerSetup( new ServletSetup( TestServlet.class ), new FilterSetup( TestFilter.class ) ) );
         try {
             String location = servletTestManager.getServletLocation();
             LOG.debug( "location: " + location );
@@ -241,12 +245,13 @@ public class ServletTestManagerTest {
             throws Exception {
 
         ServletTestManager servletTestManager = new ServletTestManager();
-        Map<String, String> filterInitParams = new HashMap<String, String>();
-        filterInitParams.put( "param1", "value1" );
-        filterInitParams.put( "param2", "value2" );
         TestServlet.reset();
         TestFilter.reset();
-        servletTestManager.setUp( TestServlet.class, TestFilter.class, filterInitParams );
+        servletTestManager.setUp( new ContainerSetup( //
+                new ServletSetup( TestServlet.class ), //
+                new FilterSetup( TestFilter.class ) //
+                        .addInitParameter( "param1", "value1" ) //
+                        .addInitParameter( "param2", "value2" ) ) );
         try {
             String location = servletTestManager.getServletLocation();
             LOG.debug( "location: " + location );
@@ -271,7 +276,8 @@ public class ServletTestManagerTest {
         ServletTestManager servletTestManager = new ServletTestManager();
         TestServlet.reset();
         TestServlet.setSessionAttributeWhenInvoked( "attribute1", "value1" );
-        servletTestManager.setUp( TestServlet.class );
+        servletTestManager.setUp( new ContainerSetup( //
+                new ServletSetup( TestServlet.class ) ) );
         try {
             String location = servletTestManager.getServletLocation();
             LOG.debug( "location: " + location );
@@ -293,8 +299,9 @@ public class ServletTestManagerTest {
 
         ServletTestManager servletTestManager = new ServletTestManager();
         TestServlet.reset();
-        servletTestManager.setUp( TestServlet.class );
-        servletTestManager.setSessionAttribute( "attribute1", "value1" );
+        servletTestManager.setUp( new ContainerSetup( //
+                new ServletSetup( TestServlet.class ) ) //
+                .addSessionAttribute( "attribute1", "value1" ) );
         TestServlet.setSessionAttributeWhenInvoked( "setter", "value" );
         try {
             String location = servletTestManager.getServletLocation();

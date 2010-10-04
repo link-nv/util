@@ -31,7 +31,7 @@ while getopts :fdu:h opt; do
         f) force=1
             ;;
         d) deploy=1
-           url=${url:-scpexe://maven.lyndir.com/scm/maven2}
+           url=${url:-scpexe://maven.lyndir.com/usr/local/scm/maven2}
             ;;
         u) url=$OPTARG
             ;;

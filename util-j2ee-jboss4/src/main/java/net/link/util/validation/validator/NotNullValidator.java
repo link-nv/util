@@ -7,7 +7,7 @@
 
 package net.link.util.validation.validator;
 
-import net.link.util.validation.annotation.NotNull;
+import org.jetbrains.annotations.NotNull;
 
 
 public class NotNullValidator implements Validator<NotNull> {

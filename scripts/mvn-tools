@@ -31,7 +31,7 @@ installTools() {
     local from=$1 to=$2
 
     for file in "$from/"{bashlib,mvn-auto,mvn-install,mvn-meta,mvn-release,mvn-sync,mvn-tools}; do
-        install "$file" "$to/"
+        cp "$file" "$to/"
         touch -r "$file" "$to/${file##*/}"
     done
 }

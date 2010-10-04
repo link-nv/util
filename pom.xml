@@ -135,19 +135,12 @@
                     </plugin>
                 </plugins>
             </build>
-            <modules>
-                <module>util-jpa</module>
-                <module>util-test</module>
-                <module>util-j2ee</module>
-                <module>util-j2ee-jboss4</module>
-                <module>util-j2ee-jboss6</module>
-                <module>util-wicket</module>
-            </modules>
         </profile>
     </profiles>
 
     <!-- MODULES -->
     <modules>
+        <module>util-config</module>
         <module>util-jpa</module>
         <module>util-test</module>
         <module>util-j2ee</module>
@@ -180,6 +173,8 @@
         <wicket-javaee.version>1.1-safe-online</wicket-javaee.version>
         <wicketstuff-annotation.version>1.1</wicketstuff-annotation.version>
 
+        <guava.version>r05</guava.version>
+        <slf4j.version>1.5.11</slf4j.version>
         <commons-logging-api.version>1.1</commons-logging-api.version>
         <persistence-api.version>1.0</persistence-api.version>
         <hibernate-annotations.version>3.4.0.GA</hibernate-annotations.version>
@@ -210,6 +205,7 @@
         <logback.version>0.9.15</logback.version>
         <jlibs.version>1.3-p4</jlibs.version>
         <commons-lang.version>2.3</commons-lang.version>
+        <jetbrains-annotations.version>7.0.2</jetbrains-annotations.version>
 
         <!-- JBoss 4 -->
         <jboss.version>4.2.3.GA</jboss.version>
@@ -496,6 +492,16 @@
                 </exclusions>
             </dependency>
             <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>commons-logging</groupId>
                 <artifactId>commons-logging-api</artifactId>
                 <version>${commons-logging-api.version}</version>
@@ -700,9 +706,23 @@
                 <artifactId>commons-lang</artifactId>
                 <version>${commons-lang.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.jetbrains</groupId>
+                <artifactId>annotations</artifactId>
+                <version>${jetbrains-annotations.version}</version>
+                <scope>provided</scope>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+        </dependency>
+    </dependencies>
+
     <prerequisites>
         <maven>2.2.0</maven>
     </prerequisites>

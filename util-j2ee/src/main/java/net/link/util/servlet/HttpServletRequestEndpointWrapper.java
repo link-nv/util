@@ -17,7 +17,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * {@link HttpServletRequest} wrapper used to provide the correct endpoint URI when behind a proxy or load balancer.
- * 
+ *
  * @author lhunath
  */
 public class HttpServletRequestEndpointWrapper extends HttpServletRequestWrapper {
@@ -50,10 +50,10 @@ public class HttpServletRequestEndpointWrapper extends HttpServletRequestWrapper
 
         String originalRequest = super.getRequestURI();
 
-        int index = originalRequest.indexOf( super.getContextPath() );
+        int index = originalRequest.indexOf( getContextPath() );
         URI locationUri;
         if (index != -1 && !originalRequest.equals( "/" ))
-            locationUri = URI.create( originalRequest.substring( index + super.getContextPath().length() + 1 ) );
+            locationUri = URI.create( originalRequest.substring( index + getContextPath().length() + 1 ) );
         else
             locationUri = URI.create( originalRequest );
 

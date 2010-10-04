@@ -228,8 +228,8 @@ if [[ -e $distribution ]] && (( ! nodeploy && ! nodistribution )); then
 
     emit "Unpacking distribution"
     cd "$distribution/target/"
-    unzip -uo "$distribution"-*.zip
-    src=("$distribution"-*/*/); src=("${src[@]%/}")
+    unzip -uo "${distribution##*/}"-*.zip
+    src=("${distribution##*/}"-*/*/); src=("${src[@]%/}")
 
     emit "Uploading distribution to $remote"
     ssh -qt "$remote" "$(printf 's=%q/scripts/stop; [[ -e $s ]] || exit 0; "$s" -w' "${src%%/*}")"
