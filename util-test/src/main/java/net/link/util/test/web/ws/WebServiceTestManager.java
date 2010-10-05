@@ -24,9 +24,9 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author fcorneli
  */
-public class WebServiceTestUtils {
+public class WebServiceTestManager {
 
-    private static final Log LOG = LogFactory.getLog( WebServiceTestUtils.class );
+    private static final Log LOG = LogFactory.getLog( WebServiceTestManager.class );
 
     private Endpoint endpoint;
 
@@ -69,8 +69,7 @@ public class WebServiceTestUtils {
 
     public String getEndpointAddress() {
 
-        String endpointAddress = String.format( "http://localhost:%d%s/%s", port, contextPath, servlet );
-        return endpointAddress;
+        return String.format( "http://localhost:%d%s/%s", port, contextPath, servlet );
     }
 
     public String getLocation() {

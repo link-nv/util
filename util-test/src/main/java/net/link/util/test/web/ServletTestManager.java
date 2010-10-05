@@ -7,8 +7,12 @@
 
 package net.link.util.test.web;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.base.Preconditions;
 import java.util.HashMap;
 import java.util.Map;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,8 +35,9 @@ public class ServletTestManager {
 
     private Server server;
 
-    private String baseURL;
-    private String contextPath;
+    private String         baseURL;
+    private String         contextPath;
+    private ServletContext servletContext;
     TestHashSessionManager sessionManager;
 
 
@@ -64,7 +69,7 @@ public class ServletTestManager {
         }
     }
 
-    public void setUp(ContainerSetup setup)
+    public ServletContext setUp(ContainerSetup setup)
             throws Exception {
 
         Context context = new Context( null, new SessionHandler( sessionManager = new TestHashSessionManager() ), new SecurityHandler(),
@@ -78,7 +83,7 @@ public class ServletTestManager {
                     filterSetup.getInitParameters() );
 
         ServletHolder servletHolder = new ServletHolder();
-        servletHolder.setClassName( setup.getServlet().getType().getCanonicalName() );
+        servletHolder.setClassName( setup.getServlet().getType().getName() );
         String servletName = setup.getServlet().getType().getSimpleName();
         if (servletName == null)
             servletName = setup.getServlet().getType().getName();
@@ -97,6 +102,8 @@ public class ServletTestManager {
         server.addConnector( new LocalConnector() );
         server.addHandler( context );
         server.start();
+
+        return servletContext = handler.getServletContext();
     }
 
     /**
@@ -121,9 +128,14 @@ public class ServletTestManager {
         return baseURL = String.format( "http://%s:%d", connector.getHost(), connector.getLocalPort() );
     }
 
+    public ServletContext getServletContext() {
+
+        return servletContext;
+    }
+
     public String getServletLocation() {
 
-        return baseURL + contextPath;
+        return checkNotNull( baseURL, "Connector has not yet been created." ) + contextPath;
     }
 
     public void tearDown()

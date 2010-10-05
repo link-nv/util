@@ -156,6 +156,14 @@ public class PkiTestUtils {
         return certificate;
     }
 
+    public static KeyStore.PrivateKeyEntry generateKeyEntry(String dn)
+            throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, SignatureException, IOException, InvalidKeyException,
+                   CertificateException {
+
+        KeyPair keyPair = generateKeyPair();
+        return new KeyStore.PrivateKeyEntry( keyPair.getPrivate(), new Certificate[] { generateSelfSignedCertificate( keyPair, dn ) } );
+    }
+
     public static X509Certificate loadCertificate(InputStream inputStream)
             throws CertificateException {
 
@@ -179,9 +187,9 @@ public class PkiTestUtils {
     /**
      * Persist the given private key and corresponding certificate to a JKS keystore file.
      *
-     * @param pkcs12keyStore the file of the JKS keystore to write the key material to.
-     * @param privateKey the private key to persist.
-     * @param certificate the X509 certificate corresponding with the private key.
+     * @param pkcs12keyStore   the file of the JKS keystore to write the key material to.
+     * @param privateKey       the private key to persist.
+     * @param certificate      the X509 certificate corresponding with the private key.
      * @param keyStorePassword the keystore password.
      * @param keyEntryPassword the keyentry password.
      *
@@ -200,9 +208,9 @@ public class PkiTestUtils {
     /**
      * Persist the given private key and corresponding certificate to a PKCS12 keystore file.
      *
-     * @param pkcs12keyStore the file of the PKCS12 keystore to write the key material to.
-     * @param privateKey the private key to persist.
-     * @param certificate the X509 certificate corresponding with the private key.
+     * @param pkcs12keyStore   the file of the PKCS12 keystore to write the key material to.
+     * @param privateKey       the private key to persist.
+     * @param certificate      the X509 certificate corresponding with the private key.
      * @param keyStorePassword the keystore password.
      * @param keyEntryPassword the keyentry password.
      *
@@ -221,10 +229,10 @@ public class PkiTestUtils {
     /**
      * Persist the given private key and corresponding certificate to a keystore file.
      *
-     * @param pkcs12keyStore The file of the keystore to write the key material to.
-     * @param keyStoreType The type of the key store format to use.
-     * @param privateKey The private key to persist.
-     * @param certificate The X509 certificate corresponding with the private key.
+     * @param pkcs12keyStore   The file of the keystore to write the key material to.
+     * @param keyStoreType     The type of the key store format to use.
+     * @param privateKey       The private key to persist.
+     * @param certificate      The X509 certificate corresponding with the private key.
      * @param keyStorePassword The keystore password.
      * @param keyEntryPassword The keyentry password.
      *

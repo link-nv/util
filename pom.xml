@@ -140,7 +140,6 @@
 
     <!-- MODULES -->
     <modules>
-        <module>util-config</module>
         <module>util-jpa</module>
         <module>util-test</module>
         <module>util-j2ee</module>
@@ -721,6 +720,10 @@
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
     </dependencies>
 
