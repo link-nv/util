@@ -30,7 +30,10 @@
 # |                                         .:: GLOBAL CONFIGURATION ::. |
 # |______________________________________________________________________|
 
+{
 shopt -s extglob
+shopt -s globstar
+} 2>/dev/null ||:
 
 
 
@@ -51,39 +54,37 @@ runner=(     '> >'           \
              ' >>'           )
 
 # Variables for terminal requests.
-{
-hide=$(     tput civis  || tput vi      )
-show=$(     tput cvvis  || tput vs      )
-save=$(     tput sc                     )
-load=$(     tput rc                     )
-bold=$(     tput bold   || tput md      )
-reset=$(    tput sgr0   || tput me      )
-#blink=$(   tput blink  || tput mb      )
-italic=$(   tput sitm   || tput ZH      )
-red=$(      tput setaf 1|| tput AF 1    )
-green=$(    tput setaf 2|| tput AF 2    )
-yellow=$(   tput setaf 3|| tput AF 3    )
-blue=$(     tput setaf 4|| tput AF 4    )
-magenta=$(  tput setaf 5|| tput AF 5    )
-cyan=$(     tput setaf 6|| tput AF 6    )
-white=$(    tput setaf 7|| tput AF 7    )
-default=$(  tput op                     )
-eed=$(      tput ed     || tput cd      )   # Erase to end of display
-eel=$(      tput el     || tput ce      )   # Erase to end of line
-ebl=$(      tput el1    || tput cb      )   # Erase to beginning of line
-ewl=$eel$ebl                                # Erase whole line
-draw=$(     tput -S <<< '   enacs
-                            smacs
-                            acsc
-                            rmacs' || { \
-            tput eA; tput as;
-            tput ac; tput ae;         } )   # Drawing characters
-back=$'\b'
+[[ -t 1 ]] && {
+    hide=$(     tput civis  || tput vi      )
+    show=$(     tput cvvis  || tput vs      )
+    save=$(     tput sc                     )
+    load=$(     tput rc                     )
+    bold=$(     tput bold   || tput md      )
+    reset=$(    tput sgr0   || tput me      )
+    #blink=$(   tput blink  || tput mb      )
+    italic=$(   tput sitm   || tput ZH      )
+[[ $TERM != *-m ]] && {
+    red=$(      tput setaf 1|| tput AF 1    )
+    green=$(    tput setaf 2|| tput AF 2    )
+    yellow=$(   tput setaf 3|| tput AF 3    )
+    blue=$(     tput setaf 4|| tput AF 4    )
+    magenta=$(  tput setaf 5|| tput AF 5    )
+    cyan=$(     tput setaf 6|| tput AF 6    )
+}
+    white=$(    tput setaf 7|| tput AF 7    )
+    default=$(  tput op                     )
+    eed=$(      tput ed     || tput cd      )   # Erase to end of display
+    eel=$(      tput el     || tput ce      )   # Erase to end of line
+    ebl=$(      tput el1    || tput cb      )   # Erase to beginning of line
+    ewl=$eel$ebl                                # Erase whole line
+    draw=$(     tput -S <<< '   enacs
+                                smacs
+                                acsc
+                                rmacs' || { \
+                tput eA; tput as;
+                tput ac; tput ae;         } )   # Drawing characters
+    back=$'\b'
 } 2>/dev/null ||:
-
-# Monochrome terminals don't need these.
-[[ $TERM = *-m ]] && \
-    unset red= green= yellow= blue= magenta= cyan= white=
 
 
 
