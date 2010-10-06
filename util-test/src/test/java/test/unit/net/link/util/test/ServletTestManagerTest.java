@@ -129,6 +129,8 @@ public class ServletTestManagerTest {
         ServletTestManager servletTestManager = new ServletTestManager();
         servletTestManager.setUp( new ContainerSetup( //
                 new ServletSetup( TestServlet.class ) ) );
+        servletTestManager.createSocketConnector();
+
         try {
             TestServlet.reset();
             String location = servletTestManager.getServletLocation();
@@ -153,6 +155,8 @@ public class ServletTestManagerTest {
                 new ServletSetup( TestServlet.class ) //
                         .addInitParameter( "param1", "value1" ) //
                         .addInitParameter( "param2", "value2" ) ) );
+        servletTestManager.createSocketConnector();
+
         try {
             TestServlet.reset();
             String location = servletTestManager.getServletLocation();
@@ -225,6 +229,8 @@ public class ServletTestManagerTest {
         TestServlet.reset();
         TestFilter.reset();
         servletTestManager.setUp( new ContainerSetup( new ServletSetup( TestServlet.class ), new FilterSetup( TestFilter.class ) ) );
+        servletTestManager.createSocketConnector();
+
         try {
             String location = servletTestManager.getServletLocation();
             LOG.debug( "location: " + location );
@@ -252,6 +258,8 @@ public class ServletTestManagerTest {
                 new FilterSetup( TestFilter.class ) //
                         .addInitParameter( "param1", "value1" ) //
                         .addInitParameter( "param2", "value2" ) ) );
+        servletTestManager.createSocketConnector();
+
         try {
             String location = servletTestManager.getServletLocation();
             LOG.debug( "location: " + location );
@@ -278,6 +286,8 @@ public class ServletTestManagerTest {
         TestServlet.setSessionAttributeWhenInvoked( "attribute1", "value1" );
         servletTestManager.setUp( new ContainerSetup( //
                 new ServletSetup( TestServlet.class ) ) );
+        servletTestManager.createSocketConnector();
+
         try {
             String location = servletTestManager.getServletLocation();
             LOG.debug( "location: " + location );
@@ -303,6 +313,8 @@ public class ServletTestManagerTest {
                 new ServletSetup( TestServlet.class ) ) //
                 .addSessionAttribute( "attribute1", "value1" ) );
         TestServlet.setSessionAttributeWhenInvoked( "setter", "value" );
+        servletTestManager.createSocketConnector();
+
         try {
             String location = servletTestManager.getServletLocation();
             LOG.debug( "location: " + location );
