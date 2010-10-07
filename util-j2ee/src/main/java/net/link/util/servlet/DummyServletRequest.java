@@ -23,6 +23,7 @@ import javax.servlet.http.HttpSession;
 *
 * @author lhunath
 */
+@SuppressWarnings({ "ALL" })
 public class DummyServletRequest implements HttpServletRequest {
 
     public String getAuthType() {
