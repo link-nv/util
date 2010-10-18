@@ -121,9 +121,10 @@ public class JNDITestUtils {
         return serviceClass.cast( service );
     }
 
-    public void setUp() {
+    public JNDITestUtils setUp() {
 
         System.setProperty( Context.INITIAL_CONTEXT_FACTORY, "org.shiftone.ooc.InitialContextFactoryImpl" );
+        return this;
     }
 
     /**
