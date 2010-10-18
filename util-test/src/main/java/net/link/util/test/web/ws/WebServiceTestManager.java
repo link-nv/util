@@ -85,7 +85,16 @@ public class WebServiceTestManager {
         executorService.shutdown();
     }
 
+    /**
+     * @deprecated Use #becomeEndpointOf instead: this method name is confusing.
+     */
+    @Deprecated
     public void setEndpointAddress(Object webServiceClientPort) {
+
+        becomeEndpointOf( webServiceClientPort );
+    }
+
+    public void becomeEndpointOf(Object webServiceClientPort) {
 
         BindingProvider bindingProvider = (BindingProvider) webServiceClientPort;
         String endpointAddress = getEndpointAddress();

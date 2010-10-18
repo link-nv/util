@@ -26,11 +26,12 @@ set -e
 trap 'echo "$BASH_SOURCE:$BASH_LINENO: ${FUNCNAME:+$FUNCNAME:}$BASH_COMMAND failed with exit code: $?"' ERR
 [[ $0 = */* && -e ${0%/*}/bashlib ]] && source "${0%/*}/bashlib" || source bashlib
 
+tools=( bashlib mvn-auto mvn-install mvn-meta mvn-release mvn-sync mvn-tools )
 # Install all files necessary for mvn-tools.
 installTools() {
     local from=$1 to=$2
 
-    for file in "$from/"{bashlib,mvn-auto,mvn-install,mvn-meta,mvn-release,mvn-sync,mvn-tools}; do
+    for file in "${tools[@]/#/$from/}"; do
         cp "$file" "$to/"
         touch -r "$file" "$to/${file##*/}"
     done
@@ -40,7 +41,8 @@ updateCheck() {
     local from=$1 outdated=
     [[ -d $from ]] || return 0
 
-    for tool in {bashlib,mvn-auto,mvn-install,mvn-meta,mvn-release,mvn-sync,mvn-tools}; do
+    for tool in "${tools[@]}"; do
+        cmp -s "$(type -P "$tool")" "$from/$tool" && continue
         [[ "$(type -P "$tool")" -ot "$from/$tool" ]] && { outdated=installed; break; }
         [[ "$(type -P "$tool")" -nt "$from/$tool" ]] && { outdated=source; break; }
     done
