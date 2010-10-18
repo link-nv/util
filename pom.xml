@@ -208,7 +208,6 @@
         <derby.version>10.3.1.4</derby.version>
         <shiftone-oocjndi.version>1.2</shiftone-oocjndi.version>
         <shiftone-arbor.version>1.4</shiftone-arbor.version>
-        <hibernate-annotations.version>3.3.1.GA</hibernate-annotations.version>
         <commons-httpclient.version>3.0.1</commons-httpclient.version>
         <http.version>20070405</http.version>
         <jaxb-api.version>2.1</jaxb-api.version>
@@ -471,29 +470,11 @@
                 <groupId>org.apache.wicket</groupId>
                 <artifactId>wicket-extensions</artifactId>
                 <version>${wicket.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.wicket</groupId>
                 <artifactId>wicket-ioc</artifactId>
                 <version>${wicket.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wicketstuff</groupId>
-                <artifactId>wicketstuff-annotation</artifactId>
-                <version>${wicketstuff-annotation.version}
-                </version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.wicket</groupId>
@@ -530,6 +511,12 @@
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-annotations</artifactId>
                 <version>${hibernate-annotations.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>commons-collections</groupId>
@@ -565,6 +552,12 @@
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-entitymanager</artifactId>
                 <version>${hibernate-entitymanager.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.mortbay.jetty</groupId>
@@ -617,14 +610,15 @@
                 <version>${jboss.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-annotations</artifactId>
-                <version>${hibernate-annotations.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>commons-httpclient</groupId>
                 <artifactId>commons-httpclient</artifactId>
                 <version>${commons-httpclient.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.sun.net.httpserver</groupId>
