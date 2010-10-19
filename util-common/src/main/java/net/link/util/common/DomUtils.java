@@ -29,84 +29,94 @@ public abstract class DomUtils {
 
     /**
      * Parses the given string to a DOM object.
-     *
-     * @throws Exception
      */
-    public static Document parseDocument(String documentString)
-            throws Exception {
+    public static Document parseDocument(String documentString) {
 
-        DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
-        domFactory.setNamespaceAware( true );
-        DocumentBuilder domBuilder = domFactory.newDocumentBuilder();
-        StringReader stringReader = new StringReader( documentString );
-        InputSource inputSource = new InputSource( stringReader );
-        return domBuilder.parse( inputSource );
+        try {
+            DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
+            domFactory.setNamespaceAware( true );
+            DocumentBuilder domBuilder = domFactory.newDocumentBuilder();
+            StringReader stringReader = new StringReader( documentString );
+            InputSource inputSource = new InputSource( stringReader );
+            return domBuilder.parse( inputSource );
+        }
+        catch (IOException e) {
+            throw new RuntimeException( e );
+        }
+        catch (SAXException e) {
+            throw new RuntimeException( e );
+        }
+        catch (ParserConfigurationException e) {
+            throw new RuntimeException( e );
+        }
     }
 
     /**
      * Saves a DOM document to the given output file.
-     *
-     * @throws TransformerException
      */
-    public static void saveDocument(Document document, File outputFile)
-            throws TransformerException {
+    public static void saveDocument(Document document, File outputFile) {
 
-        Source source = new DOMSource( document );
-        Result streamResult = new StreamResult( outputFile );
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-        transformer.transform( source, streamResult );
+        try {
+            Source source = new DOMSource( document );
+            Result streamResult = new StreamResult( outputFile );
+
+            TransformerFactory.newInstance().newTransformer().transform( source, streamResult );
+        }
+        catch (TransformerException e) {
+            throw new RuntimeException( e );
+        }
     }
 
     /**
      * Loads a DOM document from the given input stream.
      *
-     * @throws ParserConfigurationException
      * @throws SAXException
      * @throws IOException
      */
     public static Document loadDocument(InputStream documentInputStream)
-            throws ParserConfigurationException, SAXException, IOException {
+            throws SAXException, IOException {
 
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory.setNamespaceAware( true );
-        DocumentBuilder documentBuilder;
-        documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        Document document = documentBuilder.parse( documentInputStream );
-        return document;
+        try {
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            documentBuilderFactory.setNamespaceAware( true );
+
+            return documentBuilderFactory.newDocumentBuilder().parse( documentInputStream );
+        }
+        catch (ParserConfigurationException e) {
+            throw new RuntimeException( e );
+        }
     }
 
     /**
      * Transforms a DOM node (e.g. DOM element or DOM document) to a String.
-     *
-     * @throws TransformerException
      */
-    public static String domToString(Node domNode)
-            throws TransformerException {
+    public static String domToString(Node domNode) {
 
         return domToString( domNode, false );
     }
 
     /**
      * Transforms a DOM node (e.g. DOM element or DOM document) to a String.
-     *
-     * @throws TransformerException
      */
-    public static String domToString(Node domNode, boolean indent)
-            throws TransformerException {
+    public static String domToString(Node domNode, boolean indent) {
 
-        Source source = new DOMSource( domNode );
-        StringWriter stringWriter = new StringWriter();
-        Result result = new StreamResult( stringWriter );
+        try {
+            Source source = new DOMSource( domNode );
+            StringWriter stringWriter = new StringWriter();
+            Result result = new StreamResult( stringWriter );
 
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
 
-        transformer.setOutputProperty( OutputKeys.OMIT_XML_DECLARATION, "yes" );
-        transformer.setOutputProperty( "{http://xml.apache.org/xslt}indent-amount", "4" );
-        transformer.setOutputProperty( OutputKeys.INDENT, indent? "yes": "no" );
-        transformer.transform( source, result );
+            transformer.setOutputProperty( OutputKeys.OMIT_XML_DECLARATION, "yes" );
+            transformer.setOutputProperty( "{http://xml.apache.org/xslt}indent-amount", "4" );
+            transformer.setOutputProperty( OutputKeys.INDENT, indent? "yes": "no" );
+            transformer.transform( source, result );
 
-        return stringWriter.toString();
+            return stringWriter.toString();
+        }
+        catch (TransformerException e) {
+            throw new RuntimeException( e );
+        }
     }
 }
