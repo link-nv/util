@@ -132,7 +132,7 @@ public class JNDIUtils {
         }
     }
 
-    public static <Type> List<Type> getComponents(String jndiPrefix, Class<Type> type) {
+    public static <T> List<T> getComponents(String jndiPrefix, Class<T> type) {
 
         InitialContext initialContext;
         try {
@@ -143,10 +143,10 @@ public class JNDIUtils {
         return getComponents(initialContext, jndiPrefix, type);
     }
 
-    public static <Type> List<Type> getComponents(InitialContext initialContext, String jndiPrefix, Class<Type> type) {
+    public static <T> List<T> getComponents(InitialContext initialContext, String jndiPrefix, Class<T> type) {
 
         LOG.debug("get components at " + jndiPrefix);
-        List<Type> components = new LinkedList<Type>();
+        List<T> components = new LinkedList<T>();
         try {
             Context context;
             try {
@@ -167,7 +167,7 @@ public class JNDIUtils {
                     LOG.error(message);
                     throw new IllegalStateException(message);
                 }
-                Type component = type.cast(object);
+                T component = type.cast(object);
                 components.add(component);
             }
             return components;
