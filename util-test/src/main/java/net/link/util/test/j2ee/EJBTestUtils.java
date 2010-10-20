@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.Identity;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Date;
@@ -63,8 +64,8 @@ public final class EJBTestUtils {
      * Injects a value into a given object's field of the given name.
      *
      * @param fieldName the name of the field to set.
-     * @param object the object on which to inject the value.
-     * @param value the value to inject.
+     * @param object    the object on which to inject the value.
+     * @param value     the value to inject.
      *
      * @throws Exception
      */
@@ -85,9 +86,9 @@ public final class EJBTestUtils {
     /**
      * Injects a resource value into an object's field which has the given resource name in a {@link Resource} annotation.
      *
-     * @param bean the bean object on which to inject a value.
+     * @param bean         the bean object on which to inject a value.
      * @param resourceName the source name.
-     * @param value the value to inject.
+     * @param value        the value to inject.
      */
     public static void injectResource(Object bean, String resourceName, Object value)
             throws Exception {
@@ -117,7 +118,7 @@ public final class EJBTestUtils {
      * Injects the value into the object's field with a field type that matches the value.
      *
      * @param object the bean object in which to inject.
-     * @param value the value object to inject.
+     * @param value  the value object to inject.
      *
      * @throws Exception
      */
@@ -177,7 +178,7 @@ public final class EJBTestUtils {
             PostConstruct postConstruct = method.getAnnotation( PostConstruct.class );
             if (null == postConstruct)
                 continue;
-            method.invoke( bean, new Object[] { } );
+            method.invoke( bean, new Object[]{ } );
         }
     }
 
@@ -247,13 +248,15 @@ public final class EJBTestUtils {
         Type instance;
         try {
             instance = beanType.newInstance();
-        } catch (InstantiationException e) {
+        }
+        catch (InstantiationException e) {
             throw new RuntimeException( "instantiation error: " + beanType );
-        } catch (IllegalAccessException e) {
+        }
+        catch (IllegalAccessException e) {
             throw new RuntimeException( "illegal access error: " + beanType );
         }
         TestContainerMethodInterceptor testContainerMethodInterceptor = new TestContainerMethodInterceptor( instance, container,
-                entityManager, sessionContext );
+                                                                                                            entityManager, sessionContext );
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass( beanType );
         enhancer.setCallback( testContainerMethodInterceptor );
@@ -263,10 +266,12 @@ public final class EJBTestUtils {
             try {
                 init( beanType, object );
                 return object;
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 throw new RuntimeException( "init error: " + beanType, e );
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException( "CG Enhancer error: " + beanType, e );
         }
     }
@@ -312,7 +317,8 @@ public final class EJBTestUtils {
                 method.setAccessible( true );
                 Object result = method.invoke( object, args );
                 return result;
-            } catch (InvocationTargetException e) {
+            }
+            catch (InvocationTargetException e) {
                 throw e.getTargetException();
             }
         }
@@ -469,7 +475,8 @@ public final class EJBTestUtils {
                 Object bean;
                 try {
                     bean = EJBUtils.getEJB( fieldType );
-                } catch (EJBException e) {
+                }
+                catch (EJBException e) {
                     if (false == fieldType.isInterface())
                         throw new EJBException( "field is not an interface type" );
                     Local localAnnotation = fieldType.getAnnotation( Local.class );
@@ -493,9 +500,11 @@ public final class EJBTestUtils {
                 field.setAccessible( true );
                 if (field.get( object ) == null)
                     field.set( object, value );
-            } catch (IllegalArgumentException e) {
+            }
+            catch (IllegalArgumentException e) {
                 throw new EJBException( "illegal argument error" );
-            } catch (IllegalAccessException e) {
+            }
+            catch (IllegalAccessException e) {
                 throw new EJBException( "illegal access error" );
             }
         }
@@ -539,7 +548,7 @@ public final class EJBTestUtils {
 
         private final Subject subject;
 
-        public TestPolicyContextHandler(Principal principal, String... roles) {
+        TestPolicyContextHandler(Principal principal, String... roles) {
 
             subject = new Subject();
             Set<Principal> principals = subject.getPrincipals();
@@ -561,14 +570,12 @@ public final class EJBTestUtils {
 
         public String[] getKeys() {
 
-            return new String[] { "javax.security.auth.Subject.container" };
+            return new String[]{ "javax.security.auth.Subject.container" };
         }
 
         public boolean supports(String key) {
 
-            if ("javax.security.auth.Subject.container".equals( key ))
-                return true;
-            return false;
+            return "javax.security.auth.Subject.container".equals( key );
         }
     }
 
@@ -579,7 +586,7 @@ public final class EJBTestUtils {
 
         private final String[] roles;
 
-        public TestSessionContext(String principalName, String... roles) {
+        TestSessionContext(String principalName, String... roles) {
 
             if (null != principalName) {
                 principal = new SimplePrincipal( principalName );
@@ -592,8 +599,9 @@ public final class EJBTestUtils {
             TestPolicyContextHandler testPolicyContextHandler = new TestPolicyContextHandler( principal, roles );
             try {
                 PolicyContext.registerHandler( "javax.security.auth.Subject.container", testPolicyContextHandler, true );
-            } catch (PolicyContextException e) {
-                throw new EJBException( "policy context error: " + e.getMessage() );
+            }
+            catch (PolicyContextException e) {
+                throw new EJBException( "policy context error", e );
             }
         }
 
@@ -622,7 +630,7 @@ public final class EJBTestUtils {
         }
 
         @SuppressWarnings("deprecation")
-        public java.security.Identity getCallerIdentity() {
+        public Identity getCallerIdentity() {
 
             return null;
         }
@@ -668,7 +676,7 @@ public final class EJBTestUtils {
         }
 
         @SuppressWarnings("deprecation")
-        public boolean isCallerInRole(@SuppressWarnings("unused") java.security.Identity arg0) {
+        public boolean isCallerInRole(@SuppressWarnings("unused") Identity arg0) {
 
             return false;
         }
