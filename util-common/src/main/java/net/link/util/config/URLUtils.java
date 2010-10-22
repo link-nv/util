@@ -13,12 +13,9 @@ import java.net.URLEncoder;
 
 
 /**
- * <h2>{@link URLUtils}<br>
- * <sub>Utilities for working with URLs.</sub></h2>
+ * <h2>{@link URLUtils}<br> <sub>Utilities for working with URLs.</sub></h2>
  *
- * <p>
- * <i>Sep 17, 2009</i>
- * </p>
+ * <p> <i>Sep 17, 2009</i> </p>
  *
  * @author lhunath
  */
@@ -27,8 +24,8 @@ public abstract class URLUtils {
     /**
      * Add a GET parameter to the query component of the given URL.
      *
-     * @param url The base URL on which to append the parameter.
-     * @param key The key of the parameter to add.
+     * @param url   The base URL on which to append the parameter.
+     * @param key   The key of the parameter to add.
      * @param value The value of the parameter to add.
      *
      * @return A new URL which is the base URL with the given query parameter added to it.
@@ -37,7 +34,8 @@ public abstract class URLUtils {
 
         try {
             return new URL( addParameter( url.toExternalForm(), key, value ) );
-        } catch (MalformedURLException e) {
+        }
+        catch (MalformedURLException e) {
             throw new IllegalStateException( "Bug.", e );
         }
     }
@@ -45,8 +43,8 @@ public abstract class URLUtils {
     /**
      * Add a GET parameter to the query component of the given URL.
      *
-     * @param url The base URL on which to append the parameter.
-     * @param key The key of the parameter to add.
+     * @param url   The base URL on which to append the parameter.
+     * @param key   The key of the parameter to add.
      * @param value The value of the parameter to add.
      *
      * @return A new URL which is the base URL with the given query parameter added to it.
@@ -56,7 +54,7 @@ public abstract class URLUtils {
         if (key == null)
             throw new IllegalArgumentException( "key to add to url can't be null" );
 
-        StringBuffer urlString = new StringBuffer( url );
+        StringBuilder urlString = new StringBuilder( url );
         if (!url.contains( "?" ))
             urlString.append( '?' );
         else
@@ -68,7 +66,8 @@ public abstract class URLUtils {
                 urlString.append( '=' );
                 urlString.append( URLEncoder.encode( value.toString(), "UTF-8" ) );
             }
-        } catch (UnsupportedEncodingException e) {
+        }
+        catch (UnsupportedEncodingException e) {
             throw new IllegalStateException( "UTF-8 unsupported by VM", e );
         }
 
@@ -98,10 +97,40 @@ public abstract class URLUtils {
 
         // Glue the base onto the other paths.
         StringBuilder glued = new StringBuilder( base );
-        glued.append( (base.charAt( base.length() - 1 ) == '/' || otherPathsGlued.length() == 0? "": '/') );
+        glued.append( base.charAt( base.length() - 1 ) == '/' || otherPathsGlued.length() == 0? "": '/' );
         if (otherPathsGlued.length() > 0)
-            glued.append( ((otherPathsGlued.charAt( 0 ) == '/')? otherPathsGlued.substring( 1 ): otherPathsGlued) );
+            glued.append( otherPathsGlued.charAt( 0 ) == '/'? otherPathsGlued.substring( 1 ): otherPathsGlued );
 
         return glued.toString();
+    }
+
+    public static URL newURL(CharSequence urlString) {
+
+        try {
+            return new URL( urlString.toString() );
+        }
+        catch (MalformedURLException e) {
+            throw new RuntimeException( e );
+        }
+    }
+
+    public static URL newURL(URL baseURL, CharSequence relativeURLString) {
+
+        try {
+            return new URL( baseURL, relativeURLString.toString() );
+        }
+        catch (MalformedURLException e) {
+            throw new RuntimeException( e );
+        }
+    }
+
+    public static URL newURL(CharSequence baseURL, CharSequence relativeURLString) {
+
+        try {
+            return new URL( newURL( baseURL ), relativeURLString.toString() );
+        }
+        catch (MalformedURLException e) {
+            throw new RuntimeException( e );
+        }
     }
 }
