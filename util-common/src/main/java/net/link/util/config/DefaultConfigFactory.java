@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author lhunath
  */
-public class DefaultConfigFactory<A extends AppConfig> {
+public class DefaultConfigFactory {
 
     private static final Logger logger = LoggerFactory.getLogger( DefaultConfigFactory.class );
 
@@ -90,23 +90,16 @@ public class DefaultConfigFactory<A extends AppConfig> {
         }
     };
 
-    private final String   configResourceName;
-    private final Class<A> appConfigType;
+    private final String configResourceName;
 
     public DefaultConfigFactory() {
 
-        this( null );
+        this( DEFAULT_CONFIG_RESOURCE );
     }
 
-    public DefaultConfigFactory(Class<A> appConfig) {
-
-        this( DEFAULT_CONFIG_RESOURCE, appConfig );
-    }
-
-    protected DefaultConfigFactory(String configResourceName, Class<A> appConfigType) {
+    protected DefaultConfigFactory(String configResourceName) {
 
         this.configResourceName = configResourceName;
-        this.appConfigType = appConfigType;
     }
 
     protected Iterable<String> getXMLResources() {
@@ -152,6 +145,22 @@ public class DefaultConfigFactory<A extends AppConfig> {
     }
 
     /**
+     * Get the implementation for app config of the given type.
+     *
+     * Override this method to provide your own app config implementation.  By default, this method will use {@link
+     * #getDefaultImplementation(Class)} to create a default implementation for the given app config.
+     *
+     * @param type The app configuration class that we should get an implementation for.
+     * @param <A>  The type of the configuration class.
+     *
+     * @return An implementation of the configuration class.
+     */
+    protected <A extends AppConfig> A getAppImplementation(final Class<A> type) {
+
+        return getDefaultImplementation( "", type );
+    }
+
+    /**
      * Get a default implementation for the given configuration class.
      *
      * @param type The configuration class that we should create a default implementation for.
@@ -177,10 +186,10 @@ public class DefaultConfigFactory<A extends AppConfig> {
     public final <C> C getDefaultImplementation(@NotNull String prefix, final Class<C> type) {
 
         // Check whether the type is a config group and determine the prefix to use for finding keys in this type.
+        checkArgument( type.isInterface(), "Can't create a config proxy for %s, it is not an interface.", type );
         Config.Group configGroupAnnotation = checkNotNull( ObjectUtils.findAnnotation( type, Config.Group.class ),
                                                            "Can't create a config proxy for %s, it is not a config group (has no @Group).",
                                                            type );
-        checkArgument( type.isInterface(), "Can't create a config proxy for %s, it is not an interface." );
         String proxyPrefix = prefix + configGroupAnnotation.prefix();
         if (!configGroupAnnotation.prefix().isEmpty())
             proxyPrefix += '.';
@@ -312,11 +321,6 @@ public class DefaultConfigFactory<A extends AppConfig> {
             value = propertyAnnotation.unset();
 
         return value;
-    }
-
-    protected A getAppConfig() {
-
-        return getDefaultImplementation( checkNotNull( appConfigType, "Can't get app config, app config type was not set." ) );
     }
 
     protected final String generateValue(final Method method) {
@@ -508,7 +512,8 @@ public class DefaultConfigFactory<A extends AppConfig> {
                 return method.invoke( this, args );
 
             if ("app".equals( method.getName() ) && method.getDeclaringClass().equals( Config.class ))
-                return getAppConfig();
+                //noinspection unchecked
+                return getAppImplementation( (Class<AppConfig>) args[0] );
 
             Config.Group configGroupAnnotation = ObjectUtils.findAnnotation( method.getReturnType(), Config.Group.class );
             if (configGroupAnnotation != null)

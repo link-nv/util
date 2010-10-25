@@ -96,7 +96,8 @@ while getopts :aABcCdDfnr:h arg; do
             '-C'                "Clean each artifact before building it (eg. when files were renamed/removed or to rebuild /lib)." \
 			'-d distribution'   "The name in the reactor of the distribution artifact. (Default: [top dir name]-distribution)" \
             '-D'                "Do not try to build and deploy a distribution." \
-            '-n'                "Do not try to deploy the distribution after building it."
+            '-f'                "Force default operations, no questions asked." \
+            '-n'                "Do not try to deploy the distribution after building it." \
 			'-r user@host'      "Upload and deploy the distribution to user@host." \
 
 			exit		;;
@@ -177,9 +178,10 @@ while (( ! nobuild )); do
     done
     cd "$root"
 
-    (( ! ${#targets[@]} && ! force )) && {
-        if ! ask -y!N 'No artifacts selected for build; build anyway?'; then
-            if (( nodeploy || nodistribution )) || ! ask -Y!n 'Continue deployment with existing build?'; then
+    (( ! ${#targets[@]} )) && {
+        if (( force )) || ! ask -y!N 'No artifacts selected for build; build anyway?'; then
+            if (( nodeploy || nodistribution || force )) || ! ask -y!N 'Continue deployment with existing build?'; then
+                emit "No artifacts selected for build.  Nothing to build or deploy."
                 exit
             fi
 
@@ -212,7 +214,7 @@ while (( ! nobuild )); do
         emit "Building"
         mvn -pl "$(printf '%s,' "${targets[@]}")" -npu -amd "${opts[@]}" ${cleanAll:+clean} install & mvnpid=$!
         (( clean && ! nodistribution )) && [[ -e $distribution ]] && ( sleep 10; kill -0 $mvnpid 2>/dev/null && rm -rf "$distribution/target/" ) & cleanpid=$!
-        trap "kill $mvnpid $cleanpid 2>/dev/null" EXIT
+        trap "kill $mvnpid $cleanpid 2>/dev/null ||:" EXIT
         wait $mvnpid
     fi
 

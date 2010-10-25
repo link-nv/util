@@ -84,7 +84,7 @@ public abstract class ObjectUtils {
      *
      * @return true if the annotation exists in the type's hierarchy.
      */
-    public static boolean hasAnnotation(Class<?> type, Class<Annotation> annotationType) {
+    public static boolean hasAnnotation(Class<?> type, Class<? extends Annotation> annotationType) {
 
         return findAnnotation( type, annotationType ) != null;
     }

@@ -27,14 +27,14 @@ public abstract class ConfigFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger( ConfigFilter.class );
 
-    private final ConfigHolder<?, ?> configHolder;
+    private final ConfigHolder<?> configHolder;
 
     private ServletContext servletContext;
 
     /**
      * @param configHolder The configuration holder that holds the config that requests coming through this filter should use.
      */
-    protected ConfigFilter(ConfigHolder<?, ?> configHolder) {
+    protected ConfigFilter(ConfigHolder<?> configHolder) {
 
         this.configHolder = configHolder;
     }
