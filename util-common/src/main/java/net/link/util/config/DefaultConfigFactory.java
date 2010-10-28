@@ -33,17 +33,17 @@ public class DefaultConfigFactory {
 
     private static final Logger logger = LoggerFactory.getLogger( DefaultConfigFactory.class );
 
-    private static final String  DEFAULT_CONFIG_RESOURCE = "config";
-    private static final Pattern SYSTEM_PROPERTY         = Pattern.compile( "\\$\\{([^\\}]*)\\}" );
-    private static final Pattern LEADING_WHITESPACE      = Pattern.compile( "^\\s+" );
-    private static final Pattern TRAILING_WHITESPACE     = Pattern.compile( "\\s+$" );
-    private static final Pattern COMMA_DELIMITOR         = Pattern.compile( "\\s*,\\s*" );
+    private static final String DEFAULT_CONFIG_RESOURCE = "config";
+    private static final Pattern SYSTEM_PROPERTY = Pattern.compile( "\\$\\{([^\\}]*)\\}" );
+    private static final Pattern LEADING_WHITESPACE = Pattern.compile( "^\\s+" );
+    private static final Pattern TRAILING_WHITESPACE = Pattern.compile( "\\s+$" );
+    private static final Pattern COMMA_DELIMITOR = Pattern.compile( "\\s*,\\s*" );
 
-    private final ClassToInstanceMap<Object>  proxyMap       = MutableClassToInstanceMap.create();
-    private final Map<Object, Object>         wrapperMap     = Maps.newHashMap();
+    private final ClassToInstanceMap<Object> proxyMap = MutableClassToInstanceMap.create();
+    private final Map<Object, Object> wrapperMap = Maps.newHashMap();
     private final ThreadLocal<ServletContext> servletContext = new ThreadLocal<ServletContext>();
     private final ThreadLocal<ServletRequest> servletRequest = new ThreadLocal<ServletRequest>();
-    private final ThreadLocal<Properties>     properties     = new ThreadLocal<Properties>() {
+    private final ThreadLocal<Properties> properties = new ThreadLocal<Properties>() {
         @Override
         protected Properties initialValue() {
 
@@ -61,8 +61,7 @@ public class DefaultConfigFactory {
                             logger.info( String.format( "    - %-30s = %s", config.getKey(), config.getValue() ) );
 
                         return properties;
-                    }
-                    catch (IOException e) {
+                    } catch (IOException e) {
                         logger.error( "While loading config from: " + configUrl, e );
                     }
             }
@@ -78,8 +77,7 @@ public class DefaultConfigFactory {
                             logger.info( String.format( "    - %30s = %s", config.getKey(), config.getValue() ) );
 
                         return properties;
-                    }
-                    catch (IOException e) {
+                    } catch (IOException e) {
                         logger.error( "While loading config from: " + configUrl, e );
                     }
             }
@@ -114,32 +112,32 @@ public class DefaultConfigFactory {
                                  "../etc/" + configResourceName + ".properties" );
     }
 
-    protected final ServletContext getServletContext() {
+    protected ServletContext getServletContext() {
 
         return servletContext.get();
     }
 
-    public final void setServletContext(ServletContext servletContext) {
+    public void setServletContext(ServletContext servletContext) {
 
         this.servletContext.set( servletContext );
     }
 
-    public final void unsetServletContext() {
+    public void unsetServletContext() {
 
         servletContext.remove();
     }
 
-    protected final ServletRequest getServletRequest() {
+    protected ServletRequest getServletRequest() {
 
         return servletRequest.get();
     }
 
-    public final void setServletRequest(ServletRequest servletRequest) {
+    public void setServletRequest(ServletRequest servletRequest) {
 
         this.servletRequest.set( servletRequest );
     }
 
-    public final void unsetServletRequest() {
+    public void unsetServletRequest() {
 
         servletRequest.remove();
     }
@@ -197,7 +195,7 @@ public class DefaultConfigFactory {
         // Get the proxy that will service this type.
         C proxy = proxyMap.getInstance( type );
         if (proxy == null)
-            proxyMap.putInstance( type, proxy = type.cast( Proxy.newProxyInstance( type.getClassLoader(), new Class[]{ type },
+            proxyMap.putInstance( type, proxy = type.cast( Proxy.newProxyInstance( type.getClassLoader(), new Class[] { type },
                                                                                    newDefaultImplementationHandler( proxyPrefix ) ) ) );
 
         return getDefaultWrapper( proxy );
@@ -377,14 +375,10 @@ public class DefaultConfigFactory {
         // Reflection: type has a constructor that takes a string.
         try {
             return type.getConstructor( String.class ).newInstance( value );
-        }
-        catch (InstantiationException ignored) {
-        }
-        catch (IllegalAccessException ignored) {
-        }
-        catch (InvocationTargetException ignored) {
-        }
-        catch (NoSuchMethodException ignored) {
+        } catch (InstantiationException ignored) {
+        } catch (IllegalAccessException ignored) {
+        } catch (InvocationTargetException ignored) {
+        } catch (NoSuchMethodException ignored) {
         }
 
         // Enums: use valueOf
@@ -405,14 +399,10 @@ public class DefaultConfigFactory {
                 Collection<String> values = collectionType.getConstructor().newInstance();
                 Iterables.addAll( values, splitValues );
                 return type.cast( values );
-            }
-            catch (InstantiationException ignored) {
-            }
-            catch (IllegalAccessException ignored) {
-            }
-            catch (NoSuchMethodException ignored) {
-            }
-            catch (InvocationTargetException ignored) {
+            } catch (InstantiationException ignored) {
+            } catch (IllegalAccessException ignored) {
+            } catch (NoSuchMethodException ignored) {
+            } catch (InvocationTargetException ignored) {
             }
 
             // In case type is not instantiable
