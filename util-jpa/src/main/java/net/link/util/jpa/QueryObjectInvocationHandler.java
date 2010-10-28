@@ -16,8 +16,6 @@ import javax.persistence.Query;
 import net.link.util.jpa.annotation.QueryMethod;
 import net.link.util.jpa.annotation.QueryParam;
 import net.link.util.jpa.annotation.UpdateMethod;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -35,12 +33,9 @@ public class QueryObjectInvocationHandler implements InvocationHandler {
         this.entityManager = entityManager;
     }
 
-    private static final Log LOG = LogFactory.getLog( QueryObjectInvocationHandler.class );
-
     public Object invoke(Object proxy, Method method, Object[] args)
             throws Throwable {
 
-        LOG.debug( "invoke: " + method.getName() );
         QueryMethod queryMethodAnnotation = method.getAnnotation( QueryMethod.class );
         if (null != queryMethodAnnotation)
             return query( queryMethodAnnotation, method, args );

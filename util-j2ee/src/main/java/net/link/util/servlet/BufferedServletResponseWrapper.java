@@ -14,22 +14,16 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
  * Buffered servlet response wrapper.
  *
- * <p>
- * See also: Servlet API version 2.4 specifications.
- * </p>
+ * <p> See also: Servlet API version 2.4 specifications. </p>
  *
  * @author fcorneli
  */
 public class BufferedServletResponseWrapper extends HttpServletResponseWrapper {
-
-    private static final Log LOG = LogFactory.getLog( BufferedServletResponseWrapper.class );
 
     private final HttpServletResponse origResponse;
 
@@ -58,14 +52,12 @@ public class BufferedServletResponseWrapper extends HttpServletResponseWrapper {
              */
             writer.flush();
         byte[] data = bufferedServletOutputStream.getData();
-        LOG.debug( "committing " + data.length + " bytes" );
         IOUtils.write( data, origResponse.getOutputStream() );
     }
 
     @Override
     public ServletOutputStream getOutputStream() {
 
-        LOG.debug( "get output stream" );
         return bufferedServletOutputStream;
     }
 
@@ -73,7 +65,6 @@ public class BufferedServletResponseWrapper extends HttpServletResponseWrapper {
     public PrintWriter getWriter()
             throws IOException {
 
-        LOG.debug( "get writer" );
         if (null == writer) {
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter( bufferedServletOutputStream, getCharacterEncoding() );
             writer = new PrintWriter( outputStreamWriter );
