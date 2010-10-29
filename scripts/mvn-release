@@ -26,8 +26,25 @@ source mvn-tools || exit
 cd "$root"
 
 
+# Failure report
+failure() {
+    r=$?
+    (( r )) && {
+        case $step in
+            0)  emit -R "Failed while preparing.  You may resume the process with the command:"
+                echo "$0 $*" ;;
+            1)  emit -R "Failed while performing.  You may resume the process with the command:"
+                echo "$0 -p $*" ;;
+            2)  emit -R "Failed while branching.  You may resume the process with the command:"
+                echo "$0 -b $*" ;;
+        esac
+    }
+    return $r
+}
+trap failure EXIT
+
 # Options.
-prepare=1; perform=1; branch=1
+prepare=1; perform=1; branch=1; step=0
 while getopts :pbh arg; do
     case $arg in 
         p) prepare=0; perform=1; branch=1 ;;
@@ -74,6 +91,7 @@ if (( prepare )); then
         mvn --batch-mode release:clean release:prepare -Dtag="$version" -DreleaseVersion="$version"
     fi
 fi
+step=1
 
 # Perform the release by deploying the changes.
 if (( perform )); then
@@ -85,6 +103,7 @@ if (( perform )); then
         mvn release:perform
     fi
 fi
+step=2
 
 # Create the release's maintenance branch.
 if (( branch && maintBranch )); then
