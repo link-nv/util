@@ -22,7 +22,7 @@ public abstract class ObjectUtils {
      */
     public static <T> T getOrDefault(T value, T defaultValue) {
 
-        if (value == null)
+        if (value != null)
             return value;
 
         return defaultValue;
@@ -40,7 +40,7 @@ public abstract class ObjectUtils {
      */
     public static <T> T getOrDefault(T value, Supplier<T> defaultValueSupplier) {
 
-        if (value == null)
+        if (value != null)
             return value;
 
         return defaultValueSupplier.get();
