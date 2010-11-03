@@ -257,6 +257,7 @@ public class WSSecurityClientHandler implements SOAPHandler<SOAPMessageContext> 
         @SuppressWarnings("unchecked")
         List<Handler> handlerChain = ((BindingProvider) port).getBinding().getHandlerChain();
         handlerChain.add( new WSSecurityClientHandler( certificate, privateKey, serverCertificate, maxTimestampOffset ) );
+        ((BindingProvider) port).getBinding().setHandlerChain( handlerChain );
     }
 
     /**
