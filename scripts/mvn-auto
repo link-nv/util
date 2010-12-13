@@ -211,7 +211,7 @@ while (( ! nobuild )); do
     # Begin the build.
     if (( ${#targets[@]} )); then
         echo
-        emit "Building"
+        emit "Building with: mvn -pl "$(printf '%s,' "${targets[@]}")" -npu -amd "${opts[@]}" ${cleanAll:+clean} install"
         mvn -pl "$(printf '%s,' "${targets[@]}")" -npu -amd "${opts[@]}" ${cleanAll:+clean} install & mvnpid=$!
         (( clean && ! nodistribution )) && [[ -e $distribution ]] && ( sleep 10; kill -0 $mvnpid 2>/dev/null && rm -rf "$distribution/target/" ) & cleanpid=$!
         trap "kill $mvnpid $cleanpid 2>/dev/null ||:" EXIT
