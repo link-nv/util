@@ -32,6 +32,10 @@ installTools() {
     local from=$1 to=$2
 
     for file in "${tools[@]/#/$from/}"; do
+        if [[ $to/${file##*/} -nt $file ]]; then
+            emit -y "$to/${file##*/} is newer than $file, won't overwrite."
+            continue
+        fi
         cp "$file" "$to/"
         touch -r "$file" "$to/${file##*/}"
     done

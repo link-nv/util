@@ -65,7 +65,7 @@ shift $((OPTIND-1))
 
 # Ask for the to-be-released version number.
 while true; do
-    version=${1:-$(xpathNodes pom.xml '/project/properties/release.version/text()')}
+    version=${1:-$(xpathNodes '/project/properties/release.version/text()' pom.xml)}
     version=$(ask "Which version are you releasing? [$version] " || echo "$version")
     if (( prepare )) && [[ $(git tag -l "$version") ]]; then
         emit -r "Version '$version' is already tagged."
