@@ -1004,7 +1004,7 @@ inArray() {
 #  ______________________________________________________________________
 # |__ xpathNodes ________________________________________________________|
 #
-#       xpathNodes filename query
+#       xpathNodes query [filename]
 #
 # Outputs every xpath node that matches the query on a separate line.
 # Leading and trailing whitespace is always stripped.
@@ -1013,11 +1013,14 @@ inArray() {
 #   query       The XPath query to run on the document.
 #
 xpathNodes() {
+    local query=$1 filename=$2
+    [[ $filename ]] || filename=<(cat)
+
     {
         if xpath -e / <(echo '<a></a>') >/dev/null 2>&1; then
-            xpath -e "$2" "$1" 2>&1
+            xpath -e "$query" "$filename" 2>&1
         else
-            xpath "$1" "$2" 2>&1
+            xpath "$filename" "$query" 2>&1
         fi
     } | {
         read
