@@ -17,22 +17,6 @@
     <artifactId>util-jpa</artifactId>
     <packaging>jar</packaging>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-
     <dependencies>
 
         <!-- Dependencies: Util -->
