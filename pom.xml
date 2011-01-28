@@ -699,22 +699,22 @@
                 <version>${ejb-api.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.jboss</groupId>
+                <groupId>jboss</groupId>
                 <artifactId>jbosssx-client</artifactId>
                 <version>${jboss.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.jboss</groupId>
+                <groupId>jboss</groupId>
                 <artifactId>jboss-j2ee</artifactId>
                 <version>${jboss.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.jboss</groupId>
+                <groupId>jboss</groupId>
                 <artifactId>jboss-annotations-ejb3</artifactId>
                 <version>${jboss.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.jboss</groupId>
+                <groupId>jboss</groupId>
                 <artifactId>jboss-ejb3x</artifactId>
                 <version>${jboss.version}</version>
             </dependency>
