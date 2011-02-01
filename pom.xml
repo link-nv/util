@@ -180,7 +180,7 @@
 
 
         <!-- DEFAULT VERSIONS, SEE DEPENDENCIES -->
-        <release.version>1.13</release.version>
+        <release.version>1.14</release.version>
         <servlet-api.version>2.4</servlet-api.version>
 
         <wicket.version>1.4.15</wicket.version>
