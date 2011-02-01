@@ -191,6 +191,16 @@ public class ConfigHolder<C extends Config> {
     }
 
     /**
+     * Provides the custom config held by this holder.
+     *
+     * @return A custom configuration instance or <code>null</code> if there is no custom configuration set.
+     */
+    protected C getUnwrappedCustomConfig() {
+
+        return config;
+    }
+
+    /**
      * @return The factory that this config holder uses to create default implementations of config classes.
      */
     protected DefaultConfigFactory getFactory() {

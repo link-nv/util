@@ -34,7 +34,7 @@ loadModules() {
     (( ${#modules[@]} )) && return
 
     # Build list of all modules allowed in the maven reactor.
-    IFS=$'\n' read -d '' -r -a profiles < <(xpathNodes ~/.m2/settings.xml '/settings/activeProfiles/activeProfile/text()') ||:
+    IFS=$'\n' read -d '' -r -a profiles < <(xpathNodes '/settings/activeProfiles/activeProfile/text()' ~/.m2/settings.xml) ||:
     emit "Enumerating modules in the Maven reactor" --
         modules=()
         addModules() {
@@ -52,18 +52,20 @@ loadModules() {
 
             done < <(
                 # Sub modules from the module's pom.xml's module list.
-                xpathNodes "$1" '/project/modules/module/text()'
+                xpathNodes '/project/modules/module/text()' "$1"
 
                 # Profile-enabled sub modules from the module's pom.xml's profiles module lists.
                 grep -qF '<profile>' "$1" && {
                     for profile in "${profiles[@]}"; do
-                        xpathNodes "$1" "/project/profiles/profile/id[text()='$profile']/../modules/module/text()"
+                        xpathNodes "/project/profiles/profile/id[text()='$profile']/../modules/module/text()" "$1"
                     done
                 }
             )
         }
         addModules ./pom.xml
     emit -$?
+
+    (( ${#modules[@]} ))
 }
 
 
@@ -121,7 +123,7 @@ fi
 while (( ! nobuild )); do
 
     if (( autoFindArtifacts )); then
-        loadModules
+        loadModules || emit -r "No modules found."
 
         # Automatically find outdated artifacts.
         emit "Scanning for outdated artifacts"
@@ -163,6 +165,9 @@ while (( ! nobuild )); do
                                 #echo "$f"
                             elif [[ $f -nt $ref ]]; then
                                 echo "$f"
+                                #echo "outdated: $f" >&2
+                            else
+                                : #echo "uptodate: $f, $ref" >&2
                             fi
                         done
                         :' -- {} + | sort -u)

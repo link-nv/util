@@ -33,17 +33,17 @@ public class DefaultConfigFactory {
 
     private static final Logger logger = LoggerFactory.getLogger( DefaultConfigFactory.class );
 
-    private static final String DEFAULT_CONFIG_RESOURCE = "config";
-    private static final Pattern SYSTEM_PROPERTY = Pattern.compile( "\\$\\{([^\\}]*)\\}" );
-    private static final Pattern LEADING_WHITESPACE = Pattern.compile( "^\\s+" );
-    private static final Pattern TRAILING_WHITESPACE = Pattern.compile( "\\s+$" );
-    private static final Pattern COMMA_DELIMITOR = Pattern.compile( "\\s*,\\s*" );
+    private static final String  DEFAULT_CONFIG_RESOURCE = "config";
+    private static final Pattern SYSTEM_PROPERTY         = Pattern.compile( "\\$\\{([^\\}]*)\\}" );
+    private static final Pattern LEADING_WHITESPACE      = Pattern.compile( "^\\s+" );
+    private static final Pattern TRAILING_WHITESPACE     = Pattern.compile( "\\s+$" );
+    private static final Pattern COMMA_DELIMITOR         = Pattern.compile( "\\s*,\\s*" );
 
-    private final ClassToInstanceMap<Object> proxyMap = MutableClassToInstanceMap.create();
-    private final Map<Object, Object> wrapperMap = Maps.newHashMap();
+    private final ClassToInstanceMap<Object>  proxyMap       = MutableClassToInstanceMap.create();
+    private final Map<Object, Object>         wrapperMap     = Maps.newHashMap();
     private final ThreadLocal<ServletContext> servletContext = new ThreadLocal<ServletContext>();
     private final ThreadLocal<ServletRequest> servletRequest = new ThreadLocal<ServletRequest>();
-    private final ThreadLocal<Properties> properties = new ThreadLocal<Properties>() {
+    private final ThreadLocal<Properties>     properties     = new ThreadLocal<Properties>() {
         @Override
         protected Properties initialValue() {
 
@@ -103,13 +103,13 @@ public class DefaultConfigFactory {
     protected Iterable<String> getXMLResources() {
 
         return ImmutableList.of( configResourceName + ".xml", "../conf/" + configResourceName + ".xml",
-                                 "../etc/" + configResourceName + ".xml" );
+                "../etc/" + configResourceName + ".xml" );
     }
 
     protected Iterable<String> getPlainResources() {
 
         return ImmutableList.of( configResourceName + ".properties", "../conf/" + configResourceName + ".properties",
-                                 "../etc/" + configResourceName + ".properties" );
+                "../etc/" + configResourceName + ".properties" );
     }
 
     protected ServletContext getServletContext() {
@@ -186,8 +186,7 @@ public class DefaultConfigFactory {
         // Check whether the type is a config group and determine the prefix to use for finding keys in this type.
         checkArgument( type.isInterface(), "Can't create a config proxy for %s, it is not an interface.", type );
         Config.Group configGroupAnnotation = checkNotNull( ObjectUtils.findAnnotation( type, Config.Group.class ),
-                                                           "Can't create a config proxy for %s, it is not a config group (has no @Group).",
-                                                           type );
+                "Can't create a config proxy for %s, it is not a config group (has no @Group).", type );
         String proxyPrefix = prefix + configGroupAnnotation.prefix();
         if (!configGroupAnnotation.prefix().isEmpty())
             proxyPrefix += '.';
@@ -196,7 +195,7 @@ public class DefaultConfigFactory {
         C proxy = proxyMap.getInstance( type );
         if (proxy == null)
             proxyMap.putInstance( type, proxy = type.cast( Proxy.newProxyInstance( type.getClassLoader(), new Class[] { type },
-                                                                                   newDefaultImplementationHandler( proxyPrefix ) ) ) );
+                    newDefaultImplementationHandler( proxyPrefix ) ) ) );
 
         return getDefaultWrapper( proxy );
     }
@@ -210,20 +209,19 @@ public class DefaultConfigFactory {
      *
      * @return A wrapper for the given config implementation.
      */
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings( { "unchecked" })
     public final <C> C getDefaultWrapper(final C config) {
 
         // Check whether the type is a config group and determine the prefix to use for finding keys in this type.
         Config.Group configGroupAnnotation = checkNotNull( ObjectUtils.findAnnotation( config.getClass(), Config.Group.class ),
-                                                           "Can't create a config wrapper for %s, it is not a config group (has no @Group).",
-                                                           config.getClass() );
+                "Can't create a config wrapper for %s, it is not a config group (has no @Group).", config.getClass() );
 
         // Get the proxy that will service this type.
         C wrapper = (C) wrapperMap.get( config );
         if (wrapper == null)
             wrapperMap.put( config,
-                            wrapper = (C) Proxy.newProxyInstance( config.getClass().getClassLoader(), config.getClass().getInterfaces(),
-                                                                  newDefaultWrapperHandler( config ) ) );
+                    wrapper = (C) Proxy.newProxyInstance( config.getClass().getClassLoader(), config.getClass().getInterfaces(),
+                            newDefaultWrapperHandler( config ) ) );
 
         return wrapper;
     }
@@ -287,8 +285,8 @@ public class DefaultConfigFactory {
      */
     protected final Object getDefaultValueFor(Method method) {
 
-        Config.Property propertyAnnotation = checkNotNull( method.getAnnotation( Config.Property.class ),
-                                                           "Missing @Property on " + method );
+        Config.Property propertyAnnotation = checkNotNull( ObjectUtils.findAnnotation( method, Config.Property.class ),
+                "Missing @Property on " + method );
 
         String value = findDefaultValueFor( method );
         if (propertyAnnotation.required())
@@ -308,8 +306,8 @@ public class DefaultConfigFactory {
      */
     protected String findDefaultValueFor(Method method) {
 
-        Config.Property propertyAnnotation = checkNotNull( method.getAnnotation( Config.Property.class ),
-                                                           "Missing @Property on " + method );
+        Config.Property propertyAnnotation = checkNotNull( ObjectUtils.findAnnotation( method, Config.Property.class ),
+                "Missing @Property on " + method );
 
         String value = null;
         if (propertyAnnotation.unset().equals( Config.Property.AUTO ))
@@ -388,14 +386,14 @@ public class DefaultConfigFactory {
         // Collections: Split the value
         if (Collection.class.isAssignableFrom( type )) {
 
-            @SuppressWarnings({ "unchecked" })
+            @SuppressWarnings( { "unchecked" })
             Class<? extends Collection> collectionType = (Class<? extends Collection>) type;
             String trimmedValue = LEADING_WHITESPACE.matcher( TRAILING_WHITESPACE.matcher( value ).replaceFirst( "" ) ).replaceFirst( "" );
             Iterable<String> splitValues = Splitter.on( COMMA_DELIMITOR ).split( trimmedValue );
 
             // In case type is a concrete collection
             try {
-                @SuppressWarnings({ "unchecked" })
+                @SuppressWarnings( { "unchecked" })
                 Collection<String> values = collectionType.getConstructor().newInstance();
                 Iterables.addAll( values, splitValues );
                 return type.cast( values );
@@ -539,16 +537,22 @@ public class DefaultConfigFactory {
 
             Object value = method.invoke( config, args );
 
-            if (value == null)
-                value = getDefaultValueFor( method );
-
+            // If method return type is annotated with @Group, it's a config group: wrap the value or provide a default implementation if no value
             if (ObjectUtils.findAnnotation( method.getReturnType(), Config.Group.class ) != null)
-                // Method return type is annotated with @Group, it's a config group: wrap the value.
-                value = getDefaultWrapper( value );
+                if (value == null) {
+                    // FIXME: prefix-lookup probably needs to be recursive...
+                    String prefix = checkNotNull( ObjectUtils.findAnnotation( method.getDeclaringClass(), Config.Group.class ),
+                            "Missing @Group on " + method.getDeclaringClass() ).prefix();
+                    value = getDefaultImplementation( prefix, method.getReturnType() );
+                } else
+                    value = getDefaultWrapper( value );
+            else
+                // Not a group.
+                if (value == null)
+                    value = getDefaultValueFor( method );
 
             logger.debug( String.format( "%s %s#%s = %s", //
-                                         method.getReturnType().getSimpleName(), method.getDeclaringClass().getSimpleName(),
-                                         method.getName(), value ) );
+                    method.getReturnType().getSimpleName(), method.getDeclaringClass().getSimpleName(), method.getName(), value ) );
             return value;
         }
 

@@ -67,4 +67,9 @@ public abstract class ConfigFilter implements Filter {
 
         servletContext = null;
     }
+
+    protected ConfigHolder<?> getConfigHolder() {
+
+        return configHolder;
+    }
 }
