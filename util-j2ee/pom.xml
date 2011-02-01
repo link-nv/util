@@ -19,12 +19,6 @@
 
     <dependencies>
 
-        <!-- Specific Dependencies: Util -->
-        <dependency>
-            <groupId>net.lin-k.util</groupId>
-            <artifactId>util-common</artifactId>
-        </dependency>
-
         <!-- Specific Dependencies: External -->
         <dependency>
             <groupId>commons-io</groupId>
