@@ -423,6 +423,11 @@
             <!-- Util -->
             <dependency>
                 <groupId>net.lin-k.util</groupId>
+                <artifactId>util-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.lin-k.util</groupId>
                 <artifactId>util-j2ee</artifactId>
                 <version>${project.version}</version>
             </dependency>
