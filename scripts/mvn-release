@@ -27,8 +27,10 @@ cd "$root"
 
 
 # Failure report
-failure() {
+checkExit() {
     r=$?
+    trap - ERR
+
     (( r )) && {
         case $step in
             0)  emit -R "Failed while preparing.  You may resume the process with the command:"
@@ -41,7 +43,7 @@ failure() {
     }
     return $r
 }
-trap failure EXIT
+trap checkExit EXIT
 
 # Options.
 prepare=1; perform=1; branch=1; step=0
