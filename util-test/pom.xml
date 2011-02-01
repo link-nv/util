@@ -67,11 +67,11 @@
             <artifactId>ejb-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jboss</groupId>
+            <groupId>jboss</groupId>
             <artifactId>jboss-ejb3x</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jboss</groupId>
+            <groupId>jboss</groupId>
             <artifactId>jboss-j2ee</artifactId>
         </dependency>
         <dependency>
@@ -79,7 +79,7 @@
             <artifactId>jboss-jaxrpc</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jboss</groupId>
+            <groupId>jboss</groupId>
             <artifactId>jbosssx-client</artifactId>
         </dependency>
         <dependency>
@@ -95,7 +95,7 @@
             <artifactId>hibernate-entitymanager</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jboss</groupId>
+            <groupId>jboss</groupId>
             <artifactId>jboss-annotations-ejb3</artifactId>
         </dependency>
         <dependency>

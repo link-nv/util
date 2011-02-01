@@ -247,6 +247,14 @@
         </testOutputDirectory>
         <finalName>${pom.artifactId}-${pom.version}
         </finalName>
+        <!-- Maven 3.0.1 does not support scp as transport out of the box :| -->
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh</artifactId>
+                <version>1.0-beta-6</version>
+            </extension>
+        </extensions>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -704,22 +712,22 @@
                 <version>${ejb-api.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.jboss</groupId>
+                <groupId>jboss</groupId>
                 <artifactId>jbosssx-client</artifactId>
                 <version>${jboss.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.jboss</groupId>
+                <groupId>jboss</groupId>
                 <artifactId>jboss-j2ee</artifactId>
                 <version>${jboss.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.jboss</groupId>
+                <groupId>jboss</groupId>
                 <artifactId>jboss-annotations-ejb3</artifactId>
                 <version>${jboss.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.jboss</groupId>
+                <groupId>jboss</groupId>
                 <artifactId>jboss-ejb3x</artifactId>
                 <version>${jboss.version}</version>
             </dependency>

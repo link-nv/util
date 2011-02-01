@@ -47,11 +47,11 @@
             <artifactId>ejb-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jboss</groupId>
+            <groupId>jboss</groupId>
             <artifactId>jboss-annotations-ejb3</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jboss</groupId>
+            <groupId>jboss</groupId>
             <artifactId>jbosssx-client</artifactId>
         </dependency>
         <dependency>
@@ -59,7 +59,7 @@
             <artifactId>jmx-client</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jboss</groupId>
+            <groupId>jboss</groupId>
             <artifactId>jboss-j2ee</artifactId>
         </dependency>
         <dependency>
