@@ -217,7 +217,7 @@
         <catalina.version>5.5.15</catalina.version>
         <slf4j.version>1.5.11</slf4j.version>
         <logback.version>0.9.15</logback.version>
-        <jlibs.version>1.3-p4</jlibs.version>
+        <jlibs.version>SNAPSHOT</jlibs.version>
         <commons-lang.version>2.3</commons-lang.version>
         <jetbrains-annotations.version>7.0.2</jetbrains-annotations.version>
 
@@ -770,6 +770,11 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>log4j-over-slf4j</artifactId>
                 <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lyndir.lhunath.jlibs</groupId>
+                <artifactId>system</artifactId>
+                <version>${jlibs.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.lyndir.lhunath.jlibs</groupId>

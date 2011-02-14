@@ -30,5 +30,5 @@ public @interface QueryMethod {
      * Allows the method to return <code>null</code> instead of a {@link NoResultException}. Useful to implement <code>findXXX</code>
      * methods.
      */
-    boolean nullable() default false;
+    boolean nullable() default true;
 }

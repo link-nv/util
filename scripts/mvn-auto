@@ -52,12 +52,12 @@ loadModules() {
 
             done < <(
                 # Sub modules from the module's pom.xml's module list.
-                xpathNodes '/project/modules/module/text()' "$1"
+                xpathNodes '/project/modules/module/text()' "$1" ||:
 
                 # Profile-enabled sub modules from the module's pom.xml's profiles module lists.
                 grep -qF '<profile>' "$1" && {
                     for profile in "${profiles[@]}"; do
-                        xpathNodes "/project/profiles/profile/id[text()='$profile']/../modules/module/text()" "$1"
+                        xpathNodes "/project/profiles/profile/id[text()='$profile']/../modules/module/text()" "$1" ||:
                     done
                 }
             )
@@ -70,7 +70,7 @@ loadModules() {
 
 
 # Options.
-while getopts :aABcCdDfnr:h arg; do
+while getopts :aABcCdDfn:h arg; do
     case $arg in 
         a) autoFindArtifacts=1  ;;
         A) resetArtifacts=1     ;;
@@ -81,7 +81,6 @@ while getopts :aABcCdDfnr:h arg; do
         D) nodistribution=1     ;;
         f) force=1              ;;
         n) nodeploy=1           ;;
-        r) remote=$OPTARG       ;;
 
 		h) showHelp \
 			'Build and Deploy' \
@@ -99,8 +98,7 @@ while getopts :aABcCdDfnr:h arg; do
 			'-d distribution'   "The name in the reactor of the distribution artifact. (Default: [top dir name]-distribution)" \
             '-D'                "Do not try to build and deploy a distribution." \
             '-f'                "Force default operations, no questions asked." \
-            '-n'                "Do not try to deploy the distribution after building it." \
-			'-r user@host'      "Upload and deploy the distribution to user@host." \
+            '-n'                "Do not try to deploy the distribution after building it."
 
 			exit		;;
     esac
@@ -108,7 +106,6 @@ done
 shift $((OPTIND-1))
 
 # Validate parameters.
-[[ $remote ]] || emit -y "Missing remote"
 distribution=${distribution:-${PWD##*/}-distribution}
 [[ -e $distribution ]] || distribution=
 (( nodistribution )) && distribution=
@@ -227,24 +224,24 @@ while (( ! nobuild )); do
 done
 
 if [[ -e $distribution ]] && (( ! nodeploy && ! nodistribution )); then
+    echo
 
     # Upload the distribution.
-    echo
-    emit "Shutting down remote distribution"
-    ssh -qt "$remote" "$(printf 's=%q/scripts/stop; [[ -e $s ]] || exit 0; "$s"' "${src%%/*}")"
-
     emit "Unpacking distribution"
     cd "$distribution/target/"
     unzip -uo "${distribution##*/}"-*.zip
     src=("${distribution##*/}"-*/*/); src=("${src[@]%/}")
 
-    emit "Uploading distribution to $remote"
-    ssh -qt "$remote" "$(printf 's=%q/scripts/stop; [[ -e $s ]] || exit 0; "$s" -w' "${src%%/*}")"
-    rsync -avP --delete-delay "${src[@]}" "$remote":"${src%%/*}/"
+    emit "Shutting down remote distribution"
+    ssh -qt ${deployToPort:+-p "$deployToPort"} "$deployToHost" "$(printf 's=%q/scripts/stop; [[ -e $s ]] || exit 0; "$s"' "${deployToPath:-~}/${src%%/*}")"
+
+    emit "Uploading distribution to $deployTo"
+    ssh -qt ${deployToPort:+-p "$deployToPort"} "$deployToHost" "$(printf 's=%q/scripts/stop; [[ -e $s ]] || exit 0; "$s" -w' "${deployToPath:-~}/${src%%/*}")"
+    rsync -avP --delete-after -e "ssh ${deployToPort:+-p $deployToPort}" "${src[@]}" "$deployToHost":"${deployToPath:-~}/${src%%/*}/"
 
     emit "(Re)Starting remote distribution"
-    ssh -qt "$remote" "$(printf 'dist=%q
-                                 "$dist/scripts/start" -f' "${src%%/*}")"
+    ssh -qt ${deployToPort:+-p "$deployToPort"} "$deployToHost" "$(printf 'dist=%q
+                                 "$dist/scripts/start" -f' "${deployToPath:-~}/${src%%/*}")"
 fi
 
 # Print timestamp.

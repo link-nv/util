@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.*;
+import com.lyndir.lhunath.lib.system.util.TypeUtils;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -16,7 +17,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
-import net.link.util.common.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,7 +185,7 @@ public class DefaultConfigFactory {
 
         // Check whether the type is a config group and determine the prefix to use for finding keys in this type.
         checkArgument( type.isInterface(), "Can't create a config proxy for %s, it is not an interface.", type );
-        Config.Group configGroupAnnotation = checkNotNull( ObjectUtils.findAnnotation( type, Config.Group.class ),
+        Config.Group configGroupAnnotation = checkNotNull( TypeUtils.findAnnotation( type, Config.Group.class ),
                 "Can't create a config proxy for %s, it is not a config group (has no @Group).", type );
         String proxyPrefix = prefix + configGroupAnnotation.prefix();
         if (!configGroupAnnotation.prefix().isEmpty())
@@ -213,7 +213,7 @@ public class DefaultConfigFactory {
     public final <C> C getDefaultWrapper(final C config) {
 
         // Check whether the type is a config group and determine the prefix to use for finding keys in this type.
-        Config.Group configGroupAnnotation = checkNotNull( ObjectUtils.findAnnotation( config.getClass(), Config.Group.class ),
+        Config.Group configGroupAnnotation = checkNotNull( TypeUtils.findAnnotation( config.getClass(), Config.Group.class ),
                 "Can't create a config wrapper for %s, it is not a config group (has no @Group).", config.getClass() );
 
         // Get the proxy that will service this type.
@@ -285,7 +285,7 @@ public class DefaultConfigFactory {
      */
     protected final Object getDefaultValueFor(Method method) {
 
-        Config.Property propertyAnnotation = checkNotNull( ObjectUtils.findAnnotation( method, Config.Property.class ),
+        Config.Property propertyAnnotation = checkNotNull( TypeUtils.findAnnotation( method, Config.Property.class ),
                 "Missing @Property on " + method );
 
         String value = findDefaultValueFor( method );
@@ -306,7 +306,7 @@ public class DefaultConfigFactory {
      */
     protected String findDefaultValueFor(Method method) {
 
-        Config.Property propertyAnnotation = checkNotNull( ObjectUtils.findAnnotation( method, Config.Property.class ),
+        Config.Property propertyAnnotation = checkNotNull( TypeUtils.findAnnotation( method, Config.Property.class ),
                 "Missing @Property on " + method );
 
         String value = null;
@@ -381,7 +381,7 @@ public class DefaultConfigFactory {
 
         // Enums: use valueOf
         if (type.isEnum())
-            return ObjectUtils.unsafeEnumValueOf( type, value );
+            return TypeUtils.unsafeEnumValueOf( type, value );
 
         // Collections: Split the value
         if (Collection.class.isAssignableFrom( type )) {
@@ -503,7 +503,7 @@ public class DefaultConfigFactory {
                 //noinspection unchecked
                 return getAppImplementation( (Class<AppConfig>) args[0] );
 
-            Config.Group configGroupAnnotation = ObjectUtils.findAnnotation( method.getReturnType(), Config.Group.class );
+            Config.Group configGroupAnnotation = TypeUtils.findAnnotation( method.getReturnType(), Config.Group.class );
             if (configGroupAnnotation != null)
                 // Method return type is annotated with @Group, it's a config group: return a proxy for it.
                 return getDefaultImplementation( proxyPrefix, method.getReturnType() );
@@ -538,10 +538,10 @@ public class DefaultConfigFactory {
             Object value = method.invoke( config, args );
 
             // If method return type is annotated with @Group, it's a config group: wrap the value or provide a default implementation if no value
-            if (ObjectUtils.findAnnotation( method.getReturnType(), Config.Group.class ) != null)
+            if (TypeUtils.findAnnotation( method.getReturnType(), Config.Group.class ) != null)
                 if (value == null) {
                     // FIXME: prefix-lookup probably needs to be recursive...
-                    String prefix = checkNotNull( ObjectUtils.findAnnotation( method.getDeclaringClass(), Config.Group.class ),
+                    String prefix = checkNotNull( TypeUtils.findAnnotation( method.getDeclaringClass(), Config.Group.class ),
                             "Missing @Group on " + method.getDeclaringClass() ).prefix();
                     value = getDefaultImplementation( prefix, method.getReturnType() );
                 } else

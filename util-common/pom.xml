@@ -32,6 +32,10 @@
 			<artifactId>wss4j</artifactId>
 		</dependency>
         <dependency>
+            <groupId>com.lyndir.lhunath.jlibs</groupId>
+            <artifactId>system</artifactId>
+        </dependency>
+        <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging-api</artifactId>
         </dependency>

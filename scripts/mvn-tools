@@ -131,10 +131,24 @@ updateCheck "$root/scripts"
 
 # Defaults
 distribution=
-remote=
-remoteRepo=
+deployTo=
+deployToHost=
+deployToPort=
+deployToPath=
+syncTo=
+syncToHost=
+syncToPort=
+syncToPath=
 releasePom=0
 
 # Read user configuration
 [[ -e $HOME/.mvn-tools ]] && source "$HOME/.mvn-tools"
 [[ -e $root/.mvn-tools ]] && source "$root/.mvn-tools"
+
+# Parse configuration
+[[ $deployTo = *:* ]] && deployToPort=${deployTo##*:}
+deployToHost=${deployTo%:*}
+deployTo=$deployToHost${deployToPort:+:$deployToPort}
+[[ $syncTo = *:* ]] && syncToPort=${syncTo##*:}
+syncToHost=${syncTo%:*}
+syncTo=$syncToHost${syncToPort:+:$syncToPort}

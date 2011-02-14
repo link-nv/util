@@ -29,6 +29,7 @@ cd "$root"
 # Failure report
 checkExit() {
     r=$?
+    set +e
     trap - ERR
 
     (( r )) && {
