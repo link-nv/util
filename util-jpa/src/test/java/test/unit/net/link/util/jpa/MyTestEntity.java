@@ -18,11 +18,11 @@ import net.link.util.jpa.annotation.UpdateMethod;
 
 
 @Entity
-@NamedQueries({
-        @NamedQuery(name = QUERY_ALL, query = "FROM MyTestEntity"),
-        @NamedQuery(name = QUERY_WHERE_NAME, query = "FROM MyTestEntity AS mte WHERE mte.name = :" + NAME_PARAM),
-        @NamedQuery(name = DELETE_ALL, query = "DELETE FROM MyTestEntity"),
-        @NamedQuery(name = COUNT_ALL, query = "SELECT COUNT(*) FROM MyTestEntity") })
+@NamedQueries( {
+                       @NamedQuery(name = QUERY_ALL, query = "FROM MyTestEntity"),
+                       @NamedQuery(name = QUERY_WHERE_NAME, query = "FROM MyTestEntity AS mte WHERE mte.name = :" + NAME_PARAM),
+                       @NamedQuery(name = DELETE_ALL, query = "DELETE FROM MyTestEntity"),
+                       @NamedQuery(name = COUNT_ALL, query = "SELECT COUNT(*) FROM MyTestEntity") })
 public class MyTestEntity implements Serializable {
 
     public static final String QUERY_ALL = "mte.all";
@@ -66,7 +66,7 @@ public class MyTestEntity implements Serializable {
         @QueryMethod(QUERY_WHERE_NAME)
         List<MyTestEntity> listAll(@QueryParam(NAME_PARAM) String name);
 
-        @QueryMethod(QUERY_WHERE_NAME)
+        @QueryMethod(value = QUERY_WHERE_NAME, nullable = false)
         MyTestEntity get(@QueryParam(NAME_PARAM) String name);
 
         @QueryMethod(value = QUERY_WHERE_NAME, nullable = true)

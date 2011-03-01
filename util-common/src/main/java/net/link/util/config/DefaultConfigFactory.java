@@ -381,7 +381,7 @@ public class DefaultConfigFactory {
 
         // Enums: use valueOf
         if (type.isEnum())
-            return TypeUtils.unsafeEnumValueOf( type, value );
+            return TypeUtils.unsafeValueOfEnum( type, value );
 
         // Collections: Split the value
         if (Collection.class.isAssignableFrom( type )) {
