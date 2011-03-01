@@ -35,6 +35,10 @@ shopt -s extglob
 shopt -s globstar
 } 2>/dev/null ||:
 
+# Unset all exported functions.  Exported functions are evil.
+while read _ _ func; do
+    unset -f "$func"
+done < <(declare -Fx)
 
 
 

@@ -26,6 +26,8 @@ source mvn-tools || exit
 # TODO: Support for deleted file detection:
 #       When a file is deleted from a source tree, the artifact should be
 #       added to the reactor and first cleaned.
+#       Support for pom artifacts:
+#       POM artifacts have no target/ directory to compare mtimes against.
 
 
 # Functions.
@@ -36,7 +38,7 @@ loadModules() {
     # Build list of all modules allowed in the maven reactor.
     IFS=$'\n' read -d '' -r -a profiles < <(xpathNodes '/settings/activeProfiles/activeProfile/text()' ~/.m2/settings.xml) ||:
     emit "Enumerating modules in the Maven reactor" --
-        modules=()
+        modules=(.)
         addModules() {
             grep -qF '<module>' "$1" || return 0
 
@@ -65,6 +67,7 @@ loadModules() {
         addModules ./pom.xml
     emit -$?
 
+    #printf ' - module: %s\n' "${modules[@]}" >&2
     (( ${#modules[@]} ))
 }
 
@@ -126,7 +129,7 @@ while (( ! nobuild )); do
         emit "Scanning for outdated artifacts"
         while read file; do
             files=("$file")
-            [[ $file = ./pom.xml ]] && files=(*/pom.xml)
+            #[[ $file = ./pom.xml ]] && files=(*/pom.xml)
 
             for file in "${files[@]}"; do
                 target=$file
@@ -136,25 +139,33 @@ while (( ! nobuild )); do
                 target=${target#./}
 
                 # Only consider this target if it's in the module list.
-                inArray "$target" "${modules[@]}" || continue
+                inArray "$target" "${modules[@]}" || {
+                    #echo "Ignoring: $target, not a module." >&2
+                    continue
+                }
 
                 emit "Adding (Outdated)  : $bold$target$reset:$file"
                 targets+=("$PWD/$target")
             done
-        done < <(find . \
+        done < <(export -f latest
+                 find . \
                     \( -type d ! \( -exec bash -c 'test -e "$1/pom.xml"' -- {} \; -o -name 'src' -o -path '*/src/*' \) -prune \) -o \
                     -name 'pom.xml' -exec bash -c '
                         shopt -s nullglob
-                        ref=( "${1%/pom.xml}"/target/*.{[jwe]ar,zip} )
+                        ref=$(latest "${1%/pom.xml}"/target/*.{[jwe]ar,zip})
+                        #printf "Candidate: %s <> %s" "$1" "$ref" >&2
                         if [[ -e $ref && $1 -nt $ref ]]; then
+                            #echo ", outdated." >&2
                             echo "$1"
+                        else
+                            : #echo ", up-to-date." >&2
                         fi
                         :' -- {} \; -o \
                     ! -type d -path '*/src/main/*' -exec bash -c '
                         shopt -s nullglob
                         for f; do
                             [[ ${f%%/src/main/*} != ${ref%/target/*} ]] && \
-                                ref=( "${f%%/src/main/*}"/target/*[.]{[jwe]ar,zip} )
+                                ref=$(latest "${f%%/src/main/*}"/target/*[.]{[jwe]ar,zip})
                             if [[ ! -e $ref ]]; then
                                 continue
                                 #while [[ $f = */* && ! -e $f/pom.xml ]]
@@ -213,8 +224,13 @@ while (( ! nobuild )); do
     # Begin the build.
     if (( ${#targets[@]} )); then
         echo
-        emit "Building with: mvn -pl "$(printf '%s,' "${targets[@]}")" -npu -amd "${opts[@]}" ${cleanAll:+clean} install"
-        mvn -pl "$(printf '%s,' "${targets[@]}")" -npu -amd "${opts[@]}" ${cleanAll:+clean} install & mvnpid=$!
+        if inArray . "${targets[@]}"; then
+            emit "Building with: mvn -npu "${opts[@]}" ${cleanAll:+clean} install"
+            mvn -npu "${opts[@]}" ${cleanAll:+clean} install & mvnpid=$!
+        else
+            emit "Building with: mvn -pl "$(printf '%s,' "${targets[@]}")" -npu -amd "${opts[@]}" ${cleanAll:+clean} install"
+            mvn -pl "$(printf '%s,' "${targets[@]}")" -npu -amd "${opts[@]}" ${cleanAll:+clean} install & mvnpid=$!
+        fi
         (( clean && ! nodistribution )) && [[ -e $distribution ]] && ( sleep 10; kill -0 $mvnpid 2>/dev/null && rm -rf "$distribution/target/" ) & cleanpid=$!
         trap "kill $mvnpid $cleanpid 2>/dev/null ||:" EXIT
         wait $mvnpid
@@ -226,22 +242,39 @@ done
 if [[ -e $distribution ]] && (( ! nodeploy && ! nodistribution )); then
     echo
 
-    # Upload the distribution.
-    emit "Unpacking distribution"
+    # Find the package
     cd "$distribution/target/"
-    unzip -uo "${distribution##*/}"-*.zip
-    src=("${distribution##*/}"-*/*/); src=("${src[@]%/}")
+    shopt -s nullglob
+    package=(*.{[jwe]ar,zip})
+    shopt -u nullglob
 
-    emit "Shutting down remote distribution"
-    ssh -qt ${deployToPort:+-p "$deployToPort"} "$deployToHost" "$(printf 's=%q/scripts/stop; [[ -e $s ]] || exit 0; "$s"' "${deployToPath:-~}/${src%%/*}")"
+    # Handle the package
+    case $package in
+        *.zip)
+            emit "Unpacking distribution"
+            unzip -uo "$package"
+            src=("${package%.*}"/*/); src=("${src[@]%/}")
 
-    emit "Uploading distribution to $deployTo"
-    ssh -qt ${deployToPort:+-p "$deployToPort"} "$deployToHost" "$(printf 's=%q/scripts/stop; [[ -e $s ]] || exit 0; "$s" -w' "${deployToPath:-~}/${src%%/*}")"
-    rsync -avP --delete-after -e "ssh ${deployToPort:+-p $deployToPort}" "${src[@]}" "$deployToHost":"${deployToPath:-~}/${src%%/*}/"
+            emit "Shutting down remote distribution"
+            ssh -qt ${deployToPort:+-p "$deployToPort"} "$deployToHost" "$(printf 's=%q/scripts/stop; [[ -e $s ]] || exit 0; "$s"' "${deployToPath:-~}/${src%%/*}")"
 
-    emit "(Re)Starting remote distribution"
-    ssh -qt ${deployToPort:+-p "$deployToPort"} "$deployToHost" "$(printf 'dist=%q
-                                 "$dist/scripts/start" -f' "${deployToPath:-~}/${src%%/*}")"
+            emit "Uploading distribution to $deployTo:${deployToPath:-~}/${src%%/*}"
+            ssh -qt ${deployToPort:+-p "$deployToPort"} "$deployToHost" "$(printf 's=%q/scripts/stop; [[ -e $s ]] || exit 0; "$s" -w' "${deployToPath:-~}/${src%%/*}")"
+            rsync -avP --delete-after -e "ssh ${deployToPort:+-p $deployToPort}" "${src[@]}" "$deployToHost":"${deployToPath:-~}/${src%%/*}/"
+
+            emit "(Re)Starting remote distribution"
+            ssh -qt ${deployToPort:+-p "$deployToPort"} "$deployToHost" "$(printf 'dist=%q
+                                         "$dist/scripts/start" -f' "${deployToPath:-~}/${src%%/*}")"
+            ;;
+        *.ear|*.war)
+            emit "Uploading package to $deployTo:${deployToPath:-~}/$package"
+            rsync -avP --delete-after -e "ssh ${deployToPort:+-p $deployToPort}" "$package" "$deployToHost":"${deployToPath:-~}"
+            ;;
+
+        *)
+            emit -R "Don't know how to handle package: $package"
+            ;;
+    esac
 fi
 
 # Print timestamp.
