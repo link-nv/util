@@ -442,6 +442,20 @@ public abstract class KeyStoreUtils {
         }
 
         List<X509Certificate> orderedCertChain = new LinkedList<X509Certificate>();
+        if (certChain.size() == 2) {
+
+            X509Certificate cert1 = certChain.get( 0 );
+            X509Certificate cert2 = certChain.get( 1 );
+            if (isSelfSigned( cert1 )) {
+                orderedCertChain.add( cert2 );
+                orderedCertChain.add( cert1 );
+            } else {
+                orderedCertChain.add( cert1 );
+                orderedCertChain.add( cert2 );
+            }
+
+            return orderedCertChain;
+        }
 
         // find self-signed root
         for (X509Certificate certificate : certChain) {
