@@ -437,6 +437,7 @@ public abstract class KeyStoreUtils {
      */
     public static List<X509Certificate> getOrderedCertificateChain(final List<X509Certificate> certChain) {
 
+        // TODO: cant we do this a bit nicer
         if (certChain.size() == 1 || certChain.isEmpty()) {
             return certChain;
         }
