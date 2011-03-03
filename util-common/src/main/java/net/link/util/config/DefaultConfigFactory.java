@@ -18,6 +18,9 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import org.jetbrains.annotations.NotNull;
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
+import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +64,8 @@ public class DefaultConfigFactory {
                             logger.info( String.format( "    - %-30s = %s", config.getKey(), config.getValue() ) );
 
                         return properties;
-                    } catch (IOException e) {
+                    }
+                    catch (IOException e) {
                         logger.error( "While loading config from: " + configUrl, e );
                     }
             }
@@ -77,7 +81,8 @@ public class DefaultConfigFactory {
                             logger.info( String.format( "    - %30s = %s", config.getKey(), config.getValue() ) );
 
                         return properties;
-                    } catch (IOException e) {
+                    }
+                    catch (IOException e) {
                         logger.error( "While loading config from: " + configUrl, e );
                     }
             }
@@ -370,18 +375,30 @@ public class DefaultConfigFactory {
         if (value == null || type.isAssignableFrom( String.class ))
             return type.cast( value );
 
-        // Reflection: type has a constructor that takes a string.
-        try {
-            return type.getConstructor( String.class ).newInstance( value );
-        } catch (InstantiationException ignored) {
-        } catch (IllegalAccessException ignored) {
-        } catch (InvocationTargetException ignored) {
-        } catch (NoSuchMethodException ignored) {
-        }
+        // Joda-Time
+        if (type.isAssignableFrom( DateTime.class ))
+            return type.cast( ISODateTimeFormat.localDateOptionalTimeParser().parseDateTime( value ) );
+        if (type.isAssignableFrom( Duration.class ))
+            return type.cast( new Duration( Long.valueOf( value ).longValue() ) );
 
         // Enums: use valueOf
         if (type.isEnum())
             return TypeUtils.unsafeValueOfEnum( type, value );
+
+        // Reflection: type has a constructor that takes a string.
+        try {
+            return type.getConstructor( String.class ).newInstance( value );
+        }
+        catch (InstantiationException ignored) {
+        }
+        catch (IllegalAccessException ignored) {
+        }
+        catch (InvocationTargetException ignored) {
+        }
+        catch (NoSuchMethodException ignored) {
+        }
+        catch (IllegalArgumentException ignored) {
+        }
 
         // Collections: Split the value
         if (Collection.class.isAssignableFrom( type )) {
@@ -397,10 +414,14 @@ public class DefaultConfigFactory {
                 Collection<String> values = collectionType.getConstructor().newInstance();
                 Iterables.addAll( values, splitValues );
                 return type.cast( values );
-            } catch (InstantiationException ignored) {
-            } catch (IllegalAccessException ignored) {
-            } catch (NoSuchMethodException ignored) {
-            } catch (InvocationTargetException ignored) {
+            }
+            catch (InstantiationException ignored) {
+            }
+            catch (IllegalAccessException ignored) {
+            }
+            catch (NoSuchMethodException ignored) {
+            }
+            catch (InvocationTargetException ignored) {
             }
 
             // In case type is not instantiable

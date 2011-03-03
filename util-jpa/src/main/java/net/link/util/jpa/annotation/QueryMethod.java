@@ -24,7 +24,7 @@ public @interface QueryMethod {
     /**
      * The name of the named query to execute.
      */
-    String value();
+    String value() default "";
 
     /**
      * Allows the method to return <code>null</code> instead of a {@link NoResultException}. Useful to implement <code>findXXX</code>

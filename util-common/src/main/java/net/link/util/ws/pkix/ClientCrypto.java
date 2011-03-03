@@ -7,6 +7,7 @@
 
 package net.link.util.ws.pkix;
 
+import com.google.common.collect.Iterables;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.KeyStore;
@@ -14,13 +15,14 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ws.security.components.crypto.Crypto;
 
 
 /**
- * WSS4J Crypto implementation. This component hosts the client certificate and private key as used by the WSS4J library.
+ * WSS4J Crypto implementation. This component hosts the client certificateChain and private key as used by the WSS4J library.
  *
  * @author fcorneli
  */
@@ -28,71 +30,70 @@ public class ClientCrypto implements Crypto {
 
     private static final Log LOG = LogFactory.getLog( ClientCrypto.class );
 
-    private final X509Certificate certificate;
+    private final List<X509Certificate> certificateChain;
 
     private final PrivateKey privateKey;
 
-    public ClientCrypto(X509Certificate certificate, PrivateKey privateKey) {
+    public ClientCrypto(List<X509Certificate> certificateChain, PrivateKey privateKey) {
 
-        this.certificate = certificate;
+        this.certificateChain = certificateChain;
         this.privateKey = privateKey;
     }
 
     public String getAliasForX509Cert(Certificate cert) {
 
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public String getAliasForX509Cert(String issuer) {
 
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public String getAliasForX509Cert(byte[] subjectKeyIdentifier) {
 
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public String getAliasForX509Cert(String issuer, BigInteger serialNumber) {
 
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public String getAliasForX509CertThumb(byte[] thumb) {
 
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public String[] getAliasesForDN(String subjectDN) {
 
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public byte[] getCertificateData(boolean reverse, X509Certificate[] certificates) {
 
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public CertificateFactory getCertificateFactory() {
 
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public X509Certificate[] getCertificates(String alias) {
 
         LOG.debug( "getCertificates for alias: " + alias );
-        X509Certificate[] certificates = new X509Certificate[] { certificate };
-        return certificates;
+        return Iterables.toArray( certificateChain, X509Certificate.class );
     }
 
     public String getDefaultX509Alias() {
 
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public KeyStore getKeyStore() {
 
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public PrivateKey getPrivateKey(String alias, String password)
@@ -104,21 +105,21 @@ public class ClientCrypto implements Crypto {
 
     public byte[] getSKIBytesFromCert(X509Certificate cert) {
 
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public X509Certificate[] getX509Certificates(byte[] data, boolean reverse) {
 
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public X509Certificate loadCertificate(InputStream inputStream) {
 
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public boolean validateCertPath(X509Certificate[] certificates) {
 
-        return false;
+        throw new UnsupportedOperationException();
     }
 }

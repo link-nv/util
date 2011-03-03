@@ -9,6 +9,8 @@ package net.link.util.ws.pkix.wssecurity;
 
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
+import java.util.List;
 
 
 /**
@@ -27,12 +29,12 @@ public interface WSSecurityConfigurationService {
      * Given the calling entity's certificate, perform a verification of the digestion of the SOAP body element by the WS-Security
      * signature.
      */
-    boolean validateCertificate(X509Certificate certificate);
+    boolean isCertificateChainValid(Collection<X509Certificate> certificateChain);
 
     /**
-     * Returns the certificate which will be used to sign web service response messages.
+     * Returns the certificate chain that will be used to sign web service response messages.
      */
-    X509Certificate getCertificate();
+    List<X509Certificate> getCertificateChain();
 
     /**
      * Returns the private key which will be used to sign web service response messages.

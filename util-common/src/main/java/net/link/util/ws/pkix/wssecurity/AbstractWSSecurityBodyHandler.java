@@ -7,6 +7,10 @@
 
 package net.link.util.ws.pkix.wssecurity;
 
+import static com.google.common.base.Preconditions.checkState;
+
+import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.Set;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPBody;
@@ -52,10 +56,10 @@ public abstract class AbstractWSSecurityBodyHandler implements SOAPHandler<SOAPM
             // Message is outbound.
             return true;
 
-        if (AbstractWSSecurityServerHandler.getCertificate( soapMessageContext ) == null) {
+        Collection<X509Certificate> certificateChain = AbstractWSSecurityServerHandler.findCertificateChain( soapMessageContext );
+        if (certificateChain == null || certificateChain.isEmpty()) {
             // No certificate in message.
-            if (!isInboundSignatureOptional())
-                throw new RuntimeException( "no certificate found on JAX-WS context" );
+            checkState( isInboundSignatureOptional(), "No certificate found in the incoming JAX-WS request" );
 
             return true;
         }
@@ -70,7 +74,7 @@ public abstract class AbstractWSSecurityBodyHandler implements SOAPHandler<SOAPM
 
             if (null == bodyId || 0 == bodyId.length())
                 throw SOAPUtils.createSOAPFaultException( "SOAP Body should have a wsu:Id attribute", "FailedCheck" );
-            if (!AbstractWSSecurityServerHandler.isSignedElement( bodyId, soapMessageContext ))
+            if (!AbstractWSSecurityServerHandler.isElementSigned( bodyId, soapMessageContext ))
                 throw SOAPUtils.createSOAPFaultException( "SOAP Body was not signed", "FailedCheck" );
         }
         catch (SOAPException e) {

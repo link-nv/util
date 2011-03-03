@@ -23,5 +23,5 @@ public @interface QueryParam {
     /**
      * Name of the parameter within the query.
      */
-    String value();
+    String value() default "";
 }

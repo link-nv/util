@@ -6,6 +6,14 @@
  */
 package net.link.util.wicket.util;
 
+import java.text.DateFormat;
+import java.text.NumberFormat;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import net.link.util.j2ee.NamingStrategy;
 import net.link.util.wicket.behaviour.FocusOnReady;
 import net.link.util.wicket.component.WicketPage;
@@ -22,44 +30,27 @@ import org.apache.wicket.protocol.http.WebRequest;
 import org.apache.wicket.protocol.http.WebResponse;
 import org.wicketstuff.javaee.injection.AnnotJavaEEInjector;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.text.DateFormat;
-import java.text.NumberFormat;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 
 /**
- * <h2>{@link WicketUtils}</h2>
- * <p/>
- * <p>
- * [description / usage].
- * </p>
- * <p/>
- * <p>
- * <i>Sep 17, 2008</i>
- * </p>
+ * <h2>{@link WicketUtils}</h2> <p/> <p> [description / usage]. </p> <p/> <p> <i>Sep 17, 2008</i> </p>
  *
  * @author lhunath
  */
 public abstract class WicketUtils {
 
-    static final Log LOG = LogFactory.getLog(WicketUtils.class);
+    static final Log LOG = LogFactory.getLog( WicketUtils.class );
     static ConfigurableInjector eeInjector;
 
     // %[argument_index$][flags][width][.precision][t]conversion
-    private static final String formatSpecifier = "%(\\d+\\$)?([-#+ 0,(\\<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z%])";
-    private static Pattern fsPattern = Pattern.compile(formatSpecifier);
+    private static final String  formatSpecifier = "%(\\d+\\$)?([-#+ 0,(\\<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z%])";
+    private static       Pattern fsPattern       = Pattern.compile( formatSpecifier );
 
     /**
      * @return A formatter according to the given locale in short form.
      */
     public static DateFormat getDateFormat(Locale locale) {
 
-        return DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, locale);
+        return DateFormat.getDateTimeInstance( DateFormat.SHORT, DateFormat.SHORT, locale );
     }
 
     /**
@@ -67,7 +58,7 @@ public abstract class WicketUtils {
      */
     public static String format(Locale locale, Date date) {
 
-        return getDateFormat(locale).format(date);
+        return getDateFormat( locale ).format( date );
     }
 
     /**
@@ -75,7 +66,7 @@ public abstract class WicketUtils {
      */
     public static NumberFormat getCurrencyFormat(Locale locale) {
 
-        return NumberFormat.getCurrencyInstance(locale);
+        return NumberFormat.getCurrencyInstance( locale );
     }
 
     /**
@@ -83,7 +74,7 @@ public abstract class WicketUtils {
      */
     public static String format(Locale locale, Number number) {
 
-        return getCurrencyFormat(locale).format(number);
+        return getCurrencyFormat( locale ).format( number );
     }
 
     /**
@@ -93,14 +84,14 @@ public abstract class WicketUtils {
      */
     public static void addInjector(WebApplication application, final NamingStrategy namingStrategy) {
 
-        application.addComponentInstantiationListener(new ComponentInjector() {
+        application.addComponentInstantiationListener( new ComponentInjector() {
 
             @Override
             public void onInstantiation(Component component) {
 
-                inject(component, namingStrategy);
+                inject( component, namingStrategy );
             }
-        });
+        } );
     }
 
     /**
@@ -109,9 +100,9 @@ public abstract class WicketUtils {
     public static void inject(Object injectee, NamingStrategy namingStrategy) {
 
         if (eeInjector == null)
-            eeInjector = new AnnotJavaEEInjector(namingStrategy);
+            eeInjector = new AnnotJavaEEInjector( namingStrategy );
 
-        eeInjector.inject(injectee);
+        eeInjector.inject( injectee );
     }
 
     /**
@@ -119,7 +110,12 @@ public abstract class WicketUtils {
      */
     public static HttpServletRequest getServletRequest() {
 
-        return ((WebRequest) RequestCycle.get().getRequest()).getHttpServletRequest();
+        return getServletRequest( RequestCycle.get() );
+    }
+
+    public static HttpServletRequest getServletRequest(final RequestCycle requestCycle) {
+
+        return ((WebRequest) requestCycle.getRequest()).getHttpServletRequest();
     }
 
     /**
@@ -127,7 +123,12 @@ public abstract class WicketUtils {
      */
     public static HttpServletResponse getServletResponse() {
 
-        return ((WebResponse) RequestCycle.get().getResponse()).getHttpServletResponse();
+        return getServletResponse( RequestCycle.get() );
+    }
+
+    public static HttpServletResponse getServletResponse(final RequestCycle requestCycle) {
+
+        return ((WebResponse) requestCycle.getResponse()).getHttpServletResponse();
     }
 
     /**
@@ -139,20 +140,17 @@ public abstract class WicketUtils {
     }
 
     /**
-     * Uses the application's localizer and the active session's locale.
-     * <p/>
-     * Note: You can use this method with a single argument, too. This will cause the first argument (format) to be evaluated as a
-     * localization key.
+     * Uses the application's localizer and the active session's locale. <p/> Note: You can use this method with a single argument, too.
+     * This will cause the first argument (format) to be evaluated as a localization key.
      *
      * @param format The format specification for the arguments. See {@link String#format(java.util.Locale, String, Object...)}. To that
-     *               list,
-     *               add the 'l' conversion parameter. This parameter first looks the arg data up as a localization key, then processes the
-     *               result as though it was given with the 's' conversion parameter.
+     *               list, add the 'l' conversion parameter. This parameter first looks the arg data up as a localization key, then
+     *               processes the result as though it was given with the 's' conversion parameter.
      * @param args   The arguments that contain the data to fill into the format specifications.
      */
     public static String localize(Component component, String format, Object... args) {
 
-        return localize(Application.get().getResourceSettings().getLocalizer(), component, Session.get().getLocale(), format, args);
+        return localize( Application.get().getResourceSettings().getLocalizer(), component, Session.get().getLocale(), format, args );
     }
 
     /**
@@ -163,44 +161,43 @@ public abstract class WicketUtils {
      * @param component The component in whose context to resolve localization keys.
      * @param locale    The locale for which to resolve localization keys.
      * @param format    The format specification for the arguments. See {@link String#format(java.util.Locale, String, Object...)}. To that
-     *                  list,
-     *                  add the 'l' conversion parameter. This parameter first looks the arg data up as a localization key, then processes the
-     *                  result as though it was given with the 's' conversion parameter.
+     *                  list, add the 'l' conversion parameter. This parameter first looks the arg data up as a localization key, then
+     *                  processes the result as though it was given with the 's' conversion parameter.
      * @param args      The arguments that contain the data to fill into the format specifications.
      */
     public static String localize(Localizer localizer, Component component, Locale locale, String format, Object... args) {
 
         if (args.length == 0)
             // Single argument invocation: format is localization key.
-            return localizer.getString(format, component);
+            return localizer.getString( format, component );
 
-        List<Object> localizationData = new ArrayList<Object>(args.length);
-        StringBuffer newFormat = new StringBuffer(format);
-        Matcher specifiers = fsPattern.matcher(format);
+        List<Object> localizationData = new ArrayList<Object>( args.length );
+        StringBuffer newFormat = new StringBuffer( format );
+        Matcher specifiers = fsPattern.matcher( format );
 
         int pos = 0, num = 0;
-        while (specifiers.find(pos)) {
-            if ("l".equalsIgnoreCase(specifiers.group(6))) {
-                if ("L".equals(specifiers.group(6)))
-                    newFormat.setCharAt(specifiers.end(6) - 1, 'S');
+        while (specifiers.find( pos )) {
+            if ("l".equalsIgnoreCase( specifiers.group( 6 ) )) {
+                if ("L".equals( specifiers.group( 6 ) ))
+                    newFormat.setCharAt( specifiers.end( 6 ) - 1, 'S' );
                 else
-                    newFormat.setCharAt(specifiers.end(6) - 1, 's');
+                    newFormat.setCharAt( specifiers.end( 6 ) - 1, 's' );
 
                 if (args[num] == null)
-                    throw new NullPointerException(String.format("Key for localization must be String, got %s (arg: %d)", "null", num));
+                    throw new NullPointerException( String.format( "Key for localization must be String, got %s (arg: %d)", "null", num ) );
                 if (!(args[num] instanceof String))
-                    throw new IllegalArgumentException(String.format("Key for localization must be String, got %s (arg: %d)",
-                            args[num].getClass(), num));
+                    throw new IllegalArgumentException(
+                            String.format( "Key for localization must be String, got %s (arg: %d)", args[num].getClass(), num ) );
 
-                localizationData.add(localizer.getString((String) args[num], component));
+                localizationData.add( localizer.getString( (String) args[num], component ) );
             } else
-                localizationData.add(args[num]);
+                localizationData.add( args[num] );
 
             ++num;
             pos = specifiers.end();
         }
 
-        return String.format(locale, newFormat.toString(), localizationData.toArray());
+        return String.format( locale, newFormat.toString(), localizationData.toArray() );
     }
 
     @SuppressWarnings("unchecked")
@@ -208,22 +205,22 @@ public abstract class WicketUtils {
 
         List<Locale> uniqueLocales = new LinkedList<Locale>();
         for (final Locale locale : (List<Locale>) LocaleUtils.availableLocaleList())
-            if (CollectionUtils.find(uniqueLocales, new Predicate() {
+            if (CollectionUtils.find( uniqueLocales, new Predicate() {
 
                 public boolean evaluate(Object object) {
 
                     Locale uniqueLocale = (Locale) object;
-                    return uniqueLocale.getDisplayLanguage().equals(locale.getDisplayLanguage());
+                    return uniqueLocale.getDisplayLanguage().equals( locale.getDisplayLanguage() );
                 }
-            }) == null)
-                uniqueLocales.add(locale);
-        Collections.sort(uniqueLocales, new Comparator<Locale>() {
+            } ) == null)
+                uniqueLocales.add( locale );
+        Collections.sort( uniqueLocales, new Comparator<Locale>() {
 
             public int compare(Locale l1, Locale l2) {
 
-                return l1.getDisplayLanguage().compareTo(l2.getDisplayLanguage());
+                return l1.getDisplayLanguage().compareTo( l2.getDisplayLanguage() );
             }
-        });
+        } );
         return uniqueLocales;
     }
 
@@ -238,16 +235,16 @@ public abstract class WicketUtils {
             return null;
 
         if (componentPage == null) {
-            LOG.warn("Tried to focus " + component.getId() + " but don't know the page it's on.");
+            LOG.warn( "Tried to focus " + component.getId() + " but don't know the page it's on." );
             return null;
         }
 
         if (componentPage instanceof WicketPage)
-            return ((WicketPage) componentPage).focus(component);
+            return ((WicketPage) componentPage).focus( component );
 
         // Not a WicketPage, add the behaviour manually; won't be managed now.
-        FocusOnReady focusOnReady = new FocusOnReady(component);
-        componentPage.add(focusOnReady);
+        FocusOnReady focusOnReady = new FocusOnReady( component );
+        componentPage.add( focusOnReady );
         return focusOnReady;
     }
 }

@@ -65,47 +65,47 @@ public class QueryObjectInvocationHandler implements InvocationHandler {
         return null;
     }
 
-    private Object query(QueryMethod queryMethodAnnotation, Method method, Object[] args)
-            throws Exception {
+    private Object query(QueryMethod queryMethodAnnotation, Method method, Object[] args) {
 
         String namedQueryName = queryMethodAnnotation.value();
+        if (namedQueryName == null || namedQueryName.isEmpty())
+            namedQueryName = method.getDeclaringClass().getSimpleName() + '.' + method.getName();
         Query query = entityManager.createNamedQuery( namedQueryName );
 
         setParameters( method, args, query );
 
         Class<?> returnType = method.getReturnType();
-
         if (Query.class.isAssignableFrom( returnType ))
             return query;
+        if (List.class.isAssignableFrom( returnType ))
+            return query.getResultList();
 
-        if (List.class.isAssignableFrom( returnType )) {
-            List<?> resultList = query.getResultList();
-            return resultList;
-        }
-
-        boolean nullable = queryMethodAnnotation.nullable();
-        if (true == nullable) {
+        if (queryMethodAnnotation.nullable()) {
             List<?> resultList = query.getResultList();
             if (resultList.isEmpty())
                 return null;
+
             return resultList.get( 0 );
         }
 
-        Object singleResult = query.getSingleResult();
-        return singleResult;
+        return query.getSingleResult();
     }
 
     private void setParameters(Method method, Object[] args, Query query) {
 
         if (null == args)
             return;
+
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for (int paramIdx = 0; paramIdx < args.length; paramIdx++)
             for (Annotation parameterAnnotation : parameterAnnotations[paramIdx])
                 if (parameterAnnotation instanceof QueryParam) {
                     QueryParam queryParamAnnotation = (QueryParam) parameterAnnotation;
                     String paramName = queryParamAnnotation.value();
-                    query.setParameter( paramName, args[paramIdx] );
+                    if (paramName == null || paramName.isEmpty())
+                        query.setParameter( paramIdx, args[paramIdx] );
+                    else
+                        query.setParameter( paramName, args[paramIdx] );
                 }
     }
 }

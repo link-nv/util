@@ -7,6 +7,8 @@
 
 package net.link.util.common;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.URI;
@@ -16,7 +18,9 @@ import java.security.cert.Certificate;
 import java.security.cert.*;
 import java.security.interfaces.DSAKeyPairGenerator;
 import java.security.spec.RSAKeyGenParameterSpec;
-import java.util.*;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.LinkedList;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,8 +61,8 @@ public abstract class KeyStoreUtils {
                                                            String keyEntryPassword) {
 
         return loadFirstPrivateKeyEntry( keystoreType, keyStoreInputStream, //
-                                         keyStorePassword == null? null: keyStorePassword.toCharArray(),
-                                         keyEntryPassword == null? null: keyEntryPassword.toCharArray() );
+                keyStorePassword == null? null: keyStorePassword.toCharArray(),
+                keyEntryPassword == null? null: keyEntryPassword.toCharArray() );
     }
 
     public static PrivateKeyEntry loadPrivateKeyEntry(String keystoreType, InputStream keyStoreInputStream, String keyStorePassword,
@@ -66,19 +70,19 @@ public abstract class KeyStoreUtils {
 
         if (alias != null)
             return loadPrivateKeyEntry( keystoreType, keyStoreInputStream, //
-                                        keyStorePassword == null? null: keyStorePassword.toCharArray(),
-                                        keyEntryPassword == null? null: keyEntryPassword.toCharArray(), alias );
+                    keyStorePassword == null? null: keyStorePassword.toCharArray(),
+                    keyEntryPassword == null? null: keyEntryPassword.toCharArray(), alias );
 
         return loadFirstPrivateKeyEntry( keystoreType, keyStoreInputStream, //
-                                         keyStorePassword == null? null: keyStorePassword.toCharArray(),
-                                         keyEntryPassword == null? null: keyEntryPassword.toCharArray() );
+                keyStorePassword == null? null: keyStorePassword.toCharArray(),
+                keyEntryPassword == null? null: keyEntryPassword.toCharArray() );
     }
 
-    public static Map<String, X509Certificate> loadOtherCertificates(String keystoreType, InputStream keyStoreInputStream,
-                                                                     String keyStorePassword, String alias) {
+    public static ImmutableMap<String, X509Certificate> loadCertificates(String keystoreType, InputStream keyStoreInputStream,
+                                                                         String keyStorePassword, Predicate<String> ignoreAlias) {
 
-        return loadOtherCertificates( keystoreType, keyStoreInputStream, //
-                                      keyStorePassword == null? null: keyStorePassword.toCharArray(), alias );
+        return loadCertificates( keystoreType, keyStoreInputStream, //
+                keyStorePassword == null? null: keyStorePassword.toCharArray(), ignoreAlias );
     }
 
     public static PrivateKeyEntry loadFirstPrivateKeyEntry(String keystoreType, InputStream keyStoreInputStream, char[] keyStorePassword,
@@ -89,7 +93,8 @@ public abstract class KeyStoreUtils {
         Enumeration<String> aliases;
         try {
             aliases = keyStore.aliases();
-        } catch (KeyStoreException e) {
+        }
+        catch (KeyStoreException e) {
             throw new RuntimeException( "could not get aliases", e );
         }
         String alias = null;
@@ -98,7 +103,8 @@ public abstract class KeyStoreUtils {
             try {
                 if (keyStore.isKeyEntry( alias ))
                     break;
-            } catch (KeyStoreException e) {
+            }
+            catch (KeyStoreException e) {
                 throw new RuntimeException( e );
             }
 
@@ -110,7 +116,8 @@ public abstract class KeyStoreUtils {
         /* Get the private key entry. */
         try {
             return (PrivateKeyEntry) keyStore.getEntry( alias, new KeyStore.PasswordProtection( keyEntryPassword ) );
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException( "error retrieving key", e );
         }
     }
@@ -123,7 +130,8 @@ public abstract class KeyStoreUtils {
         Enumeration<String> aliases;
         try {
             aliases = keyStore.aliases();
-        } catch (KeyStoreException e) {
+        }
+        catch (KeyStoreException e) {
             throw new RuntimeException( "could not get aliases", e );
         }
         if (!aliases.hasMoreElements())
@@ -132,14 +140,16 @@ public abstract class KeyStoreUtils {
         try {
             if (!keyStore.isKeyEntry( alias ))
                 throw new RuntimeException( "not key entry: " + alias );
-        } catch (KeyStoreException e) {
+        }
+        catch (KeyStoreException e) {
             throw new RuntimeException( "key store error", e );
         }
 
         /* Get the private key entry. */
         try {
             return (PrivateKeyEntry) keyStore.getEntry( alias, new KeyStore.PasswordProtection( keyEntryPassword ) );
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException( "error retrieving key", e );
         }
     }
@@ -150,41 +160,44 @@ public abstract class KeyStoreUtils {
             keyStore.setEntry( alias, entry, new KeyStore.PasswordProtection( keyEntryPassword ) );
 
             return keyStore;
-        } catch (KeyStoreException e) {
+        }
+        catch (KeyStoreException e) {
             throw new RuntimeException( "could not set new entry on keystore for alias: " + alias, e );
         }
     }
 
-    public static Map<String, X509Certificate> loadOtherCertificates(String keystoreType, InputStream keyStoreInputStream,
-                                                                     char[] keyStorePassword, String alias) {
+    public static ImmutableMap<String, X509Certificate> loadCertificates(String keystoreType, InputStream keyStoreInputStream,
+                                                                         char[] keyStorePassword, Predicate<String> ignoreAlias) {
 
-        KeyStore keyStore = loadKeyStore( keystoreType, keyStoreInputStream, keyStorePassword );
+        return getCertificates( loadKeyStore( keystoreType, keyStoreInputStream, keyStorePassword ), ignoreAlias );
+    }
+
+    public static ImmutableMap<String, X509Certificate> getCertificates(KeyStore keyStore, Predicate<String> ignoreAlias) {
 
         Enumeration<String> aliases;
         try {
             aliases = keyStore.aliases();
-        } catch (KeyStoreException e) {
-            throw new RuntimeException( "could not get aliases", e );
+        }
+        catch (KeyStoreException e) {
+            throw new RuntimeException( "could not enumerate aliases", e );
         }
 
-        Map<String, X509Certificate> certificates = new HashMap<String, X509Certificate>();
+        ImmutableMap.Builder<String, X509Certificate> certificates = ImmutableMap.builder();
         while (aliases.hasMoreElements()) {
-            String certAlias = aliases.nextElement();
-            if (certAlias.equals( alias ))
+            String alias = aliases.nextElement();
+            if (ignoreAlias != null && ignoreAlias.apply( alias ))
                 continue;
 
             try {
-                if (keyStore.isCertificateEntry( certAlias )) {
-                    X509Certificate certificate = (X509Certificate) keyStore.getCertificate( certAlias );
-                    LOG.debug( "loaded certificates, alias=" + certAlias );
-                    certificates.put( certAlias, certificate );
-                }
-            } catch (KeyStoreException e) {
-                throw new RuntimeException( "error retrieving certificate, alias=" + certAlias + " ", e );
+                if (keyStore.isCertificateEntry( alias ))
+                    certificates.put( alias, (X509Certificate) keyStore.getCertificate( alias ) );
+            }
+            catch (KeyStoreException e) {
+                throw new RuntimeException( "error retrieving certificate, alias=" + alias, e );
             }
         }
 
-        return certificates;
+        return certificates.build();
     }
 
     public static KeyStore loadKeyStore(String keystoreType, InputStream keyStoreInputStream, char[] keyStorePassword) {
@@ -194,13 +207,17 @@ public abstract class KeyStoreUtils {
             keyStore.load( keyStoreInputStream, keyStorePassword );
 
             return keyStore;
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException( e );
-        } catch (NoSuchAlgorithmException e) {
+        }
+        catch (NoSuchAlgorithmException e) {
             throw new RuntimeException( e );
-        } catch (CertificateException e) {
+        }
+        catch (CertificateException e) {
             throw new RuntimeException( e );
-        } catch (KeyStoreException e) {
+        }
+        catch (KeyStoreException e) {
             throw new RuntimeException( e );
         }
     }
@@ -209,7 +226,8 @@ public abstract class KeyStoreUtils {
 
         try {
             return generateKeyPair( "RSA" );
-        } catch (NoSuchAlgorithmException e) {
+        }
+        catch (NoSuchAlgorithmException e) {
             throw new RuntimeException( "RSA not supported", e );
         }
     }
@@ -220,7 +238,8 @@ public abstract class KeyStoreUtils {
         X509Certificate certificate;
         try {
             certificate = generateSelfSignedCertificate( keyPair, dn );
-        } catch (InvalidKeyException e) {
+        }
+        catch (InvalidKeyException e) {
             throw new RuntimeException( "Can't generate certificate from generated key", e );
         }
 
@@ -235,7 +254,8 @@ public abstract class KeyStoreUtils {
         if ("RSA".equals( keyPairGenerator.getAlgorithm() ))
             try {
                 keyPairGenerator.initialize( new RSAKeyGenParameterSpec( 1024, RSAKeyGenParameterSpec.F4 ), random );
-            } catch (InvalidAlgorithmParameterException e) {
+            }
+            catch (InvalidAlgorithmParameterException e) {
                 throw new RuntimeException( "KeyGenParams incompatible with key generator.", e );
             }
         else if (keyPairGenerator instanceof DSAKeyPairGenerator) {
@@ -254,7 +274,8 @@ public abstract class KeyStoreUtils {
         X509Certificate certificate;
         try {
             certificate = generateSelfSignedCertificate( keyPair, dn, now, future, null, true, false );
-        } catch (NoSuchAlgorithmException e) {
+        }
+        catch (NoSuchAlgorithmException e) {
             throw new RuntimeException( "Default signature algorithm not supported", e );
         }
         return certificate;
@@ -265,7 +286,7 @@ public abstract class KeyStoreUtils {
             throws InvalidKeyException, NoSuchAlgorithmException {
 
         return generateCertificate( keyPair.getPublic(), dn, keyPair.getPrivate(), null, notBefore, notAfter, signatureAlgorithm, caCert,
-                                    timeStampingPurpose, null );
+                timeStampingPurpose, null );
     }
 
     public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn, PrivateKey issuerPrivateKey,
@@ -303,21 +324,23 @@ public abstract class KeyStoreUtils {
 
         if (timeStampingPurpose)
             certificateGenerator.addExtension( X509Extensions.ExtendedKeyUsage, true,
-                                               new ExtendedKeyUsage( new DERSequence( KeyPurposeId.id_kp_timeStamping ) ) );
+                    new ExtendedKeyUsage( new DERSequence( KeyPurposeId.id_kp_timeStamping ) ) );
 
         if (null != ocspUri) {
             GeneralName ocspName = new GeneralName( GeneralName.uniformResourceIdentifier, ocspUri.toString() );
             AuthorityInformationAccess authorityInformationAccess = new AuthorityInformationAccess( X509ObjectIdentifiers.ocspAccessMethod,
-                                                                                                    ocspName );
+                    ocspName );
             certificateGenerator.addExtension( X509Extensions.AuthorityInfoAccess.getId(), false, authorityInformationAccess );
         }
 
         X509Certificate certificate;
         try {
             certificate = certificateGenerator.generate( issuerPrivateKey );
-        } catch (CertificateEncodingException e) {
+        }
+        catch (CertificateEncodingException e) {
             throw new RuntimeException( e );
-        } catch (SignatureException e) {
+        }
+        catch (SignatureException e) {
             throw new RuntimeException( e );
         }
 
@@ -327,7 +350,8 @@ public abstract class KeyStoreUtils {
         try {
             return (X509Certificate) CertificateFactory.getInstance( "X.509" )
                     .generateCertificate( new ByteArrayInputStream( certificate.getEncoded() ) );
-        } catch (CertificateException e) {
+        }
+        catch (CertificateException e) {
             throw new RuntimeException( "X.509 is not supported.", e );
         }
     }
@@ -339,7 +363,8 @@ public abstract class KeyStoreUtils {
             SubjectPublicKeyInfo info = new SubjectPublicKeyInfo( (ASN1Sequence) new ASN1InputStream( bais ).readObject() );
 
             return new SubjectKeyIdentifier( info );
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException( "Can't read from a ByteArrayInputStream?", e );
         }
     }
@@ -351,7 +376,8 @@ public abstract class KeyStoreUtils {
             SubjectPublicKeyInfo info = new SubjectPublicKeyInfo( (ASN1Sequence) new ASN1InputStream( bais ).readObject() );
 
             return new AuthorityKeyIdentifier( info );
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException( "Can't read from a ByteArrayInputStream?", e );
         }
     }
@@ -374,13 +400,17 @@ public abstract class KeyStoreUtils {
             FileOutputStream keyStoreOut = new FileOutputStream( pkcs12keyStore );
             keyStore.store( keyStoreOut, keyStorePassword );
             keyStoreOut.close();
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException( "Key Store can't be created or stored.", e );
-        } catch (CertificateException e) {
+        }
+        catch (CertificateException e) {
             throw new RuntimeException( "Certificate couldn't be stored.", e );
-        } catch (NoSuchAlgorithmException e) {
+        }
+        catch (NoSuchAlgorithmException e) {
             throw new RuntimeException( "KeyStores integrity algorithm not supported.", e );
-        } catch (KeyStoreException e) {
+        }
+        catch (KeyStoreException e) {
             throw new RuntimeException( "PKCS12 KeyStores not supported or store does not support the key or certificate.", e );
         }
     }
@@ -393,7 +423,8 @@ public abstract class KeyStoreUtils {
             keyStore.setKeyEntry( "default", privateKey, keyEntryPassword, new Certificate[] { certificate } );
 
             return keyStore;
-        } catch (KeyStoreException e) {
+        }
+        catch (KeyStoreException e) {
             throw new RuntimeException( "PKCS12 KeyStores not supported or store does not support the key or certificate.", e );
         }
     }
@@ -405,13 +436,17 @@ public abstract class KeyStoreUtils {
             keyStore.load( null, null );
 
             return keyStore;
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException( "Key Store can't be created or stored.", e );
-        } catch (CertificateException e) {
+        }
+        catch (CertificateException e) {
             throw new RuntimeException( "Certificate couldn't be stored.", e );
-        } catch (NoSuchAlgorithmException e) {
+        }
+        catch (NoSuchAlgorithmException e) {
             throw new RuntimeException( "KeyStores integrity algorithm not supported.", e );
-        } catch (KeyStoreException e) {
+        }
+        catch (KeyStoreException e) {
             throw new RuntimeException( "PKCS12 KeyStores not supported or store does not support the key or certificate.", e );
         }
     }
@@ -421,82 +456,77 @@ public abstract class KeyStoreUtils {
         Certificate certificate = privateKeyEntry.getCertificate();
         try {
             FileUtils.writeByteArrayToFile( certificateFile, certificate.getEncoded() );
-        } catch (CertificateEncodingException e) {
+        }
+        catch (CertificateEncodingException e) {
             throw new RuntimeException( "error encoding certificate ", e );
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException( "error writing out certificate ", e );
         }
     }
 
     /**
-     * Orders the specified certificate chain so the end/leaf certificate is the first element.
+     * Returns a new list that ends with the self-signed certificate in the given collection and sorts all issued certificates before it.
+     * The first certificate is the end certificate (hasn't issued any certificates).
      *
-     * @param certChain the certificate chain to order
+     * @param certificateChain A collection of certificates that we should construct an ordered chain from.
      *
-     * @return the ordered certificate chain
+     * @return The ordered certificate chain
      */
-    public static List<X509Certificate> getOrderedCertificateChain(final List<X509Certificate> certChain) {
+    public static LinkedList<X509Certificate> getOrderedCertificateChain(final Collection<X509Certificate> certificateChain) {
 
-        if (certChain.size() == 1 || certChain.isEmpty()) {
-            return certChain;
-        }
+        if (certificateChain.isEmpty() || certificateChain.size() == 1)
+            return new LinkedList<X509Certificate>( certificateChain );
 
-        List<X509Certificate> orderedCertChain = new LinkedList<X509Certificate>();
+        LinkedList<X509Certificate> endToRootCertificateChain = new LinkedList<X509Certificate>();
 
         // find self-signed root
-        for (X509Certificate certificate : certChain) {
+        for (X509Certificate certificate : certificateChain) {
             if (isSelfSigned( certificate )) {
-                orderedCertChain.add( certificate );
+                endToRootCertificateChain.add( certificate );
                 break;
             }
         }
 
         // now go down
-        while (true) {
-
-            X509Certificate certificate = orderedCertChain.get( orderedCertChain.size() - 1 );
-            boolean found = false;
-            for (X509Certificate cert : certChain) {
-                if (cert.getIssuerX500Principal().equals( certificate.getSubjectX500Principal() )) {
-                    orderedCertChain.add( cert );
-                    found = true;
+        boolean childFound = false;
+        do {
+            X509Certificate parentCertificate = endToRootCertificateChain.getFirst();
+            for (X509Certificate aCertificate : certificateChain) {
+                if (aCertificate.getIssuerX500Principal().equals( parentCertificate.getSubjectX500Principal() )) {
+                    endToRootCertificateChain.addFirst( aCertificate );
+                    childFound = true;
                     break;
                 }
             }
-            if (!found)
-                break;
         }
+        while (childFound);
 
-        // now reverse the chain
-        Collections.reverse( orderedCertChain );
-
-        return orderedCertChain;
+        return endToRootCertificateChain;
     }
 
     /**
-     * Get root {@link X509Certificate} from specified chain.
+     * Get the root {@link X509Certificate} from the specified chain.
      *
-     * @param certChain the certificate chain
+     * @param certificateChain The certificate chain.  Order is irrelevant.
      *
      * @return the root {@link X509Certificate}
      */
-    public static X509Certificate getRootCertificate(final List<X509Certificate> certChain) {
+    public static X509Certificate getRootCertificate(final Collection<X509Certificate> certificateChain) {
 
-        List<X509Certificate> orderedCertChain = getOrderedCertificateChain( certChain );
-        return orderedCertChain.get( orderedCertChain.size() - 1 );
+        return getOrderedCertificateChain( certificateChain ).getLast();
     }
 
     /**
-     * Get end {@link X509Certificate} from specified chain.
+     * Get the end {@link X509Certificate} from the specified chain.
      *
-     * @param certChain the {@link X509Certificate} chain.
+     * @param certificateChain The certificate chain.  Order is irrelevant.
      *
      * @return the end {@link X509Certificate}.
      */
-    public static X509Certificate getEndCertificate(final List<X509Certificate> certChain) {
+    public static X509Certificate getEndCertificate(final Collection<X509Certificate> certificateChain) {
 
-        List<X509Certificate> orderedCertChain = getOrderedCertificateChain( certChain );
-        return orderedCertChain.get( 0 );
+        return getOrderedCertificateChain( certificateChain ).getFirst();
     }
 
     private static boolean isSelfSigned(X509Certificate certificate) {

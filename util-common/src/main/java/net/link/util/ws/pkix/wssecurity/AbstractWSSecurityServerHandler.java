@@ -7,15 +7,12 @@
 
 package net.link.util.ws.pkix.wssecurity;
 
+import com.google.common.collect.ImmutableList;
 import java.security.cert.X509Certificate;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 import javax.annotation.PostConstruct;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPPart;
-import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.MessageContext.Scope;
 import javax.xml.ws.handler.soap.SOAPHandler;
@@ -45,7 +42,7 @@ public abstract class AbstractWSSecurityServerHandler implements SOAPHandler<SOA
 
     private static final Log LOG = LogFactory.getLog( AbstractWSSecurityServerHandler.class );
 
-    public static final String CERTIFICATE_PROPERTY = AbstractWSSecurityServerHandler.class + ".x509";
+    public static final String CERTIFICATE_CHAIN_PROPERTY = AbstractWSSecurityServerHandler.class + ".x509";
 
     public static final String SIGNED_ELEMENTS_CONTEXT_KEY = AbstractWSSecurityServerHandler.class + ".signed.elements";
 
@@ -97,7 +94,9 @@ public abstract class AbstractWSSecurityServerHandler implements SOAPHandler<SOA
         WSSecSignature wsSecSignature = new WSSecSignature();
         wsSecSignature.setKeyIdentifierType( WSConstants.BST_DIRECT_REFERENCE );
         WSSecurityConfigurationService wsSecurityConfigurationService = getConfiguration();
-        Crypto crypto = new ClientCrypto( wsSecurityConfigurationService.getCertificate(), wsSecurityConfigurationService.getPrivateKey() );
+        List<X509Certificate> certificateChain = wsSecurityConfigurationService.getCertificateChain();
+        Crypto crypto = new ClientCrypto( certificateChain, wsSecurityConfigurationService.getPrivateKey() );
+        wsSecSignature.setUseSingleCertificate( certificateChain.size() == 1 );
         try {
             wsSecSignature.prepare( document, crypto, wsSecHeader );
 
@@ -105,7 +104,7 @@ public abstract class AbstractWSSecurityServerHandler implements SOAPHandler<SOA
 
             Vector<WSEncryptionPart> wsEncryptionParts = new Vector<WSEncryptionPart>();
             WSEncryptionPart wsEncryptionPart = new WSEncryptionPart( soapConstants.getBodyQName().getLocalPart(),
-                                                                      soapConstants.getEnvelopeURI(), "Content" );
+                    soapConstants.getEnvelopeURI(), "Content" );
             wsEncryptionParts.add( wsEncryptionPart );
 
             WSSecTimestamp wsSecTimeStamp = new WSSecTimestamp();
@@ -162,9 +161,12 @@ public abstract class AbstractWSSecurityServerHandler implements SOAPHandler<SOA
             Set<String> resultSignedElements = (Set<String>) result.get( WSSecurityEngineResult.TAG_SIGNED_ELEMENT_IDS );
             if (null != resultSignedElements)
                 signedElements = resultSignedElements;
+            X509Certificate[] certificateChain = (X509Certificate[]) result.get( WSSecurityEngineResult.TAG_X509_CERTIFICATES );
             X509Certificate certificate = (X509Certificate) result.get( WSSecurityEngineResult.TAG_X509_CERTIFICATE );
-            if (null != certificate)
-                setCertificate( soapMessageContext, certificate );
+            if (null != certificateChain)
+                setCertificateChain( soapMessageContext, certificateChain );
+            else if (null != certificate)
+                setCertificateChain( soapMessageContext, certificate );
 
             Timestamp resultTimestamp = (Timestamp) result.get( WSSecurityEngineResult.TAG_TIMESTAMP );
             if (null != resultTimestamp)
@@ -179,11 +181,11 @@ public abstract class AbstractWSSecurityServerHandler implements SOAPHandler<SOA
         /*
          * Validate certificate.
          */
-        X509Certificate certificate = getCertificate( soapMessageContext );
-        if (null == certificate)
-            throw SOAPUtils.createSOAPFaultException( "missing X509Certificate in WS-Security header", "InvalidSecurity" );
-        if (!wsSecurityConfigurationService.validateCertificate( certificate ))
-            throw SOAPUtils.createSOAPFaultException( "invalid X509Certificate in WS-Security header", "InvalidSecurity" );
+        Collection<X509Certificate> certificateChain = findCertificateChain( soapMessageContext );
+        if (null == certificateChain)
+            throw SOAPUtils.createSOAPFaultException( "missing X509Certificate chain in WS-Security header", "InvalidSecurity" );
+        if (!wsSecurityConfigurationService.isCertificateChainValid( certificateChain ))
+            throw SOAPUtils.createSOAPFaultException( "can't trust X509Certificate chain in WS-Security header", "InvalidSecurity" );
 
         /*
          * Check timestamp.
@@ -206,32 +208,31 @@ public abstract class AbstractWSSecurityServerHandler implements SOAPHandler<SOA
         }
     }
 
-    private static void setCertificate(SOAPMessageContext context, X509Certificate certificate) {
+    private static void setCertificateChain(SOAPMessageContext context, X509Certificate[] certificateChain) {
 
-        context.put( CERTIFICATE_PROPERTY, certificate );
-        context.setScope( CERTIFICATE_PROPERTY, Scope.APPLICATION );
+        context.put( CERTIFICATE_CHAIN_PROPERTY, ImmutableList.copyOf( certificateChain ) );
+        context.setScope( CERTIFICATE_CHAIN_PROPERTY, Scope.APPLICATION );
+    }
+
+    private static void setCertificateChain(SOAPMessageContext context, X509Certificate certificate) {
+
+        context.put( CERTIFICATE_CHAIN_PROPERTY, ImmutableList.of( certificate ) );
+        context.setScope( CERTIFICATE_CHAIN_PROPERTY, Scope.APPLICATION );
     }
 
     /**
-     * Gives back the X509 certificate that was set previously by a WS-Security handler.
+     * @return the X509 certificate chain that was set previously by a WS-Security handler.
      */
-    public static X509Certificate getCertificate(SOAPMessageContext context) {
+    @SuppressWarnings( { "unchecked" })
+    public static Collection<X509Certificate> findCertificateChain(MessageContext context) {
 
-        return (X509Certificate) context.get( CERTIFICATE_PROPERTY );
-    }
-
-    /**
-     * Gives back the X509 certificate that was set previously by a WS-Security handler.
-     */
-    public static X509Certificate getCertificate(WebServiceContext context) {
-
-        return (X509Certificate) context.getMessageContext().get( CERTIFICATE_PROPERTY );
+        return (Collection<X509Certificate>) context.get( CERTIFICATE_CHAIN_PROPERTY );
     }
 
     /**
      * Checks whether a WS-Security handler did verify that the element with given Id was signed correctly.
      */
-    public static boolean isSignedElement(String id, SOAPMessageContext context) {
+    public static boolean isElementSigned(String id, SOAPMessageContext context) {
 
         @SuppressWarnings("unchecked")
         Set<String> signedElements = (Set<String>) context.get( SIGNED_ELEMENTS_CONTEXT_KEY );

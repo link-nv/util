@@ -52,7 +52,7 @@ public class WSSecurityClientHandler implements SOAPHandler<SOAPMessageContext> 
 
     public static final long DEFAULT_MAX_TIMESTAMP_OFFSET = 1000 * 60 * 5L;
 
-    private final X509Certificate certificate;
+    private final List<X509Certificate> certificateChain;
 
     private final PrivateKey privateKey;
 
@@ -63,15 +63,15 @@ public class WSSecurityClientHandler implements SOAPHandler<SOAPMessageContext> 
     /**
      * Main constructor.
      *
-     * @param certificate        the client X509 certificate.
+     * @param certificateChain   the client X509 certificate.
      * @param privateKey         the private key corresponding with the client X509 certificate.
      * @param serverCertificate  the server X509 certificate
      * @param maxTimestampOffset maximum offset of the WS-Security timestamp ( in ms ), if <code>null</code> defaults to 5 minutes
      */
-    public WSSecurityClientHandler(X509Certificate certificate, PrivateKey privateKey, X509Certificate serverCertificate,
+    public WSSecurityClientHandler(List<X509Certificate> certificateChain, PrivateKey privateKey, X509Certificate serverCertificate,
                                    Long maxTimestampOffset) {
 
-        this.certificate = certificate;
+        this.certificateChain = certificateChain;
         this.privateKey = privateKey;
         this.serverCertificate = serverCertificate;
 
@@ -105,7 +105,7 @@ public class WSSecurityClientHandler implements SOAPHandler<SOAPMessageContext> 
         SOAPPart soapPart = soapMessage.getSOAPPart();
 
         Boolean outboundProperty = (Boolean) soapMessageContext.get( MessageContext.MESSAGE_OUTBOUND_PROPERTY );
-        if (false == outboundProperty.booleanValue()) {
+        if (!outboundProperty.booleanValue()) {
             /*
              * Validate incoming WS-Security header
              */
@@ -128,10 +128,8 @@ public class WSSecurityClientHandler implements SOAPHandler<SOAPMessageContext> 
 
         Vector<WSSecurityEngineResult> wsSecurityEngineResults;
         try {
-            @SuppressWarnings("unchecked")
-            Vector<WSSecurityEngineResult> checkedWsSecurityEngineResults = securityEngine.processSecurityHeader( document, null, null,
-                                                                                                                  crypto );
-            wsSecurityEngineResults = checkedWsSecurityEngineResults;
+            //noinspection unchecked
+            wsSecurityEngineResults = securityEngine.processSecurityHeader( document, null, null, crypto );
         }
         catch (WSSecurityException e) {
             throw SOAPUtils.createSOAPFaultException( "The signature or decryption was invalid", "FailedCheck", e );
@@ -173,7 +171,7 @@ public class WSSecurityClientHandler implements SOAPHandler<SOAPMessageContext> 
             throw SOAPUtils.createSOAPFaultException( "missing Certificate in WS-Security header", "InvalidSecurity" );
         if (null != serverCertificate && !serverCertificate.equals( signingCertificate ))
             throw SOAPUtils.createSOAPFaultException( "The signing certificate does not match the specified server certificate",
-                                                      "FailedCheck" );
+                    "FailedCheck" );
 
         /*
          * Check timestamp.
@@ -200,7 +198,7 @@ public class WSSecurityClientHandler implements SOAPHandler<SOAPMessageContext> 
      */
     private void handleOutBoundDocument(Document document, Set<String> tbsIds) {
 
-        if (null == certificate || null == privateKey) {
+        if (null == certificateChain || null == privateKey) {
             LOG.debug( "no certificate specified, will NOT sign message" );
             return;
         }
@@ -208,7 +206,7 @@ public class WSSecurityClientHandler implements SOAPHandler<SOAPMessageContext> 
         LOG.debug( "adding WS-Security SOAP header" );
         WSSecSignature wsSecSignature = new WSSecSignature();
         wsSecSignature.setKeyIdentifierType( WSConstants.BST_DIRECT_REFERENCE );
-        Crypto crypto = new ClientCrypto( certificate, privateKey );
+        Crypto crypto = new ClientCrypto( certificateChain, privateKey );
         WSSecHeader wsSecHeader = new WSSecHeader();
         wsSecHeader.insertSecurityHeader( document );
         try {
@@ -218,7 +216,7 @@ public class WSSecurityClientHandler implements SOAPHandler<SOAPMessageContext> 
 
             Vector<WSEncryptionPart> wsEncryptionParts = new Vector<WSEncryptionPart>();
             WSEncryptionPart wsEncryptionPart = new WSEncryptionPart( soapConstants.getBodyQName().getLocalPart(),
-                                                                      soapConstants.getEnvelopeURI(), "Content" );
+                    soapConstants.getEnvelopeURI(), "Content" );
             wsEncryptionParts.add( wsEncryptionPart );
 
             WSSecTimestamp wsSecTimeStamp = new WSSecTimestamp();
@@ -251,13 +249,13 @@ public class WSSecurityClientHandler implements SOAPHandler<SOAPMessageContext> 
     /**
      * Adds a new WS-Security client handler to the handler chain of the given JAX-WS port.
      */
-    public static void addNewHandler(Object port, X509Certificate certificate, PrivateKey privateKey, X509Certificate serverCertificate,
-                                     Long maxTimestampOffset) {
+    public static void addNewHandler(BindingProvider port, List<X509Certificate> certificateChain, PrivateKey privateKey,
+                                     X509Certificate serverCertificate, Long maxTimestampOffset) {
 
         @SuppressWarnings("unchecked")
-        List<Handler> handlerChain = ((BindingProvider) port).getBinding().getHandlerChain();
-        handlerChain.add( new WSSecurityClientHandler( certificate, privateKey, serverCertificate, maxTimestampOffset ) );
-        ((BindingProvider) port).getBinding().setHandlerChain( handlerChain );
+        List<Handler> handlerChain = port.getBinding().getHandlerChain();
+        handlerChain.add( new WSSecurityClientHandler( certificateChain, privateKey, serverCertificate, maxTimestampOffset ) );
+        port.getBinding().setHandlerChain( handlerChain );
     }
 
     /**
