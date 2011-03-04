@@ -5,7 +5,7 @@
  * Lin.k N.V. proprietary/confidential. Use is subject to license terms.
  */
 
-package net.link.util.ws.pkix.wssecurity;
+package net.link.util.ws.security;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;

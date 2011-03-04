@@ -5,7 +5,7 @@
  * Lin.k N.V. proprietary/confidential. Use is subject to license terms.
  */
 
-package net.link.util.ws.pkix;
+package net.link.util.pkix;
 
 import com.google.common.collect.Iterables;
 import java.io.InputStream;
