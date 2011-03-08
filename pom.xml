@@ -184,7 +184,7 @@
         <servlet-api.version>2.4</servlet-api.version>
 
         <wicket.version>1.4.15</wicket.version>
-        <wicket-datetime.version>1.4.15</wicket-datetime.version>
+        <wicket-datetime.version>1.4.6</wicket-datetime.version>
         <wicket-javaee.version>1.1-safe-online</wicket-javaee.version>
 
         <guava.version>r05</guava.version>
@@ -232,6 +232,7 @@
 
     <!-- DEFAULT BUILD CONFIGURATION -->
     <build>
+        <!--suppress MavenModelInspection -->
         <sourceDirectory>src/main/java</sourceDirectory>
         <resources>
             <resource>
@@ -239,12 +240,13 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
-        <scriptSourceDirectory>src/main/scripts
-        </scriptSourceDirectory>
+        <!--suppress MavenModelInspection -->
+        <scriptSourceDirectory>src/main/scripts</scriptSourceDirectory>
         <directory>target</directory>
+        <!--suppress MavenModelInspection -->
         <outputDirectory>target/classes</outputDirectory>
-        <testOutputDirectory>target/test-classes
-        </testOutputDirectory>
+        <!--suppress MavenModelInspection -->
+        <testOutputDirectory>target/test-classes</testOutputDirectory>
         <finalName>${pom.artifactId}-${pom.version}
         </finalName>
         <!-- Maven 3.0.1 does not support scp as transport out of the box :| -->
@@ -442,6 +444,11 @@
             <dependency>
                 <groupId>net.lin-k.util</groupId>
                 <artifactId>util-j2ee-jboss4</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.lin-k.util</groupId>
+                <artifactId>util-j2ee-jboss6</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

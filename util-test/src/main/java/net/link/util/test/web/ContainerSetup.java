@@ -1,26 +1,25 @@
 package net.link.util.test.web;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+
 /**
-* <h2>{@link net.link.util.test.web.ContainerSetup}<br>
-* <sub>[in short] (TODO).</sub></h2>
-*
-* <p>
-* <i>10 01, 2010</i>
-* </p>
-*
-* @author lhunath
-*/
+ * <h2>{@link ContainerSetup}<br> <sub>[in short] (TODO).</sub></h2>
+ *
+ * <p> <i>10 01, 2010</i> </p>
+ *
+ * @author lhunath
+ */
 public class ContainerSetup {
 
     private final String        contextPath;
-    private final ServletSetup servlet;
+    private final ServletSetup  servlet;
     private final FilterSetup[] filters;
 
-    private final Map<String, String> contextParameters = new HashMap<String, String>();
-    private final Map<String, Object> sessionAttributes = new HashMap<String, Object>();
+    private final Map<String, String>       contextParameters = new HashMap<String, String>();
+    private final Map<String, Serializable> sessionAttributes = new HashMap<String, Serializable>();
 
     public ContainerSetup(ServletSetup servlet, FilterSetup... filters) {
 
@@ -40,7 +39,7 @@ public class ContainerSetup {
         return this;
     }
 
-    public ContainerSetup addSessionAttribute(String key, Object value) {
+    public ContainerSetup addSessionAttribute(String key, Serializable value) {
 
         sessionAttributes.put( key, value );
         return this;
@@ -66,7 +65,7 @@ public class ContainerSetup {
         return contextParameters;
     }
 
-    public Map<String, Object> getSessionAttributes() {
+    public Map<String, Serializable> getSessionAttributes() {
 
         return sessionAttributes;
     }

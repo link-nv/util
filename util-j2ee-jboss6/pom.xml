@@ -9,9 +9,7 @@
     </parent>
 
     <name>Util J2EE for JBoss 6</name>
-    <description>
-        J2EE Utility library for JBoss 6.
-    </description>
+    <description>J2EE Utility library for JBoss 6.</description>
 
     <groupId>net.lin-k.util</groupId>
     <artifactId>util-j2ee-jboss6</artifactId>
@@ -43,17 +41,6 @@
 
     <reporting>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-changes-plugin</artifactId>
-                <reportSets>
-                    <reportSet>
-                        <reports>
-                            <report>changes-report</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>

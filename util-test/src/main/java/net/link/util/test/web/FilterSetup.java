@@ -2,16 +2,14 @@ package net.link.util.test.web;
 
 import javax.servlet.Filter;
 
+
 /**
-* <h2>{@link net.link.util.test.web.FilterSetup}<br>
-* <sub>[in short] (TODO).</sub></h2>
-*
-* <p>
-* <i>10 01, 2010</i>
-* </p>
-*
-* @author lhunath
-*/
+ * <h2>{@link FilterSetup}<br> <sub>[in short] (TODO).</sub></h2>
+ *
+ * <p> <i>10 01, 2010</i> </p>
+ *
+ * @author lhunath
+ */
 public class FilterSetup extends AbstractSetup<Filter> {
 
     public FilterSetup(Class<? extends Filter> type) {

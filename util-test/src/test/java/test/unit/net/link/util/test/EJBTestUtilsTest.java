@@ -23,7 +23,7 @@ public class EJBTestUtilsTest extends TestCase {
     private static final Log LOG = LogFactory.getLog( EJBTestUtilsTest.class );
 
 
-    public static interface TestIface {
+    public interface TestIface {
 
         void func();
     }
@@ -46,11 +46,12 @@ public class EJBTestUtilsTest extends TestCase {
 
         private final Object object;
 
-        public TestInvocationHandler(Object object) {
+        private TestInvocationHandler(Object object) {
 
             this.object = object;
         }
 
+        @SuppressWarnings( { "ProhibitedExceptionDeclared" })
         public Object invoke(@SuppressWarnings("unused") Object proxy, Method method, Object[] args)
                 throws Throwable {
 
@@ -66,7 +67,7 @@ public class EJBTestUtilsTest extends TestCase {
         TestClass origObject = new TestClass();
         TestInvocationHandler testInvocationHandler = new TestInvocationHandler( origObject );
         TestIface testObject = (TestIface) Proxy.newProxyInstance( EJBTestUtilsTest.class.getClassLoader(), TestClass.class.getInterfaces(),
-                testInvocationHandler );
+                                                                   testInvocationHandler );
 
         // Test
         testObject.func();
@@ -82,11 +83,12 @@ public class EJBTestUtilsTest extends TestCase {
 
         private final Object object;
 
-        public TestInterceptor(Object object) {
+        private TestInterceptor(Object object) {
 
             this.object = object;
         }
 
+        @SuppressWarnings( { "ProhibitedExceptionDeclared" })
         public Object intercept(@SuppressWarnings("unused") Object obj, Method method, Object[] args,
                                 @SuppressWarnings("unused") MethodProxy proxy)
                 throws Throwable {
