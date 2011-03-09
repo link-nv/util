@@ -123,10 +123,10 @@
             <groupId>com.sun.net.httpserver</groupId>
             <artifactId>http</artifactId>
         </dependency>
-        <dependency>
-            <groupId>javax.ejb</groupId>
-            <artifactId>ejb-api</artifactId>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>javax.ejb</groupId>-->
+            <!--<artifactId>ejb-api</artifactId>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>cglib</groupId>
             <artifactId>cglib</artifactId>
