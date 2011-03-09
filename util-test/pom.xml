@@ -30,6 +30,66 @@
             <artifactId>util-j2ee-jboss6</artifactId>
         </dependency>
 
+        <!-- JBoss 6 -->
+        <dependency>
+            <groupId>org.jboss.spec.javax.ejb</groupId>
+            <artifactId>jboss-ejb-api_3.1_spec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.spec.javax.jms</groupId>
+            <artifactId>jboss-jms-api_1.1_spec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.spec.javax.security.jacc</groupId>
+            <artifactId>jboss-jacc-api_1.4_spec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.ejb3</groupId>
+            <artifactId>jboss-ejb3-ext-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.mx</groupId>
+            <artifactId>jboss-j2se</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.picketbox</groupId>
+            <artifactId>jbosssx-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+        </dependency>
+
+        <!-- JBoss 4 : to-be-removed ... -->
+        <!--<dependency>-->
+            <!--<groupId>org.jboss</groupId>-->
+            <!--<artifactId>hsqldb</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>jboss</groupId>-->
+            <!--<artifactId>jbosssx-client</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>jboss</groupId>-->
+            <!--<artifactId>jboss-j2ee</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>jboss</groupId>-->
+            <!--<artifactId>jboss-annotations-ejb3</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>jboss</groupId>-->
+            <!--<artifactId>jboss-ejb3x</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.jboss</groupId>-->
+            <!--<artifactId>jboss-jaxrpc</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.jboss</groupId>-->
+            <!--<artifactId>ejb3-persistence</artifactId>-->
+        <!--</dependency>-->
+
         <!-- Specific Dependencies: External -->
         <dependency>
             <groupId>commons-logging</groupId>
@@ -68,36 +128,12 @@
             <artifactId>ejb-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>jboss</groupId>
-            <artifactId>jboss-ejb3x</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>jboss</groupId>
-            <artifactId>jboss-j2ee</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss</groupId>
-            <artifactId>jboss-jaxrpc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>jboss</groupId>
-            <artifactId>jbosssx-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss</groupId>
-            <artifactId>ejb3-persistence</artifactId>
-        </dependency>
-        <dependency>
             <groupId>cglib</groupId>
             <artifactId>cglib</artifactId>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.ejb3</groupId>
-            <artifactId>jboss-ejb3-ext-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mortbay.jetty</groupId>
@@ -139,11 +175,6 @@
         <dependency>
             <groupId>net.sourceforge</groupId>
             <artifactId>shiftone-arbor</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss</groupId>
-            <artifactId>hsqldb</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>

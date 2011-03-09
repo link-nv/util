@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <!-- PROJECT METADATA -->
@@ -226,7 +227,13 @@
         <jboss-messaging.version>1.4.1.CR1</jboss-messaging.version>
 
         <!-- JBoss 6 -->
+        <jboss-ejb-api_3.1_spec.version>1.0.0.Final</jboss-ejb-api_3.1_spec.version>
+        <jboss-jms-api_1.1_spec.version>1.0.0.Final</jboss-jms-api_1.1_spec.version>
+        <jboss-jacc-api_1.4_spec.version>1.0.0.Final</jboss-jacc-api_1.4_spec.version>
         <jboss-ejb3-ext-api.version>1.0.0</jboss-ejb3-ext-api.version>
+        <jboss-mx.version>6.0.0.GA</jboss-mx.version>
+        <jbosssx-client.version>3.0.0.CR2</jbosssx-client.version>
+        <hsqldb.version>1.8.0.7</hsqldb.version>
     </properties>
 
 
@@ -466,12 +473,99 @@
                 <artifactId>util-wicket</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>jboss.messaging</groupId>
+                <artifactId>jboss-messaging</artifactId>
+                <version>${jboss-messaging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss</groupId>
+                <artifactId>jmx-client</artifactId>
+                <version>${jboss.version}</version>
+            </dependency>
+
+            <!-- JBoss 4 -->
+            <dependency>
+                <groupId>org.jboss</groupId>
+                <artifactId>hsqldb</artifactId>
+                <version>${jboss.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jboss</groupId>
+                <artifactId>jbosssx-client</artifactId>
+                <version>${jboss.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jboss</groupId>
+                <artifactId>jboss-j2ee</artifactId>
+                <version>${jboss.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jboss</groupId>
+                <artifactId>jboss-annotations-ejb3</artifactId>
+                <version>${jboss.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jboss</groupId>
+                <artifactId>jboss-ejb3x</artifactId>
+                <version>${jboss.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss</groupId>
+                <artifactId>jboss-jaxrpc</artifactId>
+                <version>${jboss.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss</groupId>
+                <artifactId>ejb3-persistence</artifactId>
+                <version>${jboss.version}</version>
+            </dependency>
 
             <!-- JBoss 6 -->
+            <dependency>
+                <groupId>org.jboss.spec.javax.ejb</groupId>
+                <artifactId>jboss-ejb-api_3.1_spec</artifactId>
+                <version>${jboss-ejb-api_3.1_spec.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.spec.javax.jms</groupId>
+                <artifactId>jboss-jms-api_1.1_spec</artifactId>
+                <version>${jboss-jms-api_1.1_spec.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.spec.javax.security.jacc</groupId>
+                <artifactId>jboss-jacc-api_1.4_spec</artifactId>
+                <version>${jboss-jacc-api_1.4_spec.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.jboss.ejb3</groupId>
                 <artifactId>jboss-ejb3-ext-api</artifactId>
                 <version>${jboss-ejb3-ext-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.mx</groupId>
+                <artifactId>jboss-j2se</artifactId>
+                <version>${jboss-mx.version}</version>
+                <exclusions>
+                  <exclusion>
+                    <groupId>org.jboss.logging</groupId>
+                    <artifactId>jboss-logging-spi</artifactId>
+                  </exclusion>
+                  <exclusion>
+                    <groupId>org.jboss.logging</groupId>
+                    <artifactId>jboss-logging-log4j</artifactId>
+                  </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.picketbox</groupId>
+                <artifactId>jbosssx-client</artifactId>
+                <version>${jbosssx-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>hsqldb</groupId>
+                <artifactId>hsqldb</artifactId>
+                <version>${hsqldb.version}</version>
             </dependency>
 
             <!-- External -->
@@ -678,11 +772,6 @@
                 <version>${shiftone-arbor.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.jboss</groupId>
-                <artifactId>hsqldb</artifactId>
-                <version>${jboss.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>commons-httpclient</groupId>
                 <artifactId>commons-httpclient</artifactId>
                 <version>${commons-httpclient.version}</version>
@@ -717,46 +806,6 @@
                 <groupId>javax.ejb</groupId>
                 <artifactId>ejb-api</artifactId>
                 <version>${ejb-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>jboss</groupId>
-                <artifactId>jbosssx-client</artifactId>
-                <version>${jboss.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>jboss</groupId>
-                <artifactId>jboss-j2ee</artifactId>
-                <version>${jboss.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>jboss</groupId>
-                <artifactId>jboss-annotations-ejb3</artifactId>
-                <version>${jboss.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>jboss</groupId>
-                <artifactId>jboss-ejb3x</artifactId>
-                <version>${jboss.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss</groupId>
-                <artifactId>jboss-jaxrpc</artifactId>
-                <version>${jboss.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss</groupId>
-                <artifactId>ejb3-persistence</artifactId>
-                <version>${jboss.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>jboss.messaging</groupId>
-                <artifactId>jboss-messaging</artifactId>
-                <version>${jboss-messaging.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss</groupId>
-                <artifactId>jmx-client</artifactId>
-                <version>${jboss.version}</version>
             </dependency>
             <dependency>
                 <groupId>tomcat</groupId>
