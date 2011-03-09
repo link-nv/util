@@ -193,13 +193,15 @@
         <slf4j.version>1.5.11</slf4j.version>
         <commons-logging-api.version>1.1</commons-logging-api.version>
         <persistence-api.version>1.0</persistence-api.version>
-        <hibernate-annotations.version>3.4.0.GA</hibernate-annotations.version>
         <commons-collections.version>3.2.1</commons-collections.version>
         <junit.version>4.4</junit.version>
         <easymock.version>2.3</easymock.version>
         <easymockclassextension.version>2.2.2</easymockclassextension.version>
         <cglib.version>2.1_3</cglib.version>
-        <hibernate-entitymanager.version>3.3.2.GA</hibernate-entitymanager.version>
+
+        <hibernate-entitymanager.version>3.6.0.Final</hibernate-entitymanager.version>
+        <hibernate-annotations.version>3.5.6-Final</hibernate-annotations.version>
+
         <jetty.version>6.1.7</jetty.version>
         <bouncycastle.version>1.45</bouncycastle.version>
         <commons-io.version>1.3.1</commons-io.version>
@@ -676,6 +678,17 @@
             </dependency>
             <dependency>
                 <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-entitymanager</artifactId>
+                <version>${hibernate-entitymanager.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-annotations</artifactId>
                 <version>${hibernate-annotations.version}</version>
                 <exclusions>
@@ -714,17 +727,6 @@
                 <groupId>cglib</groupId>
                 <artifactId>cglib</artifactId>
                 <version>${cglib.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-entitymanager</artifactId>
-                <version>${hibernate-entitymanager.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.mortbay.jetty</groupId>
