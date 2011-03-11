@@ -5,7 +5,7 @@
  * Lin.k N.V. proprietary/confidential. Use is subject to license terms.
  */
 
-package no.encap.lisu.sdk;
+package net.link.util.error;
 
 public class ValidationFailedException extends Exception {
 

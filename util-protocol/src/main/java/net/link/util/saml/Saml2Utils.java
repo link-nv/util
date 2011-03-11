@@ -34,7 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
 import net.link.util.common.DomUtils;
 import net.link.util.common.KeyStoreUtils;
-import no.encap.lisu.sdk.ValidationFailedException;
+import net.link.util.error.ValidationFailedException;
 import org.joda.time.DateTime;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLObject;

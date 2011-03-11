@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.*;
+import com.lyndir.lhunath.lib.system.logging.exception.InternalInconsistencyException;
 import com.lyndir.lhunath.lib.system.util.TypeUtils;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
@@ -389,15 +390,16 @@ public class DefaultConfigFactory {
         try {
             return type.getConstructor( String.class ).newInstance( value );
         }
-        catch (InstantiationException ignored) {
+        catch (InstantiationException e) {
+            throw new InternalInconsistencyException( e );
         }
-        catch (IllegalAccessException ignored) {
-        }
-        catch (InvocationTargetException ignored) {
+        catch (IllegalAccessException e) {
+            throw new InternalInconsistencyException( e );
         }
         catch (NoSuchMethodException ignored) {
         }
-        catch (IllegalArgumentException ignored) {
+        catch (InvocationTargetException e) {
+            throw new RuntimeException( e );
         }
 
         // Collections: Split the value
@@ -421,7 +423,8 @@ public class DefaultConfigFactory {
             }
             catch (NoSuchMethodException ignored) {
             }
-            catch (InvocationTargetException ignored) {
+            catch (InvocationTargetException e) {
+                throw new RuntimeException( e );
             }
 
             // In case type is not instantiable
