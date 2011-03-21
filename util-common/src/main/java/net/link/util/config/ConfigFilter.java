@@ -1,5 +1,6 @@
 package net.link.util.config;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static net.link.util.config.ConfigHolder.factory;
 
 import java.io.IOException;
@@ -36,19 +37,21 @@ public abstract class ConfigFilter implements Filter {
      */
     protected ConfigFilter(ConfigHolder<?> configHolder) {
 
-        this.configHolder = configHolder;
+        this.configHolder = checkNotNull( configHolder );
     }
 
+    @Override
     public void init(FilterConfig filterConfig)
             throws ServletException {
 
         servletContext = filterConfig.getServletContext();
     }
 
+    @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        logger.debug( "Setting config context=" + servletContext.getServletContextName() + ": configHolder=" + configHolder );
+        logger.debug( "Setting config context={}: configHolder={}", servletContext.getServletContextName(), configHolder );
 
         try {
             ConfigHolder.setLocalConfigHolder( configHolder );
@@ -56,19 +59,22 @@ public abstract class ConfigFilter implements Filter {
             factory().setServletRequest( request );
 
             chain.doFilter( request, response );
-        } finally {
+        }
+        finally {
             factory().unsetServletRequest();
+            factory().unsetServletContext();
             ConfigHolder.unsetLocalConfigHolder();
-            logger.debug( "Unset config context=" + servletContext.getServletContextName() + ": configHolder=" + configHolder );
+            logger.debug( "Unset config context={}: configHolder={}", servletContext.getServletContextName(), configHolder );
         }
     }
 
+    @Override
     public void destroy() {
 
         servletContext = null;
     }
 
-    protected ConfigHolder<?> getConfigHolder() {
+    protected final ConfigHolder<?> getConfigHolder() {
 
         return configHolder;
     }
