@@ -236,7 +236,7 @@
         <outputDirectory>target/classes</outputDirectory>
         <testOutputDirectory>target/test-classes
         </testOutputDirectory>
-        <finalName>${pom.artifactId}-${pom.version}
+        <finalName>${project.artifactId}-${project.version}
         </finalName>
         <!-- Maven 3.0.1 does not support scp as transport out of the box :| -->
         <extensions>
