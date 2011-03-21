@@ -78,18 +78,13 @@
     <!-- DISTRIBUTION AND DEPLOYMENT -->
     <distributionManagement>
         <repository>
-            <id>buildserver-release-repository</id>
-            <url>scpexe://buildserver/home/devel/maven2/repositories/release</url>
+            <id>repo.linkid.be</id>
+            <url>scpexe://repo.linkid.be/home/maven/repository/releases</url>
         </repository>
         <snapshotRepository>
-            <id>buildserver-snapshot-repository</id>
-            <url>scpexe://buildserver/home/devel/maven2/repositories/snapshot</url>
-            <uniqueVersion>false</uniqueVersion>
+            <id>repo.linkid.be</id>
+            <url>scpexe://repo.linkid.be/home/maven/repository/snapshots</url>
         </snapshotRepository>
-        <site>
-            <id>buildserver-site-repository</id>
-            <url>scpexe://buildserver/home/devel/maven2/site/util</url>
-        </site>
     </distributionManagement>
     <reporting>
         <outputDirectory>target/site</outputDirectory>
@@ -98,17 +93,7 @@
     <profiles>
         <!-- Profile for exporting to linkid's public repository -->
         <profile>
-            <id>dep:export</id>
-            <distributionManagement>
-                <repository>
-                    <id>repo.linkid.be</id>
-                    <url>scpexe://repo.linkid.be/home/maven/repository/releases</url>
-                </repository>
-                <snapshotRepository>
-                    <id>repo.linkid.be</id>
-                    <url>scpexe://repo.linkid.be/home/maven/repository/snapshots</url>
-                </snapshotRepository>
-            </distributionManagement>
+            <id>release</id>
             <build>
                 <plugins>
                     <plugin>
