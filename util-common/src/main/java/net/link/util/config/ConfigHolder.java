@@ -1,12 +1,12 @@
 package net.link.util.config;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
+import java.lang.reflect.InvocationTargetException;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.InvocationTargetException;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 
 /**
@@ -111,13 +111,14 @@ public class ConfigHolder<C extends Config> {
     @SuppressWarnings({"unchecked"})
     public static <C extends Config> ConfigHolder<C> get() {
 
-        return (ConfigHolder<C>) holder.get();
+        return checkNotNull( (ConfigHolder<C>) holder.get(),
+                "No config holder set.  Set a global config holder or activate a local one (eg. using the ConfigFilter)." );
     }
 
     public static synchronized void setLocalConfigHolder(ConfigHolder<?> instance) {
 
-        if (holderActivated.get())
-            throw new IllegalStateException("Tried to activate config holder: " + instance + " but one is already active: " + get());
+        checkState( !holderActivated.get(), "Tried to activate config holder: %s, but one is already active: %s", instance, holder.get());
+        checkNotNull( instance, "Tried to activate a config holder but none was given." );
 
         ConfigHolder.holderActivated.set(true);
         ConfigHolder.holder.set(instance);
