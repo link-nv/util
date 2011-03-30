@@ -14,7 +14,7 @@ import javax.naming.*;
 import net.link.util.j2ee.NamingStrategy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jboss.annotation.ejb.LocalBinding;
+import org.jboss.ejb3.annotation.LocalBinding;
 
 
 /**
@@ -38,10 +38,10 @@ public class JNDITestUtils {
     /**
      * Bind a bean on JNDI using either its {@link LocalBinding} for the JNDI binding or the naming strategy to resolve it.
      *
-     * @param beanClass The class that defines the binding to use for the bean. If the class has a {@link LocalBinding} annotation, that will
-     * determine the JNDI binding. Otherwise, if the class is a {@link Local} interface, the preset {@link NamingStrategy} will
-     * determine the binding to use.
-     * @param bean The bean object to register.
+     * @param beanClass The class that defines the binding to use for the bean. If the class has a {@link LocalBinding} annotation, that
+     *                  will determine the JNDI binding. Otherwise, if the class is a {@link Local} interface, the preset {@link
+     *                  NamingStrategy} will determine the binding to use.
+     * @param bean      The bean object to register.
      */
     public void bindComponent(Class<?> beanClass, Object bean)
             throws NamingException {

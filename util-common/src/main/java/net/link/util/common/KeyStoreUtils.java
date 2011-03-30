@@ -479,6 +479,21 @@ public abstract class KeyStoreUtils {
             return new LinkedList<X509Certificate>( certificateChain );
 
         LinkedList<X509Certificate> endToRootCertificateChain = new LinkedList<X509Certificate>();
+        // TODO: cant we do this a bit nicer
+        if (certificateChain.size() == 2) {
+
+            X509Certificate cert1 = certificateChain.get( 0 );
+            X509Certificate cert2 = certificateChain.get( 1 );
+            if (isSelfSigned( cert1 )) {
+                endToRootCertificateChain.add( cert2 );
+                endToRootCertificateChain.add( cert1 );
+            } else {
+                endToRootCertificateChain.add( cert1 );
+                endToRootCertificateChain.add( cert2 );
+            }
+
+            return endToRootCertificateChain;
+        }
 
         // find self-signed root
         for (X509Certificate certificate : certificateChain) {

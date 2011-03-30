@@ -52,7 +52,7 @@ public class DynamicTestMBean implements DynamicMBean {
 
     public MBeanInfo getMBeanInfo() {
 
-        return new MBeanInfo( this.getClass().getName(), "test", null, null, null, null );
+        return new MBeanInfo( getClass().getName(), "test", null, null, null, null );
     }
 
     public Object invoke(String actionName, Object[] params, @SuppressWarnings("unused") String[] signature) {
@@ -61,8 +61,7 @@ public class DynamicTestMBean implements DynamicMBean {
         MBeanActionHandler actionHandler = actionHandlers.get( actionName );
         if (null == actionHandler)
             return null;
-        Object result = actionHandler.invoke( params );
-        return result;
+        return actionHandler.invoke( params );
     }
 
     @SuppressWarnings("unused")

@@ -7,11 +7,10 @@
 
 package test.unit.net.link.util.test;
 
-import junit.framework.TestCase;
-import net.link.util.test.j2ee.JNDITestUtils;
-
 import javax.naming.InitialContext;
 import javax.naming.NameNotFoundException;
+import junit.framework.TestCase;
+import net.link.util.test.j2ee.JNDITestUtils;
 
 
 /**
@@ -19,6 +18,7 @@ import javax.naming.NameNotFoundException;
  *
  * @author fcorneli
  */
+@SuppressWarnings( { "JNDIResourceOpenedButNotSafelyClosed" })
 public class JNDITestUtilsTest extends TestCase {
 
     public void testBindComponent()
@@ -31,17 +31,17 @@ public class JNDITestUtilsTest extends TestCase {
         // Test
         JNDITestUtils testedInstance = new JNDITestUtils();
         testedInstance.setUp();
-        testedInstance.bindComponent(testJndiName, testComponent);
+        testedInstance.bindComponent( testJndiName, testComponent );
 
         // Verify
         InitialContext initialContext = new InitialContext();
-        Object result = initialContext.lookup(testJndiName);
-        assertEquals(testComponent, result);
+        Object result = initialContext.lookup( testJndiName );
+        assertEquals( testComponent, result );
 
         // operate & verify
         testedInstance.tearDown();
         try {
-            initialContext.lookup(testJndiName);
+            initialContext.lookup( testJndiName );
             fail();
         } catch (NameNotFoundException e) {
             // Expected
@@ -58,17 +58,17 @@ public class JNDITestUtilsTest extends TestCase {
         // Test
         JNDITestUtils testedInstance = new JNDITestUtils();
         testedInstance.setUp();
-        testedInstance.bindComponent(testSimpleJndiName, testComponent);
+        testedInstance.bindComponent( testSimpleJndiName, testComponent );
 
         // Verify
         InitialContext initialContext = new InitialContext();
-        Object result = initialContext.lookup(testSimpleJndiName);
-        assertEquals(testComponent, result);
+        Object result = initialContext.lookup( testSimpleJndiName );
+        assertEquals( testComponent, result );
 
         // operate & verify
         testedInstance.tearDown();
         try {
-            initialContext.lookup(testSimpleJndiName);
+            initialContext.lookup( testSimpleJndiName );
             fail();
         } catch (NameNotFoundException e) {
             // Expected

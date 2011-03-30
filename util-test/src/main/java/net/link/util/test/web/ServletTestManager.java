@@ -9,7 +9,7 @@ package net.link.util.test.web;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Preconditions;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.ServletContext;
@@ -29,6 +29,7 @@ import org.mortbay.jetty.servlet.*;
  *
  * @author fcorneli
  */
+@SuppressWarnings( { "ProhibitedExceptionDeclared" })
 public class ServletTestManager {
 
     static final Log LOG = LogFactory.getLog( ServletTestManager.class );
@@ -43,15 +44,14 @@ public class ServletTestManager {
 
     public static class TestHashSessionManager extends HashSessionManager {
 
-        final Map<String, Object> initialSessionAttributes;
-
+        final Map<String, Serializable> initialSessionAttributes;
 
         public TestHashSessionManager() {
 
-            initialSessionAttributes = new HashMap<String, Object>();
+            initialSessionAttributes = new HashMap<String, Serializable>();
         }
 
-        public void setInitialSessionAttribute(String name, Object value) {
+        public void setInitialSessionAttribute(String name, Serializable value) {
 
             initialSessionAttributes.put( name, value );
         }
@@ -61,7 +61,7 @@ public class ServletTestManager {
 
             LOG.debug( "new session" );
             Session session = (Session) super.newSession( request );
-            for (Map.Entry<String, Object> mapEntry : initialSessionAttributes.entrySet()) {
+            for (Map.Entry<String, Serializable> mapEntry : initialSessionAttributes.entrySet()) {
                 LOG.debug( "setting attribute: " + mapEntry.getKey() );
                 session.setAttribute( mapEntry.getKey(), mapEntry.getValue() );
             }
@@ -73,14 +73,13 @@ public class ServletTestManager {
             throws Exception {
 
         Context context = new Context( null, new SessionHandler( sessionManager = new TestHashSessionManager() ), new SecurityHandler(),
-                null, null );
+                                       null, null );
         sessionManager.initialSessionAttributes.putAll( setup.getSessionAttributes() );
         context.setContextPath( contextPath = setup.getContextPath() );
         context.setInitParams( setup.getContextParameters() );
 
         for (FilterSetup filterSetup : setup.getFilters())
-            context.addFilter( filterSetup.getType(), this.contextPath, Handler.DEFAULT ).setInitParameters(
-                    filterSetup.getInitParameters() );
+            context.addFilter( filterSetup.getType(), contextPath, Handler.DEFAULT ).setInitParameters( filterSetup.getInitParameters() );
 
         ServletHolder servletHolder = new ServletHolder();
         servletHolder.setClassName( setup.getServlet().getType().getName() );
@@ -92,7 +91,7 @@ public class ServletTestManager {
 
         ServletMapping servletMapping = new ServletMapping();
         servletMapping.setServletName( servletName );
-        servletMapping.setPathSpecs( new String[] { "/*", this.contextPath } );
+        servletMapping.setPathSpecs( new String[] { "/*", contextPath } );
 
         ServletHandler handler = context.getServletHandler();
         handler.addServlet( servletHolder );
@@ -110,6 +109,8 @@ public class ServletTestManager {
      * Create a connector for the servlet manager.
      *
      * @return The base URL where the connector deploys its servlets.
+     *
+     * @throws Exception something went wrong...
      */
     public String createSocketConnector()
             throws Exception {
@@ -156,9 +157,12 @@ public class ServletTestManager {
 
     /**
      * We update all existing sessions + we make sure that new session also get this session attribute.
+     *
+     * @param name  session attribtue name
+     * @param value session attribute value
      */
     @SuppressWarnings( { "unchecked" })
-    public void setSessionAttribute(String name, Object value) {
+    public void setSessionAttribute(String name, Serializable value) {
 
         Map<String, AbstractSessionManager.Session> sessions = sessionManager.getSessionMap();
         for (AbstractSessionManager.Session session : sessions.values())

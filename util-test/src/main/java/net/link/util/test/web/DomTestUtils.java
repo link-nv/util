@@ -27,6 +27,7 @@ public class DomTestUtils {
         // empty
     }
 
+    @SuppressWarnings( { "ProhibitedExceptionDeclared" })
     public static Document parseDocument(String documentString)
             throws Exception {
 
@@ -55,8 +56,7 @@ public class DomTestUtils {
         documentBuilderFactory.setNamespaceAware( true );
         DocumentBuilder documentBuilder;
         documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        Document document = documentBuilder.parse( documentInputStream );
-        return document;
+        return documentBuilder.parse( documentInputStream );
     }
 
     public static String domToString(Node domNode)

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -26,8 +27,68 @@
         </dependency>
         <dependency>
             <groupId>net.lin-k.util</groupId>
-            <artifactId>util-j2ee-jboss4</artifactId>
+            <artifactId>util-j2ee-jboss6</artifactId>
         </dependency>
+
+        <!-- JBoss 6 -->
+        <dependency>
+            <groupId>org.jboss.spec.javax.ejb</groupId>
+            <artifactId>jboss-ejb-api_3.1_spec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.spec.javax.jms</groupId>
+            <artifactId>jboss-jms-api_1.1_spec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.spec.javax.security.jacc</groupId>
+            <artifactId>jboss-jacc-api_1.4_spec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.ejb3</groupId>
+            <artifactId>jboss-ejb3-ext-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.mx</groupId>
+            <artifactId>jboss-j2se</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.picketbox</groupId>
+            <artifactId>jbosssx-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+        </dependency>
+
+        <!-- JBoss 4 : to-be-removed ... -->
+        <!--<dependency>-->
+            <!--<groupId>org.jboss</groupId>-->
+            <!--<artifactId>hsqldb</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>jboss</groupId>-->
+            <!--<artifactId>jbosssx-client</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>jboss</groupId>-->
+            <!--<artifactId>jboss-j2ee</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>jboss</groupId>-->
+            <!--<artifactId>jboss-annotations-ejb3</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>jboss</groupId>-->
+            <!--<artifactId>jboss-ejb3x</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.jboss</groupId>-->
+            <!--<artifactId>jboss-jaxrpc</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.jboss</groupId>-->
+            <!--<artifactId>ejb3-persistence</artifactId>-->
+        <!--</dependency>-->
 
         <!-- Specific Dependencies: External -->
         <dependency>
@@ -62,30 +123,10 @@
             <groupId>com.sun.net.httpserver</groupId>
             <artifactId>http</artifactId>
         </dependency>
-        <dependency>
-            <groupId>javax.ejb</groupId>
-            <artifactId>ejb-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>jboss</groupId>
-            <artifactId>jboss-ejb3x</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>jboss</groupId>
-            <artifactId>jboss-j2ee</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss</groupId>
-            <artifactId>jboss-jaxrpc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>jboss</groupId>
-            <artifactId>jbosssx-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss</groupId>
-            <artifactId>ejb3-persistence</artifactId>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>javax.ejb</groupId>-->
+            <!--<artifactId>ejb-api</artifactId>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>cglib</groupId>
             <artifactId>cglib</artifactId>
@@ -93,10 +134,6 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>jboss</groupId>
-            <artifactId>jboss-annotations-ejb3</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mortbay.jetty</groupId>
@@ -141,11 +178,6 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.jboss</groupId>
-            <artifactId>hsqldb</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-annotations</artifactId>
             <scope>runtime</scope>
@@ -174,17 +206,6 @@
 
     <reporting>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-changes-plugin</artifactId>
-                <reportSets>
-                    <reportSet>
-                        <reports>
-                            <report>changes-report</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>

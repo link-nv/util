@@ -38,7 +38,7 @@ public class KeyStoreUtilsTest {
     }
 
     @Test
-    public void testOrderCertificateChain()
+    public void testOrderCertificateChainUnordered()
             throws Exception {
 
         // Setup
@@ -77,6 +77,45 @@ public class KeyStoreUtilsTest {
     }
 
     @Test
+    public void testOrderCertificateChainOrdered()
+            throws Exception {
+
+        // Setup
+        DateTime notBefore = new DateTime();
+        DateTime notAfter = notBefore.plusYears( 1 );
+
+        KeyPair rootKeyPair = PkiTestUtils.generateKeyPair();
+        X509Certificate rootCertificate = PkiTestUtils.generateSelfSignedCertificate( rootKeyPair, "CN=Root" );
+
+        KeyPair ca1KeyPair = PkiTestUtils.generateKeyPair();
+        X509Certificate ca1Certificate = PkiTestUtils.generateCertificate( ca1KeyPair.getPublic(), "CN=CA1", rootKeyPair.getPrivate(),
+                                                                           rootCertificate, notBefore, notAfter, null, true, true, false,
+                                                                           null );
+
+        KeyPair ca2KeyPair = PkiTestUtils.generateKeyPair();
+        X509Certificate ca2Certificate = PkiTestUtils.generateCertificate( ca2KeyPair.getPublic(), "CN=CA2", ca1KeyPair.getPrivate(),
+                                                                           ca1Certificate, notBefore, notAfter, null, true, true, false,
+                                                                           null );
+
+        KeyPair keyPair = PkiTestUtils.generateKeyPair();
+        X509Certificate certificate = PkiTestUtils.generateCertificate( keyPair.getPublic(), "CN=Test", ca2KeyPair.getPrivate(),
+                                                                        ca2Certificate, notBefore, notAfter, null, true, false, false,
+                                                                        null );
+
+        List<X509Certificate> certificateChain = Arrays.asList( certificate, ca2Certificate, ca1Certificate, rootCertificate );
+
+        // Operate: sort
+        List<X509Certificate> orderedCertChain = KeyStoreUtils.getOrderedCertificateChain( certificateChain );
+
+        // Verify
+        assertNotNull( orderedCertChain );
+        assertEquals( certificate, orderedCertChain.get( 0 ) );
+        assertEquals( ca2Certificate, orderedCertChain.get( 1 ) );
+        assertEquals( ca1Certificate, orderedCertChain.get( 2 ) );
+        assertEquals( rootCertificate, orderedCertChain.get( 3 ) );
+    }
+
+    @Test
     public void testOrderCertificateChainEmpty()
             throws Exception {
 
@@ -101,5 +140,32 @@ public class KeyStoreUtilsTest {
         // Verify
         assertEquals( 1, orderedCertChain.size() );
         assertEquals( certificate, orderedCertChain.get( 0 ) );
+    }
+
+    @Test
+    public void testOrderCertificateChain2Elements()
+            throws Exception {
+
+        // Setup
+        DateTime notBefore = new DateTime();
+        DateTime notAfter = notBefore.plusYears( 1 );
+
+        KeyPair rootKeyPair = PkiTestUtils.generateKeyPair();
+        X509Certificate rootCertificate = PkiTestUtils.generateSelfSignedCertificate( rootKeyPair, "CN=Root" );
+
+        KeyPair keyPair = PkiTestUtils.generateKeyPair();
+        X509Certificate certificate = PkiTestUtils.generateCertificate( keyPair.getPublic(), "CN=Test", rootKeyPair.getPrivate(),
+                                                                        rootCertificate, notBefore, notAfter, null, true, false, false,
+                                                                        null );
+
+        List<X509Certificate> certificateChain = Arrays.asList( rootCertificate, certificate );
+
+        // Operate: sort
+        List<X509Certificate> orderedCertChain = KeyStoreUtils.getOrderedCertificateChain( certificateChain );
+
+        // Verify
+        assertEquals( 2, orderedCertChain.size() );
+        assertEquals( certificate, orderedCertChain.get( 0 ) );
+        assertEquals( rootCertificate, orderedCertChain.get( 1 ) );
     }
 }
