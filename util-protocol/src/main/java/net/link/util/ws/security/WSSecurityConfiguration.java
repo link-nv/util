@@ -1,10 +1,3 @@
-/*
- * SafeOnline project.
- *
- * Copyright 2006-2007 Lin.k N.V. All rights reserved.
- * Lin.k N.V. proprietary/confidential. Use is subject to license terms.
- */
-
 package net.link.util.ws.security;
 
 import java.security.PrivateKey;
@@ -15,13 +8,13 @@ import org.joda.time.Duration;
 
 
 /**
- * WS-Security configuration.
+ * <h2>{@link WSSecurityConfiguration}<br> <sub>[in short] (TODO).</sub></h2>
+ *
+ * <p> <i>03 30, 2011</i> </p>
  *
  * @author lhunath
  */
-public abstract class WSSecurityConfiguration {
-
-    public static final Duration DEFAULT_MAX_AGE = new Duration( 1000 * 60 * 5L );
+public interface WSSecurityConfiguration {
 
     /**
      * Given the calling entity's certificate, perform a verification of the digestion of the SOAP body element by the WS-Security
@@ -31,33 +24,21 @@ public abstract class WSSecurityConfiguration {
      *
      * @return <code>true</code> if incoming messages signed by the given certificate chain can be trusted.
      */
-    public abstract boolean isCertificateChainTrusted(Collection<X509Certificate> certificateChain);
+    boolean isCertificateChainTrusted(Collection<X509Certificate> certificateChain);
 
     /**
      * @return the certificate chain that will be used to sign outgoing web service  messages.
      */
-    public abstract List<X509Certificate> getCertificateChain();
+    List<X509Certificate> getCertificateChain();
 
     /**
      * @return the private key which will be used to sign outgoing web service  messages.
      */
-    public abstract PrivateKey getPrivateKey();
+    PrivateKey getPrivateKey();
 
-    /**
-     * @return the maximum age of the message.
-     */
-    public Duration getMaximumAge() {
+    Duration getMaximumAge();
 
-        return DEFAULT_MAX_AGE;
-    }
+    boolean isOutboundSignatureNeeded();
 
-    public boolean isOutboundSignatureNeeded() {
-
-        return true;
-    }
-
-    public boolean isInboundSignatureOptional() {
-
-        return true;
-    }
+    boolean isInboundSignatureOptional();
 }

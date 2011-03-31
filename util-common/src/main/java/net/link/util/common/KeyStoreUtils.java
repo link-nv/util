@@ -9,6 +9,7 @@ package net.link.util.common;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.URI;
@@ -482,8 +483,8 @@ public abstract class KeyStoreUtils {
         // TODO: cant we do this a bit nicer
         if (certificateChain.size() == 2) {
 
-            X509Certificate cert1 = certificateChain.get( 0 );
-            X509Certificate cert2 = certificateChain.get( 1 );
+            X509Certificate cert1 = Iterables.get( certificateChain, 0 );
+            X509Certificate cert2 = Iterables.get( certificateChain, 1 );
             if (isSelfSigned( cert1 )) {
                 endToRootCertificateChain.add( cert2 );
                 endToRootCertificateChain.add( cert1 );

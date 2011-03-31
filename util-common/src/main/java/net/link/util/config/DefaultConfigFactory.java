@@ -7,6 +7,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.*;
 import com.lyndir.lhunath.lib.system.logging.exception.InternalInconsistencyException;
 import com.lyndir.lhunath.lib.system.util.TypeUtils;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -42,6 +43,12 @@ public class DefaultConfigFactory {
     private static final Pattern LEADING_WHITESPACE      = Pattern.compile( "^\\s+" );
     private static final Pattern TRAILING_WHITESPACE     = Pattern.compile( "\\s+$" );
     private static final Pattern COMMA_DELIMITOR         = Pattern.compile( "\\s*,\\s*" );
+    /**
+     * <p>type:[alias[:pass1[:pass2]]@]path</p>
+     *
+     * Note: <b>passwords and aliases cannot contain ':' or '@' symbols</b>
+     */
+    private static final Pattern KEYSTORE_PATTERN = Pattern.compile( "^(.*?)://(?:([^:@]*)(?::([^:@]*)(?::([^:@]*))?)?@)?(.*)" );
 
     private final ClassToInstanceMap<Object>  proxyMap       = MutableClassToInstanceMap.create();
     private final Map<Object, Object>         wrapperMap     = Maps.newHashMap();
@@ -342,7 +349,7 @@ public class DefaultConfigFactory {
      *
      * @return The generated value.
      */
-    protected String generateValueExtension(final Method method) {
+    protected String generateValueExtension(@NotNull final Method method) {
 
         return null;
     }
@@ -381,6 +388,69 @@ public class DefaultConfigFactory {
             return type.cast( ISODateTimeFormat.localDateOptionalTimeParser().parseDateTime( value ) );
         if (type.isAssignableFrom( Duration.class ))
             return type.cast( new Duration( Long.valueOf( value ).longValue() ) );
+
+        // KeyStores
+        if (KeyProvider.class.isAssignableFrom( type )) {
+
+            Matcher matcher = KEYSTORE_PATTERN.matcher( value );
+            if (!matcher.matches())
+                throw new IllegalArgumentException( "Key provider value not understood: " + value );
+
+            String keyStoreType = matcher.group( 1 );
+            String keyEntryAlias = matcher.group( 2 );
+            String keyStorePass = matcher.group( 3 );
+            String keyEntryPass = matcher.group( 4 );
+            String keyStorePath = matcher.group( 5 );
+
+            if ("classpath".equals( keyStoreType ))
+                return type.cast( new ResourceKeyStoreKeyProvider( keyStorePath, keyStorePass, keyEntryPass, keyEntryAlias ) );
+            if ("url".equals( keyStoreType ))
+                return type.cast(
+                        new URLKeyStoreKeyProvider( URLUtils.newURL( keyStorePath ), keyStorePass, keyEntryPass, keyEntryAlias ) );
+            if ("file".equals( keyStoreType ))
+                return type.cast( new FileKeyStoreKeyProvider( new File( keyStorePath ), keyStorePass, keyEntryPass, keyEntryAlias ) );
+            if ("class".equals( keyStoreType ))
+                try {
+                    Class<?> keyStoreClass = Thread.currentThread().getContextClassLoader().loadClass( keyStorePath );
+                    try {
+                        return type.cast( keyStoreClass.getConstructor( String.class, String.class, String.class )
+                                .newInstance( keyStorePass, keyEntryAlias, keyEntryPass ) );
+                    }
+                    catch (NoSuchMethodException ignored) {
+                        //noinspection UnusedCatchParameter
+                        try {
+                            return type.cast(
+                                    keyStoreClass.getConstructor( String.class, String.class ).newInstance( keyEntryAlias, keyEntryPass ) );
+                        }
+                        catch (NoSuchMethodException ignored_) {
+                            //noinspection UnusedCatchParameter
+                            try {
+                                return type.cast( keyStoreClass.getConstructor( String.class ).newInstance( keyEntryAlias ) );
+                            }
+                            catch (NoSuchMethodException ignored__) {
+                                return type.cast( keyStoreClass.getConstructor().newInstance() );
+                            }
+                        }
+                    }
+                }
+                catch (InstantiationException e) {
+                    throw new InternalInconsistencyException( e );
+                }
+                catch (IllegalAccessException e) {
+                    throw new InternalInconsistencyException( e );
+                }
+                catch (ClassNotFoundException e) {
+                    throw new IllegalArgumentException( e );
+                }
+                catch (NoSuchMethodException e) {
+                    throw new InternalInconsistencyException( e );
+                }
+                catch (InvocationTargetException e) {
+                    throw new RuntimeException( e );
+                }
+
+            throw new IllegalArgumentException( "Key provider type not supported: " + keyStoreType );
+        }
 
         // Enums: use valueOf
         if (type.isEnum())
@@ -457,7 +527,7 @@ public class DefaultConfigFactory {
      *
      * @return The value, converted to an instance of the given type.
      */
-    protected <T> T toTypeExtension(final String value, final Class<T> type) {
+    protected <T> T toTypeExtension(@NotNull final String value, @NotNull final Class<T> type) {
 
         return null;
     }
