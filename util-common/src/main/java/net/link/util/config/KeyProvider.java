@@ -2,6 +2,7 @@ package net.link.util.config;
 
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.List;
 
 
@@ -34,5 +35,10 @@ public interface KeyProvider {
      * @return The certificates that we trust.  The remote party's requests must provide a certificate chain that validates and is trusted
      *         by one of these certificates.
      */
-    List<X509Certificate> getTrustedCertificates();
+    Collection<X509Certificate> getTrustedCertificates();
+
+    /**
+     * @return A trusted certificate with the given alias.
+     */
+    X509Certificate getTrustedCertificate(String alias);
 }

@@ -13,7 +13,8 @@ import be.fedict.trust.MemoryCertificateRepository;
 import be.fedict.trust.TrustValidator;
 import com.google.common.base.Charsets;
 import com.google.common.base.Function;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
 import com.lyndir.lhunath.lib.system.logging.Logger;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,6 +26,7 @@ import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -248,7 +250,7 @@ public abstract class Saml2Utils {
      *
      * @throws ValidationFailedException The signature could not be trusted.
      */
-    public static void validateSignature(Signature signature, HttpServletRequest request, List<X509Certificate> trustedCertificates)
+    public static void validateSignature(Signature signature, HttpServletRequest request, Collection<X509Certificate> trustedCertificates)
             throws ValidationFailedException {
 
         if (signature != null)
@@ -260,7 +262,7 @@ public abstract class Saml2Utils {
                     trustedCertificates );
     }
 
-    private static void validateSignature(Signature signature, List<X509Certificate> trustedCertificates)
+    private static void validateSignature(Signature signature, Collection<X509Certificate> trustedCertificates)
             throws ValidationFailedException {
 
         logger.dbg( "validate[HTTP POST], Signature:\n%s", DomUtils.domToString( signature.getDOM(), true ) );
@@ -298,21 +300,22 @@ public abstract class Saml2Utils {
         }
     }
 
-    private static void validateSignature(HttpServletRequest request, List<X509Certificate> trustedCertificates)
+    private static void validateSignature(HttpServletRequest request, Collection<X509Certificate> trustedCertificates)
             throws ValidationFailedException {
 
         logger.dbg( "validate[HTTP Redirect], Query:\n%s", request.getQueryString() );
         if (trustedCertificates == null || trustedCertificates.isEmpty())
             throw new ValidationFailedException( "There are no credentials to validate against." );
 
-        List<Credential> credentials = Lists.transform( trustedCertificates, new Function<X509Certificate, Credential>() {
-            @Override
-            public Credential apply(final X509Certificate from) {
+        Collection<Credential> trustedCredentials = Collections2.transform( trustedCertificates,
+                new Function<X509Certificate, Credential>() {
+                    @Override
+                    public Credential apply(final X509Certificate from) {
 
-                return SecurityHelper.getSimpleCredential( from, null );
-            }
-        } );
-        StaticCredentialResolver credResolver = new StaticCredentialResolver( credentials );
+                        return SecurityHelper.getSimpleCredential( from, null );
+                    }
+                } );
+        StaticCredentialResolver credResolver = new StaticCredentialResolver( ImmutableList.copyOf( trustedCredentials ) );
         final SignatureTrustEngine engine = new ExplicitKeySignatureTrustEngine( credResolver,
                 Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver() );
 
@@ -350,7 +353,7 @@ public abstract class Saml2Utils {
         }
     }
 
-    private static void validateCertificateChain(List<X509Certificate> certificateChain, List<X509Certificate> trustedCertificates)
+    private static void validateCertificateChain(List<X509Certificate> certificateChain, Collection<X509Certificate> trustedCertificates)
             throws ValidationFailedException {
 
         try {

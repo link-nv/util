@@ -3,7 +3,6 @@ package net.link.util.config;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableList;
 import com.google.common.io.Closeables;
 import com.google.common.io.InputSupplier;
 import com.lyndir.lhunath.lib.system.util.ObjectUtils;
@@ -34,8 +33,7 @@ public class KeyStoreKeyProvider extends KeyProviderImpl {
 
     protected KeyStoreKeyProvider(@NotNull KeyStore keyStore, @Nullable String keyEntryAlias, @Nullable String keyEntryPassword) {
 
-        super( getIdentity( keyStore, keyEntryAlias, keyEntryPassword ),
-                ImmutableList.copyOf( KeyStoreUtils.getCertificates( keyStore, null ).values() ) );
+        super( getIdentity( keyStore, keyEntryAlias, keyEntryPassword ), KeyStoreUtils.getCertificates( keyStore, null ) );
     }
 
     private static KeyStore.PrivateKeyEntry getIdentity(final KeyStore keyStore, final String keyEntryAlias,

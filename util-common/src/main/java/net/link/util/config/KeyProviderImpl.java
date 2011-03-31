@@ -5,7 +5,9 @@ import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import net.link.util.common.KeyStoreUtils;
 
 
@@ -18,17 +20,21 @@ import net.link.util.common.KeyStoreUtils;
  */
 public class KeyProviderImpl implements KeyProvider {
 
-    private final PrivateKey            identityKey;
-    private final List<X509Certificate> identityCertificateChain;
-    private final List<X509Certificate> trustedCertificates;
+    private final PrivateKey                   identityKey;
+    private final List<X509Certificate>        identityCertificateChain;
+    private final Map<String, X509Certificate> trustedCertificates;
 
-    protected KeyProviderImpl(final KeyStore.PrivateKeyEntry identity, final List<X509Certificate> trustedCertificates) {
+    /**
+     * @param identity            The entry that specifies the identity's keys.
+     * @param trustedCertificates The certificates of remote entities that we trust.
+     */
+    protected KeyProviderImpl(final KeyStore.PrivateKeyEntry identity, final Map<String, X509Certificate> trustedCertificates) {
 
         this( identity.getPrivateKey(), ImmutableList.copyOf( (X509Certificate[]) identity.getCertificateChain() ), trustedCertificates );
     }
 
     protected KeyProviderImpl(final PrivateKey identityKey, final List<X509Certificate> identityCertificateChain,
-                              final List<X509Certificate> trustedCertificates) {
+                              final Map<String, X509Certificate> trustedCertificates) {
 
         this.identityKey = identityKey;
         this.identityCertificateChain = identityCertificateChain;
@@ -51,8 +57,14 @@ public class KeyProviderImpl implements KeyProvider {
         return identityCertificateChain;
     }
 
-    public List<X509Certificate> getTrustedCertificates() {
+    public Collection<X509Certificate> getTrustedCertificates() {
 
-        return trustedCertificates;
+        return trustedCertificates.values();
+    }
+
+    @Override
+    public X509Certificate getTrustedCertificate(final String alias) {
+
+        return trustedCertificates.get( alias );
     }
 }
