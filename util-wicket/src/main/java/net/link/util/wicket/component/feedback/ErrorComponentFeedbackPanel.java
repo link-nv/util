@@ -13,11 +13,11 @@ import org.apache.wicket.markup.html.panel.ComponentFeedbackPanel;
 /**
  * <h2>{@link ErrorComponentFeedbackPanel}<br>
  * <sub>Component Feedback panel only displaying error messages.</sub></h2>
- *
+ * <p/>
  * <p>
  * Component Feedback panel only displaying error messages.
  * </p>
- *
+ * <p/>
  * <p>
  * <i>Nov 6, 2008</i>
  * </p>

@@ -9,10 +9,7 @@ package net.link.util.test.j2ee;
 
 import java.util.HashMap;
 import java.util.Map;
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.DynamicMBean;
-import javax.management.MBeanInfo;
+import javax.management.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

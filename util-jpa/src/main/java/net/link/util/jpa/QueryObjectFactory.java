@@ -10,9 +10,7 @@ package net.link.util.jpa;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import javax.persistence.EntityManager;
-import net.link.util.jpa.annotation.QueryMethod;
-import net.link.util.jpa.annotation.QueryParam;
-import net.link.util.jpa.annotation.UpdateMethod;
+import net.link.util.jpa.annotation.*;
 
 
 /**
@@ -31,7 +29,7 @@ public class QueryObjectFactory {
      * Creates a new query object from the given query object interface. The methods on this interface should be annotated via
      * {@link QueryMethod} or {@link UpdateMethod}. If the method has parameters one should annotated these via {@link QueryParam}.
      *
-     * @param entityManager the JPA entity manager used by the returned query object.
+     * @param entityManager        the JPA entity manager used by the returned query object.
      * @param queryObjectInterface the interface that the query object will implement.
      *
      * @return a new query object.

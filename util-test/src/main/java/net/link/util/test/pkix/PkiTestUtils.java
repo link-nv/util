@@ -12,14 +12,12 @@ import java.io.*;
 import java.math.BigInteger;
 import java.net.URI;
 import java.security.*;
-import java.security.cert.*;
 import java.security.cert.Certificate;
+import java.security.cert.*;
 import java.security.interfaces.DSAKeyPairGenerator;
 import java.security.spec.RSAKeyGenParameterSpec;
 import org.apache.commons.io.IOUtils;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -120,8 +118,8 @@ public class PkiTestUtils {
         certificateGenerator.addExtension( X509Extensions.BasicConstraints, false, new BasicConstraints( caCert ) );
 
         if (timeStampingPurpose)
-            certificateGenerator.addExtension( X509Extensions.ExtendedKeyUsage, true, new ExtendedKeyUsage( new DERSequence(
-                    KeyPurposeId.id_kp_timeStamping ) ) );
+            certificateGenerator.addExtension( X509Extensions.ExtendedKeyUsage, true,
+                    new ExtendedKeyUsage( new DERSequence( KeyPurposeId.id_kp_timeStamping ) ) );
 
         if (null != ocspUri) {
             GeneralName ocspName = new GeneralName( GeneralName.uniformResourceIdentifier, ocspUri.toString() );
@@ -176,7 +174,8 @@ public class PkiTestUtils {
         try {
             X509Certificate certificate = loadCertificate( inputStream );
             return certificate;
-        } finally {
+        }
+        finally {
             IOUtils.closeQuietly( inputStream );
         }
     }
@@ -189,11 +188,6 @@ public class PkiTestUtils {
      * @param certificate      the X509 certificate corresponding with the private key.
      * @param keyStorePassword the keystore password.
      * @param keyEntryPassword the keyentry password.
-     *
-     * @throws KeyStoreException
-     * @throws NoSuchAlgorithmException
-     * @throws CertificateException
-     * @throws IOException
      */
     public static KeyStore persistInJKSKeyStore(File pkcs12keyStore, PrivateKey privateKey, Certificate certificate,
                                                 String keyStorePassword, String keyEntryPassword)
@@ -210,11 +204,6 @@ public class PkiTestUtils {
      * @param certificate      the X509 certificate corresponding with the private key.
      * @param keyStorePassword the keystore password.
      * @param keyEntryPassword the keyentry password.
-     *
-     * @throws KeyStoreException
-     * @throws NoSuchAlgorithmException
-     * @throws CertificateException
-     * @throws IOException
      */
     public static KeyStore persistInPKCS12KeyStore(File pkcs12keyStore, PrivateKey privateKey, Certificate certificate,
                                                    String keyStorePassword, String keyEntryPassword)
@@ -232,11 +221,6 @@ public class PkiTestUtils {
      * @param certificate      The X509 certificate corresponding with the private key.
      * @param keyStorePassword The keystore password.
      * @param keyEntryPassword The keyentry password.
-     *
-     * @throws KeyStoreException
-     * @throws NoSuchAlgorithmException
-     * @throws CertificateException
-     * @throws IOException
      */
     public static KeyStore persistInKeyStore(File pkcs12keyStore, String keyStoreType, PrivateKey privateKey, Certificate certificate,
                                              String keyStorePassword, String keyEntryPassword)

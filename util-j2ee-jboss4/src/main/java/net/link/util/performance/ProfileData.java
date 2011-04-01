@@ -52,7 +52,7 @@ public class ProfileData {
      * The header used to communicate the duration of the call
      */
     private static final String DURATION_HEADER = "X-Profiled-Duration-";
-    private static final Log LOG = LogFactory.getLog( ProfileData.class );
+    private static final Log    LOG             = LogFactory.getLog( ProfileData.class );
 
     /**
      * The header used to identify the method signature for a profile entry.

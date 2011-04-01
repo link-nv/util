@@ -43,7 +43,8 @@ public class JNDITestUtilsTest extends TestCase {
         try {
             initialContext.lookup( testJndiName );
             fail();
-        } catch (NameNotFoundException e) {
+        }
+        catch (NameNotFoundException e) {
             // Expected
         }
     }
@@ -70,7 +71,8 @@ public class JNDITestUtilsTest extends TestCase {
         try {
             initialContext.lookup( testSimpleJndiName );
             fail();
-        } catch (NameNotFoundException e) {
+        }
+        catch (NameNotFoundException e) {
             // Expected
         }
     }

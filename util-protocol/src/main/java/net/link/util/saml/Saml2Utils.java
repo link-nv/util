@@ -7,7 +7,7 @@
 
 package net.link.util.saml;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 
 import be.fedict.trust.MemoryCertificateRepository;
 import be.fedict.trust.TrustValidator;
@@ -16,20 +16,11 @@ import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.lyndir.lhunath.lib.system.logging.Logger;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.Serializable;
-import java.security.KeyException;
-import java.security.KeyPair;
-import java.security.PublicKey;
-import java.security.cert.CertPathValidatorException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
+import java.io.*;
+import java.security.*;
+import java.security.cert.*;
 import java.security.cert.X509Certificate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -64,6 +55,9 @@ import org.opensaml.xml.security.keyinfo.KeyInfoHelper;
 import org.opensaml.xml.security.x509.BasicX509Credential;
 import org.opensaml.xml.security.x509.X509KeyInfoGeneratorFactory;
 import org.opensaml.xml.signature.*;
+import org.opensaml.xml.signature.Signature;
+import org.opensaml.xml.signature.SignatureException;
+import org.opensaml.xml.signature.Signer;
 import org.opensaml.xml.signature.impl.ExplicitKeySignatureTrustEngine;
 import org.opensaml.xml.signature.impl.SignatureBuilder;
 import org.opensaml.xml.util.Base64;
@@ -172,9 +166,9 @@ public abstract class Saml2Utils {
         if (null != certificateChain) {
             // enable adding the cert.chain as KeyInfo
             ((X509KeyInfoGeneratorFactory) Configuration.getGlobalSecurityConfiguration()
-                    .getKeyInfoGeneratorManager()
-                    .getDefaultManager()
-                    .getFactory( signingCredential )).setEmitEntityCertificateChain( true );
+                                                        .getKeyInfoGeneratorManager()
+                                                        .getDefaultManager()
+                                                        .getFactory( signingCredential )).setEmitEntityCertificateChain( true );
             signingCredential.setEntityCertificateChain( certificateChain );
 
             // add certificate chain as keyinfo

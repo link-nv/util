@@ -40,13 +40,13 @@ import org.apache.wicket.proxy.IProxyTargetLocator;
  */
 public class JavaEEBeanLocator implements IProxyTargetLocator {
 
-    private Class<?> beanType;
+    private Class<?>       beanType;
     private NamingStrategy namingStrategy;
 
     /**
      * Constructor
      *
-     * @param beanType bean class
+     * @param beanType       bean class
      * @param namingStrategy - naming strategy
      */
     public JavaEEBeanLocator(Class<?> beanType, NamingStrategy namingStrategy) {

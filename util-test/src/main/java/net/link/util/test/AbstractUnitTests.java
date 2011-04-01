@@ -6,6 +6,11 @@
  */
 package net.link.util.test;
 
+import static org.easymock.EasyMock.*;
+
+import java.util.*;
+import javax.naming.NamingException;
+import javax.persistence.EntityManager;
 import net.link.util.j2ee.EJBUtils;
 import net.link.util.j2ee.FieldNamingStrategy;
 import net.link.util.test.j2ee.EJBTestUtils;
@@ -13,17 +18,7 @@ import net.link.util.test.j2ee.JNDITestUtils;
 import net.link.util.test.jpa.EntityTestManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-
-import javax.naming.NamingException;
-import javax.persistence.EntityManager;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Random;
-
-import static org.easymock.EasyMock.createMock;
+import org.junit.*;
 
 
 /**
@@ -39,15 +34,14 @@ public abstract class AbstractUnitTests<T> {
 
     protected static final Random random = new Random();
 
-    protected static JNDITestUtils jndiTestUtils;
+    protected static JNDITestUtils     jndiTestUtils;
     protected static EntityTestManager entityTestManager;
 
-    protected final Log LOG = LogFactory.getLog(getClass());
+    protected final Log LOG = LogFactory.getLog( getClass() );
 
-    protected EntityManager entityManager;
-    protected T testedBean;
+    protected EntityManager      entityManager;
+    protected T                  testedBean;
     protected Class<? extends T> testedClass;
-
 
     public AbstractUnitTests() {
 
@@ -67,7 +61,7 @@ public abstract class AbstractUnitTests<T> {
 
         jndiTestUtils = new JNDITestUtils();
         jndiTestUtils.setUp();
-        jndiTestUtils.setNamingStrategy(new FieldNamingStrategy());
+        jndiTestUtils.setNamingStrategy( new FieldNamingStrategy() );
 
         entityTestManager = new EntityTestManager();
     }
@@ -77,7 +71,8 @@ public abstract class AbstractUnitTests<T> {
      * service beans from {@link #getServiceBeans()} (unless that returns <code>null</code>) into the JNDI.
      * <p/>
      * <p>
-     * If you want to use a non-HSQL data source, use {@link EntityTestManager#configureMySql(String, int, String, String, String, boolean)}
+     * If you want to use a non-HSQL data source, use {@link EntityTestManager#configureMySql(String, int, String, String, String,
+     * boolean)}
      * or before calling this method.
      * </p>
      */
@@ -85,16 +80,17 @@ public abstract class AbstractUnitTests<T> {
     public void setUp()
             throws Exception {
 
-        LOG.debug("=== <SET-UP> ===");
+        LOG.debug( "=== <SET-UP> ===" );
 
         // Set up an HSQL entity manager.
         Class<?>[] entities = getEntities();
         if (entities != null)
             try {
-                entityTestManager.setUp(entities);
-            } catch (Exception err) {
-                LOG.error("Couldn't set up entity manager", err);
-                throw new IllegalStateException(err);
+                entityTestManager.setUp( entities );
+            }
+            catch (Exception err) {
+                LOG.error( "Couldn't set up entity manager", err );
+                throw new IllegalStateException( err );
             }
         entityManager = entityTestManager.getEntityManager();
 
@@ -102,26 +98,26 @@ public abstract class AbstractUnitTests<T> {
         Object[] mocks = getMocks();
         if (mocks != null)
             for (Object mock : mocks)
-                bindMock(mock);
+                bindMock( mock );
 
         // Bind our service beans into the JNDI.
         Class<?>[] serviceBeanArray = getServiceBeans();
         if (serviceBeanArray == null)
             serviceBeanArray = new Class<?>[0];
-        LinkedList<Class<?>> serviceBeans = new LinkedList<Class<?>>(Arrays.asList(serviceBeanArray));
-        if (null != testedClass && !testedClass.isInterface() && !serviceBeans.contains(testedClass))
-            serviceBeans.add(testedClass);
+        LinkedList<Class<?>> serviceBeans = new LinkedList<Class<?>>( Arrays.asList( serviceBeanArray ) );
+        if (null != testedClass && !testedClass.isInterface() && !serviceBeans.contains( testedClass ))
+            serviceBeans.add( testedClass );
         for (Class<?> beanClass : serviceBeans) {
 
-            Object serviceBean = EJBTestUtils.newInstance(beanClass, serviceBeanArray, entityManager);
-            jndiTestUtils.bindComponent(beanClass, serviceBean);
+            Object serviceBean = EJBTestUtils.newInstance( beanClass, serviceBeanArray, entityManager );
+            jndiTestUtils.bindComponent( beanClass, serviceBean );
 
             if (null != testedClass)
-                if (testedClass.isAssignableFrom(beanClass))
-                    testedBean = testedClass.cast(serviceBean);
+                if (testedClass.isAssignableFrom( beanClass ))
+                    testedBean = testedClass.cast( serviceBean );
         }
 
-        LOG.debug("=== </SET-UP> ===");
+        LOG.debug( "=== </SET-UP> ===" );
     }
 
     /**
@@ -131,14 +127,14 @@ public abstract class AbstractUnitTests<T> {
     public void tearDown()
             throws Exception {
 
-        LOG.debug("=== <TEAR-DOWN> ===");
+        LOG.debug( "=== <TEAR-DOWN> ===" );
 
         if (entityTestManager != null)
             entityTestManager.tearDown();
         if (jndiTestUtils != null)
             jndiTestUtils.tearDown();
 
-        LOG.debug("=== </TEAR-DOWN> ===");
+        LOG.debug( "=== </TEAR-DOWN> ===" );
     }
 
     // Utilities
@@ -148,7 +144,7 @@ public abstract class AbstractUnitTests<T> {
      */
     protected static <B> B ejb(Class<B> beanInterface) {
 
-        return EJBUtils.getEJB(beanInterface);
+        return EJBUtils.getEJB( beanInterface );
     }
 
     /**
@@ -157,7 +153,7 @@ public abstract class AbstractUnitTests<T> {
     protected static <M> M createAndBindMock(Class<M> mock)
             throws NamingException {
 
-        return bindMock(createMock(mock));
+        return bindMock( createMock( mock ) );
     }
 
     /**
@@ -166,7 +162,7 @@ public abstract class AbstractUnitTests<T> {
     protected static <M> M bindMock(M mock)
             throws NamingException {
 
-        jndiTestUtils.bindComponent(mock.getClass().getInterfaces()[0], mock);
+        jndiTestUtils.bindComponent( mock.getClass().getInterfaces()[0], mock );
 
         return mock;
     }

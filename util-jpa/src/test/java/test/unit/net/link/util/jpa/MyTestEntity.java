@@ -12,17 +12,16 @@ import static test.unit.net.link.util.jpa.MyTestEntity.*;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.*;
-import net.link.util.jpa.annotation.QueryMethod;
-import net.link.util.jpa.annotation.QueryParam;
-import net.link.util.jpa.annotation.UpdateMethod;
+import net.link.util.jpa.annotation.*;
 
 
 @Entity
 @NamedQueries( {
-                       @NamedQuery(name = QUERY_ALL, query = "FROM MyTestEntity"),
-                       @NamedQuery(name = QUERY_WHERE_NAME, query = "FROM MyTestEntity AS mte WHERE mte.name = :" + NAME_PARAM),
-                       @NamedQuery(name = DELETE_ALL, query = "DELETE FROM MyTestEntity"),
-                       @NamedQuery(name = COUNT_ALL, query = "SELECT COUNT(*) FROM MyTestEntity") })
+        @NamedQuery(name = QUERY_ALL, query = "FROM MyTestEntity"),
+        @NamedQuery(name = QUERY_WHERE_NAME, query = "FROM MyTestEntity AS mte WHERE mte.name = :" + NAME_PARAM),
+        @NamedQuery(name = DELETE_ALL, query = "DELETE FROM MyTestEntity"),
+        @NamedQuery(name = COUNT_ALL, query = "SELECT COUNT(*) FROM MyTestEntity")
+})
 public class MyTestEntity implements Serializable {
 
     public static final String QUERY_ALL = "mte.all";

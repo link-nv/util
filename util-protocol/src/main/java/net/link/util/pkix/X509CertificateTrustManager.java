@@ -7,14 +7,12 @@ import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.*;
 
 
 /**
  * <h2>{@link X509CertificateTrustManager}<br> <sub>[in short] (TODO).</sub></h2>
- *
+ * <p/>
  * <p> <i>03 03, 2011</i> </p>
  *
  * @author lhunath

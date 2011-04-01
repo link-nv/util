@@ -1,10 +1,7 @@
 package net.link.util.wicket.filter;
 
 import java.io.IOException;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.link.util.servlet.HttpServletRequestEndpointWrapper;
@@ -16,7 +13,7 @@ import org.apache.wicket.protocol.http.WicketFilter;
 
 /**
  * <h2>{@link ProxiedWicketFilter}<br> <sub>[in short] (TODO).</sub></h2>
- *
+ * <p/>
  * <p> <i>02 01, 2011</i> </p>
  *
  * @author lhunath
@@ -48,16 +45,17 @@ public abstract class ProxiedWicketFilter extends WicketFilter {
 
     /**
      * <b>REQUEST AND RESPONSE WRAPPING</b>:
-     *
+     * <p/>
      * <p> When we're behind a proxy or load balancer, the servlet request URI that the container gives us points to this machine rather
      * than the server that the request was actually sent to. This causes validation issues in OpenSAML and problems when redirecting to
      * relative URIs. </p>
-     *
+     * <p/>
      * <p> <code>[User] >--[ https://linkid.be/app/foo ]--> [Proxy] >--[ http://provider.com/linkid/app/foo ]--> [linkID]</code> <br>
      * <code>[linkID: redirect to bar] >--[ redirect: http://provider.com/linkid/app/bar ]--> [Proxy] >--[ redirect:
-     * http://provider.com/linkid/app/bar]--> [User]</code> <br> <code>[User] >--[ http://provider.com/linkid/app/bar ]--> [Problem!]</code>
+     * http://provider.com/linkid/app/bar]--> [User]</code> <br> <code>[User] >--[ http://provider.com/linkid/app/bar ]-->
+     * [Problem!]</code>
      * </p>
-     *
+     * <p/>
      * <p> To solve this problem, we wrap the servlet request and response such that the request URI in the HttpServletRequest is the
      * request URI of the client's request (the request to the proxy/load balancer), and such that sendRedirects with relative URIs are
      * translated to absolute URIs using the client's request URI base. </p>

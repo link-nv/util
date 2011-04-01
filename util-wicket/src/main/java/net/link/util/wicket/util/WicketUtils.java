@@ -11,9 +11,7 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.*;
 import net.link.util.j2ee.NamingStrategy;
 import net.link.util.wicket.behaviour.FocusOnReady;
 import net.link.util.wicket.component.WicketPage;
@@ -25,9 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.wicket.*;
 import org.apache.wicket.injection.ComponentInjector;
 import org.apache.wicket.injection.ConfigurableInjector;
-import org.apache.wicket.protocol.http.WebApplication;
-import org.apache.wicket.protocol.http.WebRequest;
-import org.apache.wicket.protocol.http.WebResponse;
+import org.apache.wicket.protocol.http.*;
 import org.wicketstuff.javaee.injection.AnnotJavaEEInjector;
 
 

@@ -11,19 +11,17 @@ import net.link.util.wicket.util.WicketUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.WebPage;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.model.StringResourceModel;
+import org.apache.wicket.model.*;
 
 
 /**
  * <h2>{@link WicketPage}<br>
  * <sub>An abstract {@link WebPage} that provides some convenience methods for wicket work.</sub></h2>
- *
+ * <p/>
  * <p>
  * The {@link #localize(String, Object...)} method provides easy access to generating localized messages in wicket pages.
  * </p>
- *
+ * <p/>
  * <p>
  * <i>Dec 15, 2008</i>
  * </p>
@@ -48,10 +46,11 @@ public abstract class WicketPage extends WebPage {
      * Note: You can use this method with a single argument, too. This will cause the first argument (format) to be evaluated as a
      * localization key.
      *
-     * @param format The format specification for the arguments. See {@link String#format(java.util.Locale, String, Object...)}. To that list,
-     * add the 'l' conversion parameter. This parameter first looks the arg data up as a localization key, then processes the
-     * result as though it was given with the 's' conversion parameter.
-     * @param args The arguments that contain the data to fill into the format specifications.
+     * @param format The format specification for the arguments. See {@link String#format(java.util.Locale, String, Object...)}. To that
+     *               list,
+     *               add the 'l' conversion parameter. This parameter first looks the arg data up as a localization key, then processes the
+     *               result as though it was given with the 's' conversion parameter.
+     * @param args   The arguments that contain the data to fill into the format specifications.
      */
     public AbstractReadOnlyModel<String> localize(final String format, final Object... args) {
 

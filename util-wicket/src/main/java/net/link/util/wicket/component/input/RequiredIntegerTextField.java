@@ -14,15 +14,15 @@ import org.apache.wicket.util.convert.converters.IntegerConverter;
 
 /**
  * <h2>{@link RequiredIntegerTextField}</h2>
- * 
+ * <p/>
  * <p>
  * [description / usage].
  * </p>
- * 
+ * <p/>
  * <p>
  * <i>Feb 27, 2009</i>
  * </p>
- * 
+ *
  * @author wvdhaute
  */
 public class RequiredIntegerTextField extends CustomRequiredTextField<Integer> implements ITextFormatProvider {
@@ -32,12 +32,11 @@ public class RequiredIntegerTextField extends CustomRequiredTextField<Integer> i
      */
     private IConverter converter = null;
 
-
     /**
      * Creates a new IntegerTextField
-     * 
+     *
      * @param id The id of the text field
-     * 
+     *
      * @see org.apache.wicket.markup.html.form.TextField
      */
     public RequiredIntegerTextField(String id) {
@@ -47,10 +46,10 @@ public class RequiredIntegerTextField extends CustomRequiredTextField<Integer> i
 
     /**
      * Creates a new IntegerTextField
-     * 
-     * @param id The id of the text field
+     *
+     * @param id    The id of the text field
      * @param model The model
-     * 
+     *
      * @see org.apache.wicket.markup.html.form.TextField
      */
     public RequiredIntegerTextField(String id, IModel<Integer> model) {
@@ -61,11 +60,11 @@ public class RequiredIntegerTextField extends CustomRequiredTextField<Integer> i
 
     /**
      * Returns the default converter.
-     * 
+     *
      * @param type The type for which the convertor should work
-     * 
+     *
      * @return A pattern-specific converter
-     * 
+     *
      * @see org.apache.wicket.markup.html.form.TextField
      */
     @Override
@@ -78,7 +77,7 @@ public class RequiredIntegerTextField extends CustomRequiredTextField<Integer> i
 
     /**
      * Returns the text format pattern.
-     * 
+     *
      * @see org.apache.wicket.markup.html.form.AbstractTextComponent.ITextFormatProvider#getTextFormat()
      */
     public String getTextFormat() {

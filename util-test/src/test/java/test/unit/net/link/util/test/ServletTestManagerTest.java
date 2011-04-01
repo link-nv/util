@@ -7,22 +7,13 @@
 
 package test.unit.net.link.util.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import javax.servlet.*;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import net.link.util.test.web.ContainerSetup;
-import net.link.util.test.web.FilterSetup;
-import net.link.util.test.web.ServletSetup;
-import net.link.util.test.web.ServletTestManager;
+import javax.servlet.http.*;
+import net.link.util.test.web.*;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
@@ -141,7 +132,8 @@ public class ServletTestManagerTest {
             LOG.debug( "status code: " + statusCode );
             assertEquals( HttpServletResponse.SC_OK, statusCode );
             assertTrue( TestServlet.isCalled() );
-        } finally {
+        }
+        finally {
             servletTestManager.tearDown();
         }
     }
@@ -169,7 +161,8 @@ public class ServletTestManagerTest {
             assertTrue( TestServlet.isCalled() );
             assertEquals( "value1", TestServlet.getInitParam( "param1" ) );
             assertEquals( "value2", TestServlet.getInitParam( "param2" ) );
-        } finally {
+        }
+        finally {
             servletTestManager.tearDown();
         }
     }
@@ -241,7 +234,8 @@ public class ServletTestManagerTest {
             assertEquals( HttpServletResponse.SC_OK, statusCode );
             assertTrue( TestServlet.isCalled() );
             assertTrue( TestFilter.isCalled() );
-        } finally {
+        }
+        finally {
             servletTestManager.tearDown();
         }
     }
@@ -272,7 +266,8 @@ public class ServletTestManagerTest {
             assertTrue( TestFilter.isCalled() );
             assertEquals( "value1", TestFilter.getInitParameter( "param1" ) );
             assertEquals( "value2", TestFilter.getInitParameter( "param2" ) );
-        } finally {
+        }
+        finally {
             servletTestManager.tearDown();
         }
     }
@@ -298,7 +293,8 @@ public class ServletTestManagerTest {
             assertEquals( HttpServletResponse.SC_OK, statusCode );
             assertTrue( TestServlet.isCalled() );
             assertEquals( "value1", servletTestManager.getSessionAttribute( "attribute1" ) );
-        } finally {
+        }
+        finally {
             servletTestManager.tearDown();
         }
     }
@@ -325,7 +321,8 @@ public class ServletTestManagerTest {
             assertEquals( HttpServletResponse.SC_OK, statusCode );
             assertTrue( TestServlet.isCalled() );
             assertEquals( "value1", TestServlet.getSessionAttribute( "attribute1" ) );
-        } finally {
+        }
+        finally {
             servletTestManager.tearDown();
         }
     }

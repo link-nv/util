@@ -10,18 +10,16 @@ import net.link.util.wicket.behaviour.FocusOnReady;
 import net.link.util.wicket.util.WicketUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.model.StringResourceModel;
+import org.apache.wicket.model.*;
 
 
 /**
  * <h2>{@link WicketPanel}</h2>
- *
+ * <p/>
  * <p>
  * [description / usage].
  * </p>
- *
+ * <p/>
  * <p>
  * <i>May 11, 2009</i>
  * </p>
@@ -42,10 +40,10 @@ public abstract class WicketPanel extends Panel {
      * localization key.
      *
      * @param format The format specification for the arguments. See {@link String#format(java.util.Locale, String, Object...)}. To that
-     * list,
-     * add the 'l' conversion parameter. This parameter first looks the arg data up as a localization key, then processes the
-     * result as though it was given with the 's' conversion parameter.
-     * @param args The arguments that contain the data to fill into the format specifications.
+     *               list,
+     *               add the 'l' conversion parameter. This parameter first looks the arg data up as a localization key, then processes the
+     *               result as though it was given with the 's' conversion parameter.
+     * @param args   The arguments that contain the data to fill into the format specifications.
      */
     public AbstractReadOnlyModel<String> localize(final String format, final Object... args) {
 

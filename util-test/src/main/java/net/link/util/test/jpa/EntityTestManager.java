@@ -7,19 +7,12 @@
 
 package net.link.util.test.jpa;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.LinkedList;
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.PersistenceContext;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
+import javax.persistence.*;
+import net.sf.cglib.proxy.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ejb.Ejb3Configuration;
@@ -32,9 +25,8 @@ public class EntityTestManager {
     private int batchSize;
 
     private EntityManagerFactory entityManagerFactory;
-    private EntityManager entityManager;
-    private Ejb3Configuration configuration;
-
+    private EntityManager        entityManager;
+    private Ejb3Configuration    configuration;
 
     public void configureHSql() {
 
@@ -158,7 +150,7 @@ public class EntityTestManager {
     /**
      * Create a new instance of the given class that has the test transaction entity manager handler applied to it. The transaction
      * semantics are:
-     *
+     * <p/>
      * <code>@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)</code>
      */
     @SuppressWarnings("unchecked")
@@ -167,9 +159,11 @@ public class EntityTestManager {
         Type instance;
         try {
             instance = clazz.newInstance();
-        } catch (InstantiationException e) {
+        }
+        catch (InstantiationException e) {
             throw new RuntimeException( "instantiation error" );
-        } catch (IllegalAccessException e) {
+        }
+        catch (IllegalAccessException e) {
             throw new RuntimeException( "illegal access error" );
         }
         TransactionMethodInterceptor transactionInvocationHandler = new TransactionMethodInterceptor( instance, entityManagerFactory );
@@ -179,7 +173,8 @@ public class EntityTestManager {
         Type object = (Type) enhancer.create();
         try {
             init( clazz, object );
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException( "init error" );
         }
         return object;
@@ -198,7 +193,6 @@ public class EntityTestManager {
         }
     }
 
-
     private static class TransactionMethodInterceptor implements MethodInterceptor {
 
         private final Object object;
@@ -206,7 +200,6 @@ public class EntityTestManager {
         private final EntityManagerFactory entityManagerFactory;
 
         private final Field field;
-
 
         public TransactionMethodInterceptor(Object object, EntityManagerFactory entityManagerFactory) {
 
@@ -231,9 +224,7 @@ public class EntityTestManager {
             throw new RuntimeException( "no entity manager field found" );
         }
 
-
         private static final Log interceptorLOG = LogFactory.getLog( TransactionMethodInterceptor.class );
-
 
         public Object intercept(@SuppressWarnings("unused") Object obj, Method method, Object[] args,
                                 @SuppressWarnings("unused") MethodProxy proxy)
@@ -248,14 +239,17 @@ public class EntityTestManager {
                 interceptorLOG.debug( "commit transaction" );
                 entityManager.getTransaction().commit();
                 return result;
-            } catch (InvocationTargetException e) {
+            }
+            catch (InvocationTargetException e) {
                 interceptorLOG.debug( "rollback transaction" );
                 entityManager.getTransaction().rollback();
                 throw e.getTargetException();
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 interceptorLOG.error( "exception received" );
                 throw e;
-            } finally {
+            }
+            finally {
                 entityManager.close();
             }
         }

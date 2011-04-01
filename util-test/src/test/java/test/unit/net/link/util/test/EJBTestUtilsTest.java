@@ -8,12 +8,10 @@
 package test.unit.net.link.util.test;
 
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.lang.reflect.Proxy;
 import junit.framework.TestCase;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
+import net.sf.cglib.proxy.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -67,7 +65,7 @@ public class EJBTestUtilsTest extends TestCase {
         TestClass origObject = new TestClass();
         TestInvocationHandler testInvocationHandler = new TestInvocationHandler( origObject );
         TestIface testObject = (TestIface) Proxy.newProxyInstance( EJBTestUtilsTest.class.getClassLoader(), TestClass.class.getInterfaces(),
-                                                                   testInvocationHandler );
+                testInvocationHandler );
 
         // Test
         testObject.func();

@@ -13,9 +13,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import net.link.util.jpa.annotation.QueryMethod;
-import net.link.util.jpa.annotation.QueryParam;
-import net.link.util.jpa.annotation.UpdateMethod;
+import net.link.util.jpa.annotation.*;
 
 
 /**

@@ -14,21 +14,20 @@ import org.apache.wicket.markup.html.IHeaderResponse;
 
 /**
  * <h2>{@link FocusOnReady}</h2>
- * 
+ * <p/>
  * <p>
  * [description / usage].
  * </p>
- * 
+ * <p/>
  * <p>
  * <i>Jan 21, 2009</i>
  * </p>
- * 
+ *
  * @author lhunath
  */
 public class FocusOnReady extends AbstractHeaderContributor {
 
     private IHeaderContributor headercontributer;
-
 
     public FocusOnReady(Component component) {
 
@@ -44,7 +43,8 @@ public class FocusOnReady extends AbstractHeaderContributor {
 
                 if (component.isVisibleInHierarchy()) {
                     String id = component.getMarkupId( true );
-                    response.renderOnDomReadyJavascript( String.format( "document.getElementById('%s').focus()", id.replaceAll( "'", "\\'" ) ) );
+                    response.renderOnDomReadyJavascript(
+                            String.format( "document.getElementById('%s').focus()", id.replaceAll( "'", "\\'" ) ) );
                 }
             }
         };

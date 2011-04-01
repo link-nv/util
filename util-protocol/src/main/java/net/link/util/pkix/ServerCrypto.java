@@ -11,10 +11,7 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.KeyStore;
 import java.security.PrivateKey;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
+import java.security.cert.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ws.security.components.crypto.Crypto;
@@ -112,13 +109,15 @@ public class ServerCrypto implements Crypto {
         CertificateFactory certificateFactory;
         try {
             certificateFactory = CertificateFactory.getInstance( "X.509" );
-        } catch (CertificateException e) {
+        }
+        catch (CertificateException e) {
             throw new RuntimeException( "cert error: " + e.getMessage() );
         }
         X509Certificate certificate;
         try {
             certificate = (X509Certificate) certificateFactory.generateCertificate( inputStream );
-        } catch (CertificateException e) {
+        }
+        catch (CertificateException e) {
             throw new RuntimeException( "cert error: " + e.getMessage() );
         }
         return certificate;

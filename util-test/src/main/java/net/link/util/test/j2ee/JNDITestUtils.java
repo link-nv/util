@@ -129,8 +129,6 @@ public class JNDITestUtils {
 
     /**
      * Tear down the test JNDI tree. This will unbind all previously bound component.
-     *
-     * @throws NamingException
      */
     public void tearDown()
             throws NamingException {

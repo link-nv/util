@@ -13,11 +13,11 @@ import org.apache.wicket.request.target.basic.RedirectRequestTarget;
 
 /**
  * <h2>{@link RedirectToPageException}</h2>
- * 
+ * <p/>
  * <p>
  * <i>Feb 5, 2010</i>
  * </p>
- * 
+ *
  * @author lhunath
  */
 public class RedirectToPageException extends AbstractRestartResponseException {

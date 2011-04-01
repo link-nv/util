@@ -7,9 +7,7 @@
 
 package net.link.util.test.session;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import javax.security.auth.spi.LoginModule;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

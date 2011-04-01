@@ -17,10 +17,10 @@ import org.apache.wicket.model.Model;
 
 /**
  * <h2>{@link ErrorComponentFeedbackLabel}<br> <sub>Custom feedback label component only displaying error messages.</sub></h2>
- *
+ * <p/>
  * <p> Custom feedback label component only displaying error messages. Introduced as the FeedbackPanel is a bit too heavy for most cases.
  * </p>
- *
+ * <p/>
  * <p> <i>Nov 6, 2008</i> </p>
  *
  * @author wvdhaute

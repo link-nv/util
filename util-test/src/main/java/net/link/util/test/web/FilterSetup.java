@@ -5,7 +5,7 @@ import javax.servlet.Filter;
 
 /**
  * <h2>{@link FilterSetup}<br> <sub>[in short] (TODO).</sub></h2>
- *
+ * <p/>
  * <p> <i>10 01, 2010</i> </p>
  *
  * @author lhunath

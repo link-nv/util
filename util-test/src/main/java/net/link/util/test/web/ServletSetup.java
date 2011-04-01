@@ -5,7 +5,7 @@ import javax.servlet.Servlet;
 
 /**
  * <h2>{@link ServletSetup}<br> <sub>[in short] (TODO).</sub></h2>
- *
+ * <p/>
  * <p> <i>10 01, 2010</i> </p>
  *
  * @author lhunath

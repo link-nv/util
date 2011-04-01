@@ -7,20 +7,15 @@
 
 package test.unit.net.link.util.common;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
+import java.util.*;
 import net.link.util.common.CertificateChain;
 import net.link.util.test.pkix.PkiTestUtils;
 import org.joda.time.DateTime;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 
 public class KeyStoreUtilsTest {
@@ -50,20 +45,18 @@ public class KeyStoreUtilsTest {
 
         KeyPair ca1KeyPair = PkiTestUtils.generateKeyPair();
         X509Certificate ca1Certificate = PkiTestUtils.generateCertificate( ca1KeyPair.getPublic(), "CN=CA1", rootKeyPair.getPrivate(),
-                                                                           rootCertificate, notBefore, notAfter, null, true, true, false,
-                                                                           null );
+                rootCertificate, notBefore, notAfter, null, true, true, false, null );
 
         KeyPair ca2KeyPair = PkiTestUtils.generateKeyPair();
         X509Certificate ca2Certificate = PkiTestUtils.generateCertificate( ca2KeyPair.getPublic(), "CN=CA2", ca1KeyPair.getPrivate(),
-                                                                           ca1Certificate, notBefore, notAfter, null, true, true, false,
-                                                                           null );
+                ca1Certificate, notBefore, notAfter, null, true, true, false, null );
 
         KeyPair keyPair = PkiTestUtils.generateKeyPair();
         X509Certificate certificate = PkiTestUtils.generateCertificate( keyPair.getPublic(), "CN=Test", ca2KeyPair.getPrivate(),
-                                                                        ca2Certificate, notBefore, notAfter, null, true, false, false,
-                                                                        null );
+                ca2Certificate, notBefore, notAfter, null, true, false, false, null );
 
-        CertificateChain certificateChain = new CertificateChain( Arrays.asList( ca1Certificate, certificate, rootCertificate, ca2Certificate ) );
+        CertificateChain certificateChain = new CertificateChain(
+                Arrays.asList( ca1Certificate, certificate, rootCertificate, ca2Certificate ) );
 
         // Verify
         assertEquals( certificate, certificateChain.getIdentityCertificate() );
@@ -85,21 +78,18 @@ public class KeyStoreUtilsTest {
 
         KeyPair ca1KeyPair = PkiTestUtils.generateKeyPair();
         X509Certificate ca1Certificate = PkiTestUtils.generateCertificate( ca1KeyPair.getPublic(), "CN=CA1", rootKeyPair.getPrivate(),
-                                                                           rootCertificate, notBefore, notAfter, null, true, true, false,
-                                                                           null );
+                rootCertificate, notBefore, notAfter, null, true, true, false, null );
 
         KeyPair ca2KeyPair = PkiTestUtils.generateKeyPair();
         X509Certificate ca2Certificate = PkiTestUtils.generateCertificate( ca2KeyPair.getPublic(), "CN=CA2", ca1KeyPair.getPrivate(),
-                                                                           ca1Certificate, notBefore, notAfter, null, true, true, false,
-                                                                           null );
+                ca1Certificate, notBefore, notAfter, null, true, true, false, null );
 
         KeyPair keyPair = PkiTestUtils.generateKeyPair();
         X509Certificate certificate = PkiTestUtils.generateCertificate( keyPair.getPublic(), "CN=Test", ca2KeyPair.getPrivate(),
-                                                                        ca2Certificate, notBefore, notAfter, null, true, false, false,
-                                                                        null );
+                ca2Certificate, notBefore, notAfter, null, true, false, false, null );
 
-        CertificateChain certificateChain = new CertificateChain( Arrays.asList( certificate, ca2Certificate, ca1Certificate,
-                rootCertificate ) );
+        CertificateChain certificateChain = new CertificateChain(
+                Arrays.asList( certificate, ca2Certificate, ca1Certificate, rootCertificate ) );
 
         // Verify
         assertEquals( certificate, certificateChain.getIdentityCertificate() );
@@ -148,10 +138,9 @@ public class KeyStoreUtilsTest {
 
         KeyPair keyPair = PkiTestUtils.generateKeyPair();
         X509Certificate certificate = PkiTestUtils.generateCertificate( keyPair.getPublic(), "CN=Test", rootKeyPair.getPrivate(),
-                                                                        rootCertificate, notBefore, notAfter, null, true, false, false,
-                                                                        null );
+                rootCertificate, notBefore, notAfter, null, true, false, false, null );
 
-        CertificateChain certificateChain = new CertificateChain( Arrays.asList( rootCertificate, certificate ));
+        CertificateChain certificateChain = new CertificateChain( Arrays.asList( rootCertificate, certificate ) );
 
         // Verify
         assertEquals( 2, certificateChain.getOrderedCertificateChain().size() );

@@ -7,10 +7,7 @@
 
 package net.link.util.test.j2ee;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import javax.management.*;
 
 
@@ -35,12 +32,6 @@ public class JMXTestUtils {
 
     /**
      * Sets up a test JMX MBean with the given MBean name.
-     *
-     * @throws MalformedObjectNameException
-     * @throws NullPointerException
-     * @throws InstanceAlreadyExistsException
-     * @throws MBeanRegistrationException
-     * @throws NotCompliantMBeanException
      */
     public void setUp(String mbeanName)
             throws MalformedObjectNameException, NullPointerException, InstanceAlreadyExistsException, MBeanRegistrationException,

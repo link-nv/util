@@ -8,42 +8,29 @@
 package net.link.util.test.j2ee;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.security.Identity;
 import java.security.Principal;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.*;
+import javax.ejb.Timer;
 import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.PersistenceContext;
+import javax.persistence.*;
 import javax.security.auth.Subject;
-import javax.security.jacc.PolicyContext;
-import javax.security.jacc.PolicyContextException;
-import javax.security.jacc.PolicyContextHandler;
+import javax.security.jacc.*;
 import javax.transaction.*;
+import javax.transaction.RollbackException;
 import javax.xml.rpc.handler.MessageContext;
 import net.link.util.j2ee.EJBUtils;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
+import net.sf.cglib.proxy.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jboss.ejb3.annotation.LocalBinding;
-import org.jboss.ejb3.annotation.RemoteBinding;
-import org.jboss.ejb3.annotation.SecurityDomain;
-import org.jboss.security.SecurityAssociation;
-import org.jboss.security.SimpleGroup;
-import org.jboss.security.SimplePrincipal;
+import org.jboss.ejb3.annotation.*;
+import org.jboss.security.*;
 
 
 /**
@@ -66,8 +53,6 @@ public final class EJBTestUtils {
      * @param fieldName the name of the field to set.
      * @param object    the object on which to inject the value.
      * @param value     the value to inject.
-     *
-     * @throws Exception
      */
     public static void inject(String fieldName, Object object, Object value)
             throws Exception {
@@ -119,8 +104,6 @@ public final class EJBTestUtils {
      *
      * @param object the bean object in which to inject.
      * @param value  the value object to inject.
-     *
-     * @throws Exception
      */
     public static void inject(Object object, Object value)
             throws Exception {
@@ -154,10 +137,6 @@ public final class EJBTestUtils {
      * Initializes a bean by invoking the {@link PostConstruct} annotated methods in it.
      *
      * @param bean the bean to initialize.
-     *
-     * @throws IllegalArgumentException
-     * @throws IllegalAccessException
-     * @throws InvocationTargetException
      */
     public static void init(Object bean)
             throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
@@ -248,13 +227,15 @@ public final class EJBTestUtils {
         Type instance;
         try {
             instance = beanType.newInstance();
-        } catch (InstantiationException e) {
+        }
+        catch (InstantiationException e) {
             throw new RuntimeException( "instantiation error: " + beanType );
-        } catch (IllegalAccessException e) {
+        }
+        catch (IllegalAccessException e) {
             throw new RuntimeException( "illegal access error: " + beanType );
         }
         TestContainerMethodInterceptor testContainerMethodInterceptor = new TestContainerMethodInterceptor( instance, container,
-                                                                                                            entityManager, sessionContext );
+                entityManager, sessionContext );
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass( beanType );
         enhancer.setCallback( testContainerMethodInterceptor );
@@ -264,10 +245,12 @@ public final class EJBTestUtils {
             try {
                 init( beanType, object );
                 return object;
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 throw new RuntimeException( "init error: " + beanType, e );
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException( "CG Enhancer error: " + beanType, e );
         }
     }
@@ -313,7 +296,8 @@ public final class EJBTestUtils {
                 method.setAccessible( true );
                 Object result = method.invoke( object, args );
                 return result;
-            } catch (InvocationTargetException e) {
+            }
+            catch (InvocationTargetException e) {
                 throw e.getTargetException();
             }
         }
@@ -470,7 +454,8 @@ public final class EJBTestUtils {
                 Object bean;
                 try {
                     bean = EJBUtils.getEJB( fieldType );
-                } catch (EJBException e) {
+                }
+                catch (EJBException e) {
                     if (false == fieldType.isInterface())
                         throw new EJBException( "field is not an interface type" );
                     Local localAnnotation = fieldType.getAnnotation( Local.class );
@@ -494,9 +479,11 @@ public final class EJBTestUtils {
                 field.setAccessible( true );
                 if (field.get( object ) == null)
                     field.set( object, value );
-            } catch (IllegalArgumentException e) {
+            }
+            catch (IllegalArgumentException e) {
                 throw new EJBException( "illegal argument error" );
-            } catch (IllegalAccessException e) {
+            }
+            catch (IllegalAccessException e) {
                 throw new EJBException( "illegal access error" );
             }
         }
@@ -591,7 +578,8 @@ public final class EJBTestUtils {
             TestPolicyContextHandler testPolicyContextHandler = new TestPolicyContextHandler( principal, roles );
             try {
                 PolicyContext.registerHandler( "javax.security.auth.Subject.container", testPolicyContextHandler, true );
-            } catch (PolicyContextException e) {
+            }
+            catch (PolicyContextException e) {
                 throw new EJBException( "policy context error", e );
             }
         }

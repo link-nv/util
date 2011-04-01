@@ -14,15 +14,15 @@ import org.apache.wicket.util.convert.converters.DoubleConverter;
 
 /**
  * <h2>{@link RequiredDoubleTextField}</h2>
- * 
+ * <p/>
  * <p>
  * [description / usage].
  * </p>
- * 
+ * <p/>
  * <p>
  * <i>Feb 27, 2009</i>
  * </p>
- * 
+ *
  * @author wvdhaute
  */
 public class RequiredDoubleTextField extends CustomRequiredTextField<Double> implements ITextFormatProvider {
@@ -32,12 +32,11 @@ public class RequiredDoubleTextField extends CustomRequiredTextField<Double> imp
      */
     private IConverter converter = null;
 
-
     /**
      * Creates a new DoubleTextField
-     * 
+     *
      * @param id The id of the text field
-     * 
+     *
      * @see org.apache.wicket.markup.html.form.TextField
      */
     public RequiredDoubleTextField(String id) {
@@ -47,10 +46,10 @@ public class RequiredDoubleTextField extends CustomRequiredTextField<Double> imp
 
     /**
      * Creates a new DoubleTextField
-     * 
-     * @param id The id of the text field
+     *
+     * @param id    The id of the text field
      * @param model The model
-     * 
+     *
      * @see org.apache.wicket.markup.html.form.TextField
      */
     public RequiredDoubleTextField(String id, IModel<Double> model) {
@@ -61,11 +60,11 @@ public class RequiredDoubleTextField extends CustomRequiredTextField<Double> imp
 
     /**
      * Returns the default converter.
-     * 
+     *
      * @param type The type for which the convertor should work
-     * 
+     *
      * @return A pattern-specific converter
-     * 
+     *
      * @see org.apache.wicket.markup.html.form.TextField
      */
     @Override
@@ -78,7 +77,7 @@ public class RequiredDoubleTextField extends CustomRequiredTextField<Double> imp
 
     /**
      * Returns the text format pattern.
-     * 
+     *
      * @see org.apache.wicket.markup.html.form.AbstractTextComponent.ITextFormatProvider#getTextFormat()
      */
     public String getTextFormat() {

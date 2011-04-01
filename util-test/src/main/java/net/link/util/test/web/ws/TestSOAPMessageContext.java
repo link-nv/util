@@ -7,10 +7,7 @@
 
 package net.link.util.test.web.ws;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPMessage;

@@ -14,21 +14,20 @@ import org.apache.wicket.validation.ValidationError;
 
 /**
  * <h2>{@link CustomRequiredPasswordTextField}</h2>
- * 
+ * <p/>
  * <p>
  * [description / usage].
  * </p>
- * 
+ * <p/>
  * <p>
  * <i>Mar 13, 2009</i>
  * </p>
- * 
+ *
  * @author wvdhaute
  */
 public class CustomRequiredPasswordTextField extends PasswordTextField {
 
     private String requiredMessageKey;
-
 
     public CustomRequiredPasswordTextField(String id) {
 

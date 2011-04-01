@@ -51,7 +51,8 @@ public class TestClassLoader extends ClassLoader {
             try {
                 InputStream inputStream = resource.openStream();
                 return inputStream;
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 LOG.debug( "error opening resource: " + resource );
             }
         }

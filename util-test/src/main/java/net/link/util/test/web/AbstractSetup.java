@@ -6,7 +6,7 @@ import java.util.Map;
 
 /**
  * <h2>{@link AbstractSetup}<br> <sub>[in short] (TODO).</sub></h2>
- *
+ * <p/>
  * <p> <i>10 01, 2010</i> </p>
  *
  * @author lhunath

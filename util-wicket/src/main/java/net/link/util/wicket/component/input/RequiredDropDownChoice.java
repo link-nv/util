@@ -16,21 +16,20 @@ import org.apache.wicket.validation.ValidationError;
 
 /**
  * <h2>{@link RequiredDropDownChoice}</h2>
- * 
+ * <p/>
  * <p>
  * Required drop down choice with easier configurable required message.
  * </p>
- * 
+ * <p/>
  * <p>
  * <i>Aug 12, 2009</i>
  * </p>
- * 
+ *
  * @author wvdhaute
  */
 public class RequiredDropDownChoice<T> extends DropDownChoice<T> {
 
     private String requiredMessageKey = "errorFieldRequired";
-
 
     public RequiredDropDownChoice(String id) {
 
@@ -46,7 +45,7 @@ public class RequiredDropDownChoice<T> extends DropDownChoice<T> {
     }
 
     /**
-     * @see org.apache.wicket.markup.html.form.AbstractChoice#AbstractChoice(String, List,IChoiceRenderer)
+     * @see org.apache.wicket.markup.html.form.AbstractChoice#AbstractChoice(String, List, IChoiceRenderer)
      */
     public RequiredDropDownChoice(final String id, final List<? extends T> data, final IChoiceRenderer<T> renderer) {
 
@@ -78,7 +77,7 @@ public class RequiredDropDownChoice<T> extends DropDownChoice<T> {
     }
 
     /**
-     * @see org.apache.wicket.markup.html.form.AbstractChoice#AbstractChoice(String, IModel,IModel)
+     * @see org.apache.wicket.markup.html.form.AbstractChoice#AbstractChoice(String, IModel, IModel)
      */
     public RequiredDropDownChoice(String id, IModel<T> model, IModel<List<? extends T>> choices) {
 
@@ -86,7 +85,7 @@ public class RequiredDropDownChoice<T> extends DropDownChoice<T> {
     }
 
     /**
-     * @see org.apache.wicket.markup.html.form.AbstractChoice#AbstractChoice(String, IModel,IChoiceRenderer)
+     * @see org.apache.wicket.markup.html.form.AbstractChoice#AbstractChoice(String, IModel, IChoiceRenderer)
      */
     public RequiredDropDownChoice(String id, IModel<List<? extends T>> choices, IChoiceRenderer<T> renderer) {
 
@@ -94,7 +93,7 @@ public class RequiredDropDownChoice<T> extends DropDownChoice<T> {
     }
 
     /**
-     * @see org.apache.wicket.markup.html.form.AbstractChoice#AbstractChoice(String, IModel, IModel,IChoiceRenderer)
+     * @see org.apache.wicket.markup.html.form.AbstractChoice#AbstractChoice(String, IModel, IModel, IChoiceRenderer)
      */
     public RequiredDropDownChoice(String id, IModel<T> model, IModel<List<? extends T>> choices, IChoiceRenderer<T> renderer) {
 

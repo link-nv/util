@@ -40,8 +40,9 @@ public abstract class SOAPUtils {
         logger.warn( "Soap fault: " + faultString, cause );
 
         try {
-            return new SOAPFaultException( soapFactory.createFault( faultString + (cause == null? "": ": " + cause.toString()), new QName(
-                    "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", wsseFaultCode, "wsse" ) ) );
+            return new SOAPFaultException( soapFactory.createFault( faultString + (cause == null? "": ": " + cause.toString()),
+                    new QName( "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", wsseFaultCode,
+                            "wsse" ) ) );
         }
         catch (SOAPException e) {
             throw new RuntimeException( e );

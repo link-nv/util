@@ -14,11 +14,11 @@ import org.apache.wicket.validation.ValidationError;
 
 /**
  * <h2>{@link CustomRequiredTextField}</h2>
- *
+ * <p/>
  * <p>
  * [description / usage].
  * </p>
- *
+ * <p/>
  * <p>
  * <i>Mar 13, 2009</i>
  * </p>
@@ -28,7 +28,6 @@ import org.apache.wicket.validation.ValidationError;
 public class CustomRequiredTextField<T> extends RequiredTextField<T> {
 
     private String requiredMessageKey = "errorFieldRequired";
-
 
     public CustomRequiredTextField(String id) {
 

@@ -1,10 +1,7 @@
 package net.link.util.wicket.filter;
 
 import java.io.IOException;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import net.link.util.lang.FallbackClassLoader;
@@ -38,7 +35,7 @@ public abstract class RemoteWicketFilter extends ProxiedWicketFilter {
     @Override
     protected ClassLoader getClassLoader() {
 
-        return new FallbackClassLoader(getRemoteClassLoader(httpSession.get()), super.getClassLoader());
+        return new FallbackClassLoader( getRemoteClassLoader( httpSession.get() ), super.getClassLoader() );
     }
 
     @Nullable

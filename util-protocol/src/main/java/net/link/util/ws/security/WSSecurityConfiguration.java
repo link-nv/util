@@ -7,7 +7,7 @@ import org.joda.time.Duration;
 
 /**
  * <h2>{@link WSSecurityConfiguration}<br> <sub>[in short] (TODO).</sub></h2>
- *
+ * <p/>
  * <p> <i>03 30, 2011</i> </p>
  *
  * @author lhunath
@@ -17,7 +17,6 @@ public interface WSSecurityConfiguration {
     /**
      * Given the calling entity's certificate, perform a verification of the digestion of the SOAP body element by the WS-Security
      * signature.
-     *
      *
      * @param aCertificateChain The chain of the certificate that signed the message.
      *

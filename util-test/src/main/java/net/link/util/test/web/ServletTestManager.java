@@ -7,7 +7,7 @@
 
 package net.link.util.test.web;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -16,9 +16,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.LocalConnector;
-import org.mortbay.jetty.Server;
+import org.mortbay.jetty.*;
 import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.servlet.*;
@@ -73,7 +71,7 @@ public class ServletTestManager {
             throws Exception {
 
         Context context = new Context( null, new SessionHandler( sessionManager = new TestHashSessionManager() ), new SecurityHandler(),
-                                       null, null );
+                null, null );
         sessionManager.initialSessionAttributes.putAll( setup.getSessionAttributes() );
         context.setContextPath( contextPath = setup.getContextPath() );
         context.setInitParams( setup.getContextParameters() );

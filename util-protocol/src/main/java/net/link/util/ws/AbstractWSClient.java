@@ -1,6 +1,6 @@
 package net.link.util.ws;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.*;
 
 import com.sun.xml.ws.developer.JAXWSProperties;
 import java.security.KeyManagementException;
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <h2>{@link AbstractWSClient}<br> <sub>[in short] (TODO).</sub></h2>
- *
+ * <p/>
  * <p> <i>10 18, 2010</i> </p>
  *
  * @author lhunath

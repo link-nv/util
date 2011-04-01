@@ -37,12 +37,12 @@ public class AnnotJavaEEInjector extends ConfigurableInjector {
      */
     public AnnotJavaEEInjector(NamingStrategy namingStrategy) {
 
-        initFactory(namingStrategy);
+        initFactory( namingStrategy );
     }
 
     private void initFactory(NamingStrategy namingStrategy) {
 
-        factory = new JavaEEProxyFieldValueFactory(namingStrategy);
+        factory = new JavaEEProxyFieldValueFactory( namingStrategy );
     }
 
     @Override

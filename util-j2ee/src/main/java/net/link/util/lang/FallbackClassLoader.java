@@ -1,13 +1,11 @@
 package net.link.util.lang;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 
 /**
  * <h2>{@link FallbackClassLoader}<br> <sub>[in short] (TODO).</sub></h2>
- *
+ * <p/>
  * <p> <i>03 21, 2011</i> </p>
  *
  * @author lhunath

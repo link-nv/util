@@ -7,19 +7,14 @@
 
 package test.unit.net.link.util.jpa;
 
-import net.link.util.jpa.QueryObjectFactory;
-import net.link.util.test.jpa.EntityTestManager;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.*;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
 import java.util.List;
 import java.util.UUID;
-
-import static org.junit.Assert.*;
+import javax.persistence.*;
+import net.link.util.jpa.QueryObjectFactory;
+import net.link.util.test.jpa.EntityTestManager;
+import org.junit.*;
 
 
 public class QueryObjectFactoryTest {
@@ -33,7 +28,7 @@ public class QueryObjectFactoryTest {
             throws Exception {
 
         entityTestManager = new EntityTestManager();
-        entityTestManager.setUp(MyTestEntity.class);
+        entityTestManager.setUp( MyTestEntity.class );
         entityManager = entityTestManager.getEntityManager();
     }
 
@@ -49,11 +44,11 @@ public class QueryObjectFactoryTest {
             throws Exception {
 
         // Test
-        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject(entityManager,
-                MyTestEntity.MyQueryTestInterface.class);
+        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager,
+                MyTestEntity.MyQueryTestInterface.class );
 
         // Verify
-        assertNotNull(queryObject);
+        assertNotNull( queryObject );
     }
 
     @Test
@@ -61,15 +56,15 @@ public class QueryObjectFactoryTest {
             throws Exception {
 
         // Setup Data
-        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject(entityManager,
-                MyTestEntity.MyQueryTestInterface.class);
+        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager,
+                MyTestEntity.MyQueryTestInterface.class );
 
         // Test
         List<MyTestEntity> result = queryObject.listAll();
 
         // Verify
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        assertNotNull( result );
+        assertTrue( result.isEmpty() );
     }
 
     @Test
@@ -78,19 +73,19 @@ public class QueryObjectFactoryTest {
 
         // Setup Data
         String testName = UUID.randomUUID().toString();
-        MyTestEntity myTestEntity = new MyTestEntity(testName);
-        entityManager.persist(myTestEntity);
+        MyTestEntity myTestEntity = new MyTestEntity( testName );
+        entityManager.persist( myTestEntity );
 
-        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject(entityManager,
-                MyTestEntity.MyQueryTestInterface.class);
+        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager,
+                MyTestEntity.MyQueryTestInterface.class );
 
         // Test
         List<MyTestEntity> result = queryObject.listAll();
 
         // Verify
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(testName, result.get(0).getName());
+        assertNotNull( result );
+        assertEquals( 1, result.size() );
+        assertEquals( testName, result.get( 0 ).getName() );
     }
 
     @Test
@@ -99,26 +94,26 @@ public class QueryObjectFactoryTest {
 
         // Setup Data
         String testName = UUID.randomUUID().toString();
-        MyTestEntity myTestEntity = new MyTestEntity(testName);
-        entityManager.persist(myTestEntity);
+        MyTestEntity myTestEntity = new MyTestEntity( testName );
+        entityManager.persist( myTestEntity );
 
-        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject(entityManager,
-                MyTestEntity.MyQueryTestInterface.class);
-
-        // Test
-        List<MyTestEntity> result = queryObject.listAll(testName);
-
-        // Verify
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(testName, result.get(0).getName());
+        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager,
+                MyTestEntity.MyQueryTestInterface.class );
 
         // Test
-        result = queryObject.listAll(testName + "foobar");
+        List<MyTestEntity> result = queryObject.listAll( testName );
 
         // Verify
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        assertNotNull( result );
+        assertEquals( 1, result.size() );
+        assertEquals( testName, result.get( 0 ).getName() );
+
+        // Test
+        result = queryObject.listAll( testName + "foobar" );
+
+        // Verify
+        assertNotNull( result );
+        assertTrue( result.isEmpty() );
     }
 
     @Test
@@ -127,24 +122,25 @@ public class QueryObjectFactoryTest {
 
         // Setup Data
         String testName = UUID.randomUUID().toString();
-        MyTestEntity myTestEntity = new MyTestEntity(testName);
-        entityManager.persist(myTestEntity);
+        MyTestEntity myTestEntity = new MyTestEntity( testName );
+        entityManager.persist( myTestEntity );
 
-        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject(entityManager,
-                MyTestEntity.MyQueryTestInterface.class);
+        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager,
+                MyTestEntity.MyQueryTestInterface.class );
 
         // Test
-        MyTestEntity result = queryObject.get(testName);
+        MyTestEntity result = queryObject.get( testName );
 
         // Verify
-        assertNotNull(result);
-        assertEquals(testName, result.getName());
+        assertNotNull( result );
+        assertEquals( testName, result.getName() );
 
         // Test
         try {
-            queryObject.get(testName + "foobar");
+            queryObject.get( testName + "foobar" );
             fail();
-        } catch (NoResultException e) {
+        }
+        catch (NoResultException e) {
             // Expected
         }
     }
@@ -155,24 +151,24 @@ public class QueryObjectFactoryTest {
 
         // Setup Data
         String testName = UUID.randomUUID().toString();
-        MyTestEntity myTestEntity = new MyTestEntity(testName);
-        entityManager.persist(myTestEntity);
+        MyTestEntity myTestEntity = new MyTestEntity( testName );
+        entityManager.persist( myTestEntity );
 
-        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject(entityManager,
-                MyTestEntity.MyQueryTestInterface.class);
-
-        // Test
-        MyTestEntity result = queryObject.get(testName);
-
-        // Verify
-        assertNotNull(result);
-        assertEquals(testName, result.getName());
+        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager,
+                MyTestEntity.MyQueryTestInterface.class );
 
         // Test
-        result = queryObject.find(testName + "foobar");
+        MyTestEntity result = queryObject.get( testName );
 
         // Verify
-        assertNull(result);
+        assertNotNull( result );
+        assertEquals( testName, result.getName() );
+
+        // Test
+        result = queryObject.find( testName + "foobar" );
+
+        // Verify
+        assertNull( result );
     }
 
     @Test
@@ -181,11 +177,11 @@ public class QueryObjectFactoryTest {
 
         // Setup Data
         String testName = UUID.randomUUID().toString();
-        MyTestEntity myTestEntity = new MyTestEntity(testName);
-        entityManager.persist(myTestEntity);
+        MyTestEntity myTestEntity = new MyTestEntity( testName );
+        entityManager.persist( myTestEntity );
 
-        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject(entityManager,
-                MyTestEntity.MyQueryTestInterface.class);
+        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager,
+                MyTestEntity.MyQueryTestInterface.class );
 
         // Test
         queryObject.removeAll();
@@ -193,10 +189,10 @@ public class QueryObjectFactoryTest {
         queryObject.removeAllReturningInteger();
 
         // Test
-        MyTestEntity result = queryObject.find(testName);
+        MyTestEntity result = queryObject.find( testName );
 
         // Verify
-        assertNull(result);
+        assertNull( result );
     }
 
     @Test
@@ -204,14 +200,14 @@ public class QueryObjectFactoryTest {
             throws Exception {
 
         // Setup Data
-        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject(entityManager,
-                MyTestEntity.MyQueryTestInterface.class);
+        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager,
+                MyTestEntity.MyQueryTestInterface.class );
 
         // Test
         Query result = queryObject.listAllQuery();
 
         // Verify
-        assertNotNull(result);
+        assertNotNull( result );
     }
 
     @Test
@@ -219,13 +215,13 @@ public class QueryObjectFactoryTest {
             throws Exception {
 
         // Setup Data
-        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject(entityManager,
-                MyTestEntity.MyQueryTestInterface.class);
+        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager,
+                MyTestEntity.MyQueryTestInterface.class );
 
         // Test
         long count = queryObject.countAll();
 
         // Verify
-        assertTrue(0 == count);
+        assertTrue( 0 == count );
     }
 }
