@@ -34,8 +34,8 @@ import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
+import net.link.util.common.CertificateChain;
 import net.link.util.common.DomUtils;
-import net.link.util.common.KeyStoreUtils;
 import net.link.util.error.ValidationFailedException;
 import org.joda.time.DateTime;
 import org.opensaml.DefaultBootstrap;
@@ -268,11 +268,11 @@ public abstract class Saml2Utils {
         logger.dbg( "validate[HTTP POST], Signature:\n%s", DomUtils.domToString( signature.getDOM(), true ) );
 
         try {
-            List<X509Certificate> certChain = KeyInfoHelper.getCertificates( signature.getKeyInfo() );
+            CertificateChain certificateChain = new CertificateChain( KeyInfoHelper.getCertificates( signature.getKeyInfo() ) );
             List<PublicKey> publicKeys = KeyInfoHelper.getPublicKeys( signature.getKeyInfo() );
             BasicX509Credential credential = new BasicX509Credential();
-            if (!certChain.isEmpty())
-                credential.setPublicKey( KeyStoreUtils.getEndCertificate( certChain ).getPublicKey() );
+            if (!certificateChain.isEmpty())
+                credential.setPublicKey( certificateChain.getIdentityCertificate().getPublicKey() );
             else if (!publicKeys.isEmpty() && publicKeys.size() == 1)
                 credential.setPublicKey( publicKeys.get( 0 ) );
             else

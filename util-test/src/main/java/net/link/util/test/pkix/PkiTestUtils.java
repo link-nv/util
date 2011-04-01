@@ -12,10 +12,8 @@ import java.io.*;
 import java.math.BigInteger;
 import java.net.URI;
 import java.security.*;
+import java.security.cert.*;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAKeyPairGenerator;
 import java.security.spec.RSAKeyGenParameterSpec;
 import org.apache.commons.io.IOUtils;
@@ -90,8 +88,7 @@ public class PkiTestUtils {
                                                       X509Certificate issuerCert, DateTime notBefore, DateTime notAfter,
                                                       String signatureAlgorithm, boolean includeAuthorityKeyIdentifier, boolean caCert,
                                                       boolean timeStampingPurpose, URI ocspUri)
-            throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException, SignatureException,
-                   CertificateException {
+            throws IOException, SignatureException, InvalidKeyException, NoSuchAlgorithmException, CertificateException {
 
         String finalSignatureAlgorithm = signatureAlgorithm;
         if (null == signatureAlgorithm)

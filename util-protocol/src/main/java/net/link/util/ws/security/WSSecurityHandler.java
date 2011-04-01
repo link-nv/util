@@ -7,11 +7,13 @@
 
 package net.link.util.ws.security;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.lyndir.lhunath.lib.system.logging.Logger;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.Vector;
 import javax.annotation.PostConstruct;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
@@ -22,6 +24,7 @@ import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.MessageContext.Scope;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
+import net.link.util.common.CertificateChain;
 import net.link.util.common.DomUtils;
 import net.link.util.pkix.ClientCrypto;
 import net.link.util.pkix.ServerCrypto;
@@ -102,14 +105,14 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
 
         logger.dbg( "Out: Adding WS-Security SOAP header" );
         try {
-            List<X509Certificate> certificateChain = configuration.getCertificateChain();
+            CertificateChain certificateChain = configuration.getIdentityCertificateChain();
 
             WSSecHeader wsSecHeader = new WSSecHeader();
             wsSecHeader.insertSecurityHeader( document );
 
             WSSecSignature wsSecSignature = new WSSecSignature();
             wsSecSignature.setKeyIdentifierType( WSConstants.BST_DIRECT_REFERENCE );
-            wsSecSignature.setUseSingleCertificate( certificateChain.size() == 1 );
+            wsSecSignature.setUseSingleCertificate( !certificateChain.hasRootCertificate() );
             wsSecSignature.prepare( document, new ClientCrypto( certificateChain, configuration.getPrivateKey() ), wsSecHeader );
 
             Vector<WSEncryptionPart> wsEncryptionParts = new Vector<WSEncryptionPart>();
@@ -205,7 +208,7 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
         /*
         * Validate certificate.
         */
-        Collection<X509Certificate> certificateChain = findCertificateChain( soapMessageContext );
+        CertificateChain certificateChain = findCertificateChain( soapMessageContext );
         if (null == certificateChain)
             throw SOAPUtils.createSOAPFaultException( "missing X509Certificate chain in WS-Security header", "InvalidSecurity" );
         if (!configuration.isCertificateChainTrusted( certificateChain ))
@@ -229,15 +232,9 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
         return true;
     }
 
-    private static void setCertificateChain(SOAPMessageContext context, X509Certificate[] certificateChain) {
+    private static void setCertificateChain(SOAPMessageContext context, X509Certificate... certificate) {
 
-        context.put( CERTIFICATE_CHAIN_PROPERTY, ImmutableList.copyOf( certificateChain ) );
-        context.setScope( CERTIFICATE_CHAIN_PROPERTY, Scope.APPLICATION );
-    }
-
-    private static void setCertificateChain(SOAPMessageContext context, X509Certificate certificate) {
-
-        context.put( CERTIFICATE_CHAIN_PROPERTY, ImmutableList.of( certificate ) );
+        context.put( CERTIFICATE_CHAIN_PROPERTY, new CertificateChain( certificate ) );
         context.setScope( CERTIFICATE_CHAIN_PROPERTY, Scope.APPLICATION );
     }
 
@@ -245,9 +242,9 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
      * @return the X509 certificate chain that was set previously by a WS-Security handler.
      */
     @SuppressWarnings( { "unchecked" })
-    public static Collection<X509Certificate> findCertificateChain(MessageContext context) {
+    public static CertificateChain findCertificateChain(MessageContext context) {
 
-        return (Collection<X509Certificate>) context.get( CERTIFICATE_CHAIN_PROPERTY );
+        return (CertificateChain) context.get( CERTIFICATE_CHAIN_PROPERTY );
     }
 
     /**

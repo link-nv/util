@@ -3,7 +3,7 @@ package net.link.util.config;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.List;
+import net.link.util.common.CertificateChain;
 
 
 /**
@@ -26,10 +26,10 @@ public interface KeyProvider {
     X509Certificate getIdentityCertificate();
 
     /**
-     * @return The certificates that make up the a validatable chain to the certificate issued for the {@link #getIdentityKeyPair()}.  The remote
-     *         party will validate and verify its trust in the chain.
+     * @return The certificates that make up the a validatable chain to the certificate issued for the {@link #getIdentityKeyPair()}.  The
+     *         remote party will validate and verify its trust in the chain.
      */
-    List<X509Certificate> getIdentityCertificateChain();
+    CertificateChain getIdentityCertificateChain();
 
     /**
      * @return The certificates that we trust.  The remote party's requests must provide a certificate chain that validates and is trusted
@@ -38,6 +38,8 @@ public interface KeyProvider {
     Collection<X509Certificate> getTrustedCertificates();
 
     /**
+     * @param alias The alias of the trusted certificate that is requested.
+     *
      * @return A trusted certificate with the given alias.
      */
     X509Certificate getTrustedCertificate(String alias);

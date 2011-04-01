@@ -9,7 +9,6 @@ package net.link.util.common;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.URI;
@@ -19,9 +18,7 @@ import java.security.cert.Certificate;
 import java.security.cert.*;
 import java.security.interfaces.DSAKeyPairGenerator;
 import java.security.spec.RSAKeyGenParameterSpec;
-import java.util.Collection;
 import java.util.Enumeration;
-import java.util.LinkedList;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -464,89 +461,5 @@ public abstract class KeyStoreUtils {
         catch (IOException e) {
             throw new RuntimeException( "error writing out certificate ", e );
         }
-    }
-
-    /**
-     * Returns a new list that ends with the self-signed certificate in the given collection and sorts all issued certificates before it.
-     * The first certificate is the end certificate (hasn't issued any certificates).
-     *
-     * @param certificateChain A collection of certificates that we should construct an ordered chain from.
-     *
-     * @return The ordered certificate chain
-     */
-    public static LinkedList<X509Certificate> getOrderedCertificateChain(final Collection<X509Certificate> certificateChain) {
-
-        if (certificateChain.isEmpty() || certificateChain.size() == 1)
-            return new LinkedList<X509Certificate>( certificateChain );
-
-        LinkedList<X509Certificate> endToRootCertificateChain = new LinkedList<X509Certificate>();
-        // TODO: cant we do this a bit nicer
-        if (certificateChain.size() == 2) {
-
-            X509Certificate cert1 = Iterables.get( certificateChain, 0 );
-            X509Certificate cert2 = Iterables.get( certificateChain, 1 );
-            if (isSelfSigned( cert1 )) {
-                endToRootCertificateChain.add( cert2 );
-                endToRootCertificateChain.add( cert1 );
-            } else {
-                endToRootCertificateChain.add( cert1 );
-                endToRootCertificateChain.add( cert2 );
-            }
-
-            return endToRootCertificateChain;
-        }
-
-        // find self-signed root
-        for (X509Certificate certificate : certificateChain) {
-            if (isSelfSigned( certificate )) {
-                endToRootCertificateChain.add( certificate );
-                break;
-            }
-        }
-
-        // now go down
-        boolean childFound = false;
-        do {
-            X509Certificate parentCertificate = endToRootCertificateChain.getFirst();
-            for (X509Certificate aCertificate : certificateChain) {
-                if (aCertificate.getIssuerX500Principal().equals( parentCertificate.getSubjectX500Principal() )) {
-                    endToRootCertificateChain.addFirst( aCertificate );
-                    childFound = true;
-                    break;
-                }
-            }
-        }
-        while (childFound);
-
-        return endToRootCertificateChain;
-    }
-
-    /**
-     * Get the root {@link X509Certificate} from the specified chain.
-     *
-     * @param certificateChain The certificate chain.  Order is irrelevant.
-     *
-     * @return the root {@link X509Certificate}
-     */
-    public static X509Certificate getRootCertificate(final Collection<X509Certificate> certificateChain) {
-
-        return getOrderedCertificateChain( certificateChain ).getLast();
-    }
-
-    /**
-     * Get the end {@link X509Certificate} from the specified chain.
-     *
-     * @param certificateChain The certificate chain.  Order is irrelevant.
-     *
-     * @return the end {@link X509Certificate}.
-     */
-    public static X509Certificate getEndCertificate(final Collection<X509Certificate> certificateChain) {
-
-        return getOrderedCertificateChain( certificateChain ).getFirst();
-    }
-
-    private static boolean isSelfSigned(X509Certificate certificate) {
-
-        return certificate.getIssuerX500Principal().equals( certificate.getSubjectX500Principal() );
     }
 }

@@ -15,7 +15,7 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.List;
+import net.link.util.common.CertificateChain;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ws.security.components.crypto.Crypto;
@@ -30,11 +30,11 @@ public class ClientCrypto implements Crypto {
 
     private static final Log LOG = LogFactory.getLog( ClientCrypto.class );
 
-    private final List<X509Certificate> certificateChain;
+    private final CertificateChain certificateChain;
 
     private final PrivateKey privateKey;
 
-    public ClientCrypto(List<X509Certificate> certificateChain, PrivateKey privateKey) {
+    public ClientCrypto(CertificateChain certificateChain, PrivateKey privateKey) {
 
         this.certificateChain = certificateChain;
         this.privateKey = privateKey;
@@ -83,7 +83,7 @@ public class ClientCrypto implements Crypto {
     public X509Certificate[] getCertificates(String alias) {
 
         LOG.debug( "getCertificates for alias: " + alias );
-        return Iterables.toArray( certificateChain, X509Certificate.class );
+        return Iterables.toArray( certificateChain.getOrderedCertificateChain(), X509Certificate.class );
     }
 
     public String getDefaultX509Alias() {

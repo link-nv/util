@@ -7,15 +7,15 @@
 
 package test.unit.net.link.util.common;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
-import net.link.util.common.KeyStoreUtils;
+import net.link.util.common.CertificateChain;
 import net.link.util.test.pkix.PkiTestUtils;
 import org.joda.time.DateTime;
 import org.junit.After;
@@ -63,17 +63,13 @@ public class KeyStoreUtilsTest {
                                                                         ca2Certificate, notBefore, notAfter, null, true, false, false,
                                                                         null );
 
-        List<X509Certificate> certificateChain = Arrays.asList( ca1Certificate, certificate, rootCertificate, ca2Certificate );
-
-        // Operate: sort
-        List<X509Certificate> orderedCertChain = KeyStoreUtils.getOrderedCertificateChain( certificateChain );
+        CertificateChain certificateChain = new CertificateChain( Arrays.asList( ca1Certificate, certificate, rootCertificate, ca2Certificate ) );
 
         // Verify
-        assertNotNull( orderedCertChain );
-        assertEquals( certificate, orderedCertChain.get( 0 ) );
-        assertEquals( ca2Certificate, orderedCertChain.get( 1 ) );
-        assertEquals( ca1Certificate, orderedCertChain.get( 2 ) );
-        assertEquals( rootCertificate, orderedCertChain.get( 3 ) );
+        assertEquals( certificate, certificateChain.getIdentityCertificate() );
+        assertEquals( ca2Certificate, certificateChain.getOrderedCertificateChain().get( 1 ) );
+        assertEquals( ca1Certificate, certificateChain.getOrderedCertificateChain().get( 2 ) );
+        assertEquals( rootCertificate, certificateChain.getRootCertificate() );
     }
 
     @Test
@@ -102,17 +98,14 @@ public class KeyStoreUtilsTest {
                                                                         ca2Certificate, notBefore, notAfter, null, true, false, false,
                                                                         null );
 
-        List<X509Certificate> certificateChain = Arrays.asList( certificate, ca2Certificate, ca1Certificate, rootCertificate );
-
-        // Operate: sort
-        List<X509Certificate> orderedCertChain = KeyStoreUtils.getOrderedCertificateChain( certificateChain );
+        CertificateChain certificateChain = new CertificateChain( Arrays.asList( certificate, ca2Certificate, ca1Certificate,
+                rootCertificate ) );
 
         // Verify
-        assertNotNull( orderedCertChain );
-        assertEquals( certificate, orderedCertChain.get( 0 ) );
-        assertEquals( ca2Certificate, orderedCertChain.get( 1 ) );
-        assertEquals( ca1Certificate, orderedCertChain.get( 2 ) );
-        assertEquals( rootCertificate, orderedCertChain.get( 3 ) );
+        assertEquals( certificate, certificateChain.getIdentityCertificate() );
+        assertEquals( ca2Certificate, certificateChain.getOrderedCertificateChain().get( 1 ) );
+        assertEquals( ca1Certificate, certificateChain.getOrderedCertificateChain().get( 2 ) );
+        assertEquals( rootCertificate, certificateChain.getRootCertificate() );
     }
 
     @Test
@@ -120,10 +113,10 @@ public class KeyStoreUtilsTest {
             throws Exception {
 
         // Operate: sort
-        List<X509Certificate> orderedCertChain = KeyStoreUtils.getOrderedCertificateChain( new LinkedList<X509Certificate>() );
+        CertificateChain certificateChain = new CertificateChain( new LinkedList<X509Certificate>() );
 
         // Verify
-        assertTrue( orderedCertChain.isEmpty() );
+        assertTrue( certificateChain.getOrderedCertificateChain().isEmpty() );
     }
 
     @Test
@@ -135,11 +128,11 @@ public class KeyStoreUtilsTest {
         X509Certificate certificate = PkiTestUtils.generateSelfSignedCertificate( keyPair, "CN=Test" );
 
         // Operate: sort
-        List<X509Certificate> orderedCertChain = KeyStoreUtils.getOrderedCertificateChain( Collections.singletonList( certificate ) );
+        CertificateChain certificateChain = new CertificateChain( Collections.singletonList( certificate ) );
 
         // Verify
-        assertEquals( 1, orderedCertChain.size() );
-        assertEquals( certificate, orderedCertChain.get( 0 ) );
+        assertEquals( 1, certificateChain.getOrderedCertificateChain().size() );
+        assertEquals( certificate, certificateChain.getIdentityCertificate() );
     }
 
     @Test
@@ -158,14 +151,11 @@ public class KeyStoreUtilsTest {
                                                                         rootCertificate, notBefore, notAfter, null, true, false, false,
                                                                         null );
 
-        List<X509Certificate> certificateChain = Arrays.asList( rootCertificate, certificate );
-
-        // Operate: sort
-        List<X509Certificate> orderedCertChain = KeyStoreUtils.getOrderedCertificateChain( certificateChain );
+        CertificateChain certificateChain = new CertificateChain( Arrays.asList( rootCertificate, certificate ));
 
         // Verify
-        assertEquals( 2, orderedCertChain.size() );
-        assertEquals( certificate, orderedCertChain.get( 0 ) );
-        assertEquals( rootCertificate, orderedCertChain.get( 1 ) );
+        assertEquals( 2, certificateChain.getOrderedCertificateChain().size() );
+        assertEquals( certificate, certificateChain.getIdentityCertificate() );
+        assertEquals( rootCertificate, certificateChain.getRootCertificate() );
     }
 }

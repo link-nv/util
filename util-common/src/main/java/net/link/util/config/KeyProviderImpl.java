@@ -6,9 +6,8 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import net.link.util.common.KeyStoreUtils;
+import net.link.util.common.CertificateChain;
 
 
 /**
@@ -21,23 +20,23 @@ import net.link.util.common.KeyStoreUtils;
 public class KeyProviderImpl implements KeyProvider {
 
     private final PrivateKey                   identityKey;
-    private final List<X509Certificate>        identityCertificateChain;
+    private final CertificateChain             identityCertificateChain;
     private final Map<String, X509Certificate> trustedCertificates;
 
     /**
      * @param identity            The entry that specifies the identity's keys.
      * @param trustedCertificates The certificates of remote entities that we trust.
      */
-    protected KeyProviderImpl(final KeyStore.PrivateKeyEntry identity, final Map<String, X509Certificate> trustedCertificates) {
+    public KeyProviderImpl(final KeyStore.PrivateKeyEntry identity, final Map<String, X509Certificate> trustedCertificates) {
 
         this( identity.getPrivateKey(), ImmutableList.copyOf( (X509Certificate[]) identity.getCertificateChain() ), trustedCertificates );
     }
 
-    protected KeyProviderImpl(final PrivateKey identityKey, final List<X509Certificate> identityCertificateChain,
-                              final Map<String, X509Certificate> trustedCertificates) {
+    public KeyProviderImpl(final PrivateKey identityKey, final Collection<X509Certificate> identityCertificateChain,
+                           final Map<String, X509Certificate> trustedCertificates) {
 
         this.identityKey = identityKey;
-        this.identityCertificateChain = identityCertificateChain;
+        this.identityCertificateChain = new CertificateChain( identityCertificateChain );
         this.trustedCertificates = trustedCertificates;
     }
 
@@ -49,10 +48,10 @@ public class KeyProviderImpl implements KeyProvider {
     @Override
     public X509Certificate getIdentityCertificate() {
 
-        return KeyStoreUtils.getEndCertificate( getIdentityCertificateChain() );
+        return getIdentityCertificateChain().getIdentityCertificate();
     }
 
-    public List<X509Certificate> getIdentityCertificateChain() {
+    public CertificateChain getIdentityCertificateChain() {
 
         return identityCertificateChain;
     }

@@ -1,0 +1,130 @@
+package net.link.util.common;
+
+import static com.google.common.base.Preconditions.checkState;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import java.io.Serializable;
+import java.security.cert.X509Certificate;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import org.jetbrains.annotations.NotNull;
+
+
+/**
+ * <h2>{@link CertificateChain}<br> <sub>[in short] (TODO).</sub></h2>
+ *
+ * <p> <i>04 01, 2011</i> </p>
+ *
+ * @author lhunath
+ */
+public class CertificateChain implements Iterable<X509Certificate>, Serializable {
+
+    private final LinkedList<X509Certificate> orderedCertificateChain = new LinkedList<X509Certificate>();
+
+    public CertificateChain(X509Certificate... unorderedCertificateChain) {
+
+        this( ImmutableList.copyOf( unorderedCertificateChain ) );
+    }
+
+    public CertificateChain(Collection<X509Certificate> unorderedCertificateChain) {
+
+        if (unorderedCertificateChain.isEmpty() || unorderedCertificateChain.size() == 1)
+            orderedCertificateChain.addAll( unorderedCertificateChain );
+
+        else if (unorderedCertificateChain.size() == 2) {
+            X509Certificate first = Iterables.get( unorderedCertificateChain, 0 );
+            X509Certificate second = Iterables.get( unorderedCertificateChain, 1 );
+
+            if (CertificateUtils.isSelfSigned( first )) {
+                orderedCertificateChain.add( second );
+                orderedCertificateChain.add( first );
+            } else {
+                orderedCertificateChain.add( first );
+                orderedCertificateChain.add( second );
+            }
+        } else {
+            // find self-signed root
+            for (X509Certificate rootCertificateCandidate : unorderedCertificateChain) {
+                if (CertificateUtils.isSelfSigned( rootCertificateCandidate )) {
+                    orderedCertificateChain.add( rootCertificateCandidate );
+                    break;
+                }
+            }
+
+            // now go down
+            X509Certificate parentCertificate = orderedCertificateChain.getFirst();
+            while (true) {
+                for (X509Certificate childCertificateCandidate : unorderedCertificateChain)
+                    if (childCertificateCandidate.getIssuerX500Principal().equals( parentCertificate.getSubjectX500Principal() )) {
+                        orderedCertificateChain.addFirst( parentCertificate = childCertificateCandidate );
+                        continue;
+                    }
+
+                if (unorderedCertificateChain.size() == orderedCertificateChain.size())
+                    break;
+
+                throw new IllegalArgumentException(
+                        "Given certificate chain is missing some nodes or contains irrelevant nodes: " + unorderedCertificateChain );
+            }
+        }
+    }
+
+    public LinkedList<X509Certificate> getOrderedCertificateChain() {
+
+        return orderedCertificateChain;
+    }
+
+    public boolean hasRootCertificate() {
+
+        return getOrderedCertificateChain().size() > 1 && CertificateUtils.isSelfSigned( getOrderedCertificateChain().getLast() );
+    }
+
+    /**
+     * @return The root {@link X509Certificate}.
+     */
+    @NotNull
+    public X509Certificate getRootCertificate() {
+
+        checkState( hasRootCertificate(), "This chain does not have a root certificate." );
+
+        return getOrderedCertificateChain().getLast();
+    }
+
+    /**
+     * @return Get the {@link X509Certificate} of the identity.
+     */
+    @NotNull
+    public X509Certificate getIdentityCertificate() {
+
+        checkState( !isEmpty(), "This chain does not have any certificates." );
+
+        return getOrderedCertificateChain().getFirst();
+    }
+
+    public CertificateChain getIssuerCertificateChain() {
+
+        LinkedList<X509Certificate> issuerOrderedCertificateChain = new LinkedList<X509Certificate>( getOrderedCertificateChain() );
+        if (!CertificateUtils.isSelfSigned( issuerOrderedCertificateChain.getFirst() ))
+            issuerOrderedCertificateChain.removeFirst();
+
+        return new CertificateChain( issuerOrderedCertificateChain );
+    }
+
+    public boolean isEmpty() {
+
+        return getOrderedCertificateChain().isEmpty();
+    }
+
+    @Override
+    public Iterator<X509Certificate> iterator() {
+
+        return getOrderedCertificateChain().iterator();
+    }
+
+    public X509Certificate[] toArray() {
+
+        return getOrderedCertificateChain().toArray( new X509Certificate[getOrderedCertificateChain().size()] );
+    }
+}
