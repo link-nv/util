@@ -147,7 +147,7 @@ public abstract class Saml2Utils {
         return Base64.encodeBytes( bytesOut.toByteArray(), Base64.DONT_BREAK_LINES );
     }
 
-    public static Element signAsElement(SignableSAMLObject samlObject, KeyPair signerKeyPair, List<X509Certificate> certificateChain) {
+    public static Element signAsElement(SignableSAMLObject samlObject, KeyPair signerKeyPair, CertificateChain certificateChain) {
 
         XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
         SignatureBuilder signatureBuilder = (SignatureBuilder) builderFactory.getBuilder( Signature.DEFAULT_ELEMENT_NAME );
@@ -169,7 +169,7 @@ public abstract class Saml2Utils {
                                                         .getKeyInfoGeneratorManager()
                                                         .getDefaultManager()
                                                         .getFactory( signingCredential )).setEmitEntityCertificateChain( true );
-            signingCredential.setEntityCertificateChain( certificateChain );
+            signingCredential.setEntityCertificateChain( certificateChain.getOrderedCertificateChain() );
 
             // add certificate chain as keyinfo
             signature.setKeyInfo( getKeyInfo( certificateChain ) );
@@ -196,7 +196,7 @@ public abstract class Saml2Utils {
         return samlElement;
     }
 
-    private static KeyInfo getKeyInfo(List<X509Certificate> certificateChain) {
+    private static KeyInfo getKeyInfo(CertificateChain certificateChain) {
 
         try {
             KeyInfo keyInfo = buildXMLObject( KeyInfo.DEFAULT_ELEMENT_NAME );
@@ -227,7 +227,7 @@ public abstract class Saml2Utils {
      *
      * @return The signed {@link SignableSAMLObject}, marshaled and serialized.
      */
-    public static String sign(SignableSAMLObject samlObject, KeyPair signerKeyPair, List<X509Certificate> certificateChain) {
+    public static String sign(SignableSAMLObject samlObject, KeyPair signerKeyPair, CertificateChain certificateChain) {
 
         Element samlElement = signAsElement( samlObject, signerKeyPair, certificateChain );
 
@@ -236,7 +236,8 @@ public abstract class Saml2Utils {
     }
 
     /**
-     * Validate the signature on specified {@link SignableSAMLObject}.
+     * Validate the signature on specified {@link Signature}.
+     *
      *
      * @param signature           Signature to validate if not using HTTP Redirect binding.
      * @param request             Request to obtain signature from if using HTTP Redirect binding.
@@ -244,19 +245,22 @@ public abstract class Saml2Utils {
      *
      * @throws ValidationFailedException The signature could not be trusted.
      */
-    public static void validateSignature(Signature signature, HttpServletRequest request, Collection<X509Certificate> trustedCertificates)
+    public static CertificateChain validateSignature(Signature signature, HttpServletRequest request,
+                                                     Collection<X509Certificate> trustedCertificates)
             throws ValidationFailedException {
 
         if (signature != null)
-            validateSignature( signature, trustedCertificates );
-        else
-            // No signature inside the SAML object, must be in the queryString (SAML HTTP Redirect Binding)
-            validateSignature(
-                    checkNotNull( request, "No signature found in SAML object and no query data provided to search for a signature." ),
-                    trustedCertificates );
+            return validateSignature( signature, trustedCertificates );
+
+        // No signature inside the SAML object, must be in the queryString (SAML HTTP Redirect Binding)
+        validateSignature(
+                checkNotNull( request, "No signature found in SAML object and no query data provided to search for a signature." ),
+                trustedCertificates );
+
+        return null;
     }
 
-    private static void validateSignature(Signature signature, Collection<X509Certificate> trustedCertificates)
+    private static CertificateChain validateSignature(Signature signature, Collection<X509Certificate> trustedCertificates)
             throws ValidationFailedException {
 
         logger.dbg( "validate[HTTP POST], Signature:\n%s", DomUtils.domToString( signature.getDOM(), true ) );
@@ -281,7 +285,12 @@ public abstract class Saml2Utils {
             sigValidator.validate( signature );
 
             // Validate the certificate chain.
-            validateCertificateChain( KeyInfoHelper.getCertificates( signature.getKeyInfo() ), trustedCertificates );
+            if (trustedCertificates != null && !trustedCertificates.isEmpty())
+                // Allow no trusted certificates: Beware, the chain has not been validated.
+                // The application should validate it manually, eg. using XKMS.
+                validateCertificateChain( certificateChain, trustedCertificates );
+
+            return certificateChain;
         }
         catch (CertificateException e) {
             throw new ValidationFailedException( e );
@@ -347,7 +356,7 @@ public abstract class Saml2Utils {
         }
     }
 
-    private static void validateCertificateChain(List<X509Certificate> certificateChain, Collection<X509Certificate> trustedCertificates)
+    private static void validateCertificateChain(CertificateChain certificateChain, Collection<X509Certificate> trustedCertificates)
             throws ValidationFailedException {
 
         try {
@@ -356,7 +365,7 @@ public abstract class Saml2Utils {
                 certificateRepository.addTrustPoint( trustedCertificate );
 
             TrustValidator trustValidator = new TrustValidator( certificateRepository );
-            trustValidator.isTrusted( certificateChain );
+            trustValidator.isTrusted( certificateChain.getOrderedCertificateChain() );
         }
         catch (CertPathValidatorException e) {
             throw new ValidationFailedException(

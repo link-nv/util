@@ -127,4 +127,25 @@ public class CertificateChain implements Iterable<X509Certificate>, Serializable
 
         return getOrderedCertificateChain().toArray( new X509Certificate[getOrderedCertificateChain().size()] );
     }
+
+    @Override
+    public int hashCode() {
+
+        return orderedCertificateChain.hashCode();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+
+        if (obj instanceof CertificateChain)
+            return orderedCertificateChain.equals( ((CertificateChain) obj).getOrderedCertificateChain() );
+
+        return orderedCertificateChain.equals( obj );
+    }
+
+    @Override
+    public String toString() {
+
+        return orderedCertificateChain.toString();
+    }
 }
