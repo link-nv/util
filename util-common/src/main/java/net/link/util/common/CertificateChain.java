@@ -58,23 +58,28 @@ public class CertificateChain implements Iterable<X509Certificate>, Serializable
             X509Certificate parentCertificate = orderedCertificateChain.getFirst();
             while (true) {
                 final X500Principal parentPrincipal = parentCertificate.getSubjectX500Principal();
-                X509Certificate childCertificate = Iterables.find( unorderedCertificateChain, new Predicate<X509Certificate>() {
-                    @Override
-                    public boolean apply(final X509Certificate input) {
 
-                        return input.getIssuerX500Principal().equals( parentPrincipal );
-                    }
-                } );
-                if (childCertificate != null)
+                try {
+                    X509Certificate childCertificate = Iterables.find( unorderedCertificateChain, new Predicate<X509Certificate>() {
+                        @Override
+                        public boolean apply(final X509Certificate input) {
+
+                            return input.getIssuerX500Principal().equals( parentPrincipal );
+                        }
+                    } );
+
                     orderedCertificateChain.addFirst( parentCertificate = childCertificate );
-                else if (unorderedCertificateChain.size() == orderedCertificateChain.size())
-                    // No child found for parent & all unordered certificates have been used.  All done.
-                    break;
-                else
-                    // No child found for parent & not all unordered certificates used.
-                    throw new IllegalArgumentException( "Given certificate chain is missing some nodes or contains irrelevant nodes." //
-                                                        + "\nNodes: " + ObjectUtils.describe( unorderedCertificateChain ) //
-                                                        + "\nFailed at: " + ObjectUtils.describe( orderedCertificateChain ) );
+                }
+                catch (NoSuchElementException ignored) {
+                    if (unorderedCertificateChain.size() == orderedCertificateChain.size())
+                        // No child found for parent & all unordered certificates have been used.  All done.
+                        break;
+                    else
+                        // No child found for parent & not all unordered certificates used.
+                        throw new IllegalArgumentException( "Given certificate chain is missing some nodes or contains irrelevant nodes." //
+                                                            + "\nNodes: " + ObjectUtils.describe( unorderedCertificateChain ) //
+                                                            + "\nFailed at: " + ObjectUtils.describe( orderedCertificateChain ) );
+                }
             }
         }
     }
