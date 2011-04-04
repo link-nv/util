@@ -1,20 +1,21 @@
 package net.link.util.common;
 
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.*;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.lyndir.lhunath.lib.system.util.ObjectUtils;
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
+import javax.security.auth.x500.X500Principal;
 import org.jetbrains.annotations.NotNull;
 
 
 /**
  * <h2>{@link CertificateChain}<br> <sub>[in short] (TODO).</sub></h2>
- *
+ * <p/>
  * <p> <i>04 01, 2011</i> </p>
  *
  * @author lhunath
@@ -56,17 +57,24 @@ public class CertificateChain implements Iterable<X509Certificate>, Serializable
             // now go down
             X509Certificate parentCertificate = orderedCertificateChain.getFirst();
             while (true) {
-                for (X509Certificate childCertificateCandidate : unorderedCertificateChain)
-                    if (childCertificateCandidate.getIssuerX500Principal().equals( parentCertificate.getSubjectX500Principal() )) {
-                        orderedCertificateChain.addFirst( parentCertificate = childCertificateCandidate );
-                        continue;
+                final X500Principal parentPrincipal = parentCertificate.getSubjectX500Principal();
+                X509Certificate childCertificate = Iterables.find( unorderedCertificateChain, new Predicate<X509Certificate>() {
+                    @Override
+                    public boolean apply(final X509Certificate input) {
+
+                        return input.getIssuerX500Principal().equals( parentPrincipal );
                     }
-
-                if (unorderedCertificateChain.size() == orderedCertificateChain.size())
+                } );
+                if (childCertificate != null)
+                    orderedCertificateChain.addFirst( parentCertificate = childCertificate );
+                else if (unorderedCertificateChain.size() == orderedCertificateChain.size())
+                    // No child found for parent & all unordered certificates have been used.  All done.
                     break;
-
-                throw new IllegalArgumentException(
-                        "Given certificate chain is missing some nodes or contains irrelevant nodes: " + unorderedCertificateChain );
+                else
+                    // No child found for parent & not all unordered certificates used.
+                    throw new IllegalArgumentException( "Given certificate chain is missing some nodes or contains irrelevant nodes." //
+                                                        + "\nNodes: " + ObjectUtils.describe( unorderedCertificateChain ) //
+                                                        + "\nFailed at: " + ObjectUtils.describe( orderedCertificateChain ) );
             }
         }
     }

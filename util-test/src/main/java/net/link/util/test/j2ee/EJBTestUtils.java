@@ -226,13 +226,19 @@ public final class EJBTestUtils {
 
         Type instance;
         try {
-            instance = beanType.newInstance();
+            instance = beanType.getConstructor().newInstance();
         }
         catch (InstantiationException e) {
-            throw new RuntimeException( "instantiation error: " + beanType );
+            throw new RuntimeException( "While instantiating: " + beanType , e);
         }
         catch (IllegalAccessException e) {
-            throw new RuntimeException( "illegal access error: " + beanType );
+            throw new RuntimeException( "While instantiating: " + beanType, e );
+        }
+        catch (NoSuchMethodException e) {
+            throw new RuntimeException( "While instantiating: " + beanType, e );
+        }
+        catch (InvocationTargetException e) {
+            throw new RuntimeException( "While instantiating: " + beanType, e );
         }
         TestContainerMethodInterceptor testContainerMethodInterceptor = new TestContainerMethodInterceptor( instance, container,
                 entityManager, sessionContext );
