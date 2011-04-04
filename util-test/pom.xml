@@ -177,11 +177,6 @@
             <artifactId>shiftone-arbor</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-annotations</artifactId>
-            <scope>runtime</scope>
-        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
