@@ -24,6 +24,10 @@
             <groupId>net.lin-k.util</groupId>
             <artifactId>util-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>net.lin-k.util</groupId>
+            <artifactId>util-j2ee-jboss6</artifactId>
+        </dependency>
 
         <!-- Dependencies: External -->
 		<dependency>
