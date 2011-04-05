@@ -25,8 +25,6 @@ import org.apache.commons.io.IOUtils;
  */
 public class BufferedServletResponseWrapper extends HttpServletResponseWrapper {
 
-    private final HttpServletResponse origResponse;
-
     private final BufferedServletOutputStream bufferedServletOutputStream;
 
     private PrintWriter writer;
@@ -34,7 +32,6 @@ public class BufferedServletResponseWrapper extends HttpServletResponseWrapper {
     public BufferedServletResponseWrapper(HttpServletResponse response) {
 
         super( response );
-        origResponse = response;
         bufferedServletOutputStream = new BufferedServletOutputStream();
     }
 
@@ -46,13 +43,35 @@ public class BufferedServletResponseWrapper extends HttpServletResponseWrapper {
     public void commit()
             throws IOException {
 
+        commit( (HttpServletResponse) getResponse() );
+    }
+
+    /**
+     * This method will commit the buffered response to the real output response.
+     *
+     * @throws IOException
+     */
+    public void commit(HttpServletResponse response)
+            throws IOException {
+
+        IOUtils.write( commitData(), response.getOutputStream() );
+    }
+
+    /**
+     * This method will commit the buffered response to the real output response.
+     *
+     * @throws IOException
+     */
+    public byte[] commitData()
+            throws IOException {
+
         if (null != writer)
             /*
              * We need to flush the writer first so that the buffered servlet output stream holds all the data.
              */
             writer.flush();
-        byte[] data = bufferedServletOutputStream.getData();
-        IOUtils.write( data, origResponse.getOutputStream() );
+
+        return bufferedServletOutputStream.getData();
     }
 
     @Override
