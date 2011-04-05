@@ -1,6 +1,6 @@
 package net.link.util.config;
 
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.*;
 
 import com.google.common.base.Throwables;
 import com.google.common.io.Closeables;
@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * <h2>{@link KeyStoreKeyProvider}<br> <sub>[in short] (TODO).</sub></h2>
- *
+ * <p/>
  * <p> <i>10 20, 2010</i> </p>
  *
  * @author lhunath
@@ -57,7 +57,7 @@ public class KeyStoreKeyProvider extends KeyProviderImpl {
             InputStream stream = streamSupplier.getInput();
 
             try {
-                return KeyStoreUtils.loadKeyStore( "JKS", stream, keyStorePassword.toCharArray() );
+                return KeyStoreUtils.loadKeyStore( "JKS", stream, null != keyStorePassword? keyStorePassword.toCharArray(): null );
             }
             finally {
                 Closeables.closeQuietly( stream );
