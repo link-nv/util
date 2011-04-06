@@ -1,7 +1,6 @@
 package net.link.util.config;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.*;
@@ -9,10 +8,7 @@ import com.lyndir.lhunath.lib.system.logging.exception.InternalInconsistencyExce
 import com.lyndir.lhunath.lib.system.util.TypeUtils;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.*;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -29,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <h2>{@link DefaultConfigFactory}<br> <sub>[in short] (TODO).</sub></h2>
- *
+ * <p/>
  * <p> <i>09 14, 2010</i> </p>
  *
  * @author lhunath
@@ -45,10 +41,10 @@ public class DefaultConfigFactory {
     private static final Pattern COMMA_DELIMITOR         = Pattern.compile( "\\s*,\\s*" );
     /**
      * <p>type:[alias[:pass1[:pass2]]@]path</p>
-     *
+     * <p/>
      * Note: <b>passwords and aliases cannot contain ':' or '@' symbols</b>
      */
-    private static final Pattern KEYSTORE_PATTERN = Pattern.compile( "^(.*?)://(?:([^:@]*)(?::([^:@]*)(?::([^:@]*))?)?@)?(.*)" );
+    private static final Pattern KEYSTORE_PATTERN        = Pattern.compile( "^(.*?)://(?:([^:@]*)(?::([^:@]*)(?::([^:@]*))?)?@)?(.*)" );
 
     private final ClassToInstanceMap<Object>  proxyMap       = MutableClassToInstanceMap.create();
     private final Map<Object, Object>         wrapperMap     = Maps.newHashMap();
@@ -157,7 +153,7 @@ public class DefaultConfigFactory {
 
     /**
      * Get the implementation for app config of the given type.
-     *
+     * <p/>
      * Override this method to provide your own app config implementation.  By default, this method will use {@link
      * #getDefaultImplementation(Class)} to create a default implementation for the given app config.
      *
@@ -257,10 +253,12 @@ public class DefaultConfigFactory {
      * implementation handler couldn't resolve a value.
      *
      * @param config The configuration object which provides the normal values.  Invoke the handled method on this object to see if the
-     *               implementation has a value to provide.  If the return value of this call is <code>null</code> , provide a default value
+     *               implementation has a value to provide.  If the return value of this call is <code>null</code> , provide a default
+     *               value
      *               for the method call.
      *
-     * @return An invocation handler that implements the logic which provides default values when methods on the given config implementation
+     * @return An invocation handler that implements the logic which provides default values when methods on the given config
+     *         implementation
      *         yield no value.
      */
     protected InvocationHandler newDefaultWrapperHandler(Object config) {
@@ -403,18 +401,18 @@ public class DefaultConfigFactory {
             String keyStorePath = matcher.group( 5 );
 
             if ("classpath".equals( keyStoreType ))
-                return type.cast( new ResourceKeyStoreKeyProvider( keyStorePath, keyStorePass, keyEntryPass, keyEntryAlias ) );
+                return type.cast( new ResourceKeyStoreKeyProvider( keyStorePath, keyStorePass, keyEntryAlias, keyEntryPass ) );
             if ("url".equals( keyStoreType ))
                 return type.cast(
-                        new URLKeyStoreKeyProvider( URLUtils.newURL( keyStorePath ), keyStorePass, keyEntryPass, keyEntryAlias ) );
+                        new URLKeyStoreKeyProvider( URLUtils.newURL( keyStorePath ), keyStorePass, keyEntryAlias, keyEntryPass ) );
             if ("file".equals( keyStoreType ))
-                return type.cast( new FileKeyStoreKeyProvider( new File( keyStorePath ), keyStorePass, keyEntryPass, keyEntryAlias ) );
+                return type.cast( new FileKeyStoreKeyProvider( new File( keyStorePath ), keyStorePass, keyEntryAlias, keyEntryPass ) );
             if ("class".equals( keyStoreType ))
                 try {
                     Class<?> keyStoreClass = Thread.currentThread().getContextClassLoader().loadClass( keyStorePath );
                     try {
                         return type.cast( keyStoreClass.getConstructor( String.class, String.class, String.class )
-                                .newInstance( keyStorePass, keyEntryAlias, keyEntryPass ) );
+                                                       .newInstance( keyStorePass, keyEntryAlias, keyEntryPass ) );
                     }
                     catch (NoSuchMethodException ignored) {
                         //noinspection UnusedCatchParameter
@@ -534,7 +532,7 @@ public class DefaultConfigFactory {
 
     /**
      * Pass given data through a filter.
-     *
+     * <p/>
      * The filter: - fills in system properties.
      *
      * @param value The data to filter.
