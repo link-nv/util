@@ -6,6 +6,7 @@
  */
 package net.link.util.test;
 
+import com.google.common.base.Throwables;
 import com.lyndir.lhunath.lib.system.logging.Logger;
 import java.util.*;
 import javax.naming.NamingException;
@@ -16,7 +17,8 @@ import net.link.util.test.j2ee.EJBTestUtils;
 import net.link.util.test.j2ee.JNDITestUtils;
 import net.link.util.test.jpa.EntityTestManager;
 import org.easymock.EasyMock;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
 
 
 /**
@@ -39,6 +41,11 @@ public abstract class AbstractUnitTests<T> {
 
     protected static final List<Object> mocks = new LinkedList<Object>();
 
+    static {
+        jndiTestUtils.setUp();
+        jndiTestUtils.setNamingStrategy( new FieldNamingStrategy() );
+    }
+
     protected EntityManager      entityManager;
     protected T                  testedBean;
     protected Class<? extends T> testedClass;
@@ -53,17 +60,6 @@ public abstract class AbstractUnitTests<T> {
     }
 
     /**
-     * Builds the JNDI context and the {@link EntityTestManager}.
-     */
-    @BeforeClass
-    public static void init()
-            throws Exception {
-
-        jndiTestUtils.setUp();
-        jndiTestUtils.setNamingStrategy( new FieldNamingStrategy() );
-    }
-
-    /**
      * Creates an entity manager, loads the entities from {@link #getEntities()} (unless that returns <code>null</code>) and loads all the
      * service beans from {@link #getServiceBeans()} (unless that returns <code>null</code>) into the JNDI.
      * <p/>
@@ -74,7 +70,7 @@ public abstract class AbstractUnitTests<T> {
      * </p>
      */
     @Before
-    public final void setUp()
+    public void _setUp()
             throws Exception {
 
         logger.dbg( "=== <SET-UP> ===" );
@@ -108,12 +104,24 @@ public abstract class AbstractUnitTests<T> {
                     testedBean = testedClass.cast( serviceBean );
         }
 
-        _setUp();
+        setUp();
+        setUpMocks();
 
         logger.dbg( "=== </SET-UP> ===" );
     }
 
-    protected void _setUp()
+    /**
+     * Called during unit test setUp, after setting up mocks.
+     */
+    protected void setUp()
+            throws Exception {
+
+    }
+
+    /**
+     * Called during unit test setUp, and after resetUpMocks.  Call super.setUpMocks() at the END.
+     */
+    protected void setUpMocks()
             throws Exception {
 
         replayMocks();
@@ -130,7 +138,7 @@ public abstract class AbstractUnitTests<T> {
 
         _tearDown();
 
-        resetMocks();
+        resetUpMocks();
 
         if (entityTestManager != null)
             entityTestManager.tearDown();
@@ -179,14 +187,21 @@ public abstract class AbstractUnitTests<T> {
         return mocks;
     }
 
-    public static void reset(Void... args) {
+    //    public static void reset(Void... args) {
+    //
+    //        // Not allowed!  Use #resetUpMocks instead.
+    //    }
 
-        // Not allowed!  Use #resetMocks instead.
-    }
-
-    protected static void resetMocks() {
+    protected void resetUpMocks() {
 
         EasyMock.reset( mocks.toArray() );
+
+        try {
+            setUpMocks();
+        }
+        catch (Exception e) {
+            throw Throwables.propagate( e );
+        }
     }
 
     public static void replay(Void... args) {
@@ -196,7 +211,13 @@ public abstract class AbstractUnitTests<T> {
 
     protected static void replayMocks() {
 
-        EasyMock.replay( mocks.toArray() );
+        for (Object mock : mocks)
+            try {
+                EasyMock.replay( mock );
+            }
+            catch (IllegalStateException ignored) {
+                // Ignore when mock was already replayed
+            }
     }
 
     public static void verify(Void... args) {

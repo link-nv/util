@@ -36,18 +36,20 @@ public abstract class AbstractWSTest<T> extends AbstractUnitTests<T> {
     protected WebServiceTestManager webServiceTestManager;
     protected T                     port;
 
-    protected long             applicationId;
-    protected String           testSubjectId;
-    protected CertificateChain clientCertificateChain;
-    protected CertificateChain serverCertificateChain;
+    protected long   applicationId;
+    protected String testSubjectId;
+
+    private   KeyPair                 clientKeyPair;
+    protected CertificateChain        clientCertificateChain;
+    private   WSSecurityConfiguration mockWSSecurityClientConfig;
+
+    private   KeyPair                 serverKeyPair;
+    protected CertificateChain        serverCertificateChain;
+    private   WSSecurityConfiguration mockWSSecurityServerConfig;
 
     @Override
-    protected void _setUp()
+    protected void setUp()
             throws Exception {
-
-        super._setUp();
-
-        String wsSecurityConfigServiceJndiName = "wsSecurityConfigurationServiceJndiName";
 
         // Generic Data
         applicationId = 1234567890;
@@ -60,27 +62,11 @@ public abstract class AbstractWSTest<T> extends AbstractUnitTests<T> {
         //InjectionInstanceResolver.clearInstanceCache();
 
         // WS Security
-        KeyPair clientKeyPair = PkiTestUtils.generateKeyPair();
+        // - Client
+        mockWSSecurityClientConfig = createAndBindMock( WSSecurityConfiguration.class );
+        clientKeyPair = PkiTestUtils.generateKeyPair();
         clientCertificateChain = new CertificateChain( PkiTestUtils.generateSelfSignedCertificate( clientKeyPair, "CN=Test" ) );
-        WSSecurityConfiguration mockWSSecurityClientConfig = createMock( WSSecurityConfiguration.class );
-        expect( mockWSSecurityClientConfig.isCertificateChainTrusted( clientCertificateChain ) ).andStubReturn( true );
-        expect( mockWSSecurityClientConfig.getIdentityCertificateChain() ).andStubReturn( clientCertificateChain );
-        expect( mockWSSecurityClientConfig.getPrivateKey() ).andStubReturn( clientKeyPair.getPrivate() );
-        expect( mockWSSecurityClientConfig.isOutboundSignatureNeeded() ).andStubReturn( true );
-        expect( mockWSSecurityClientConfig.isInboundSignatureOptional() ).andStubReturn( false );
-        expect( mockWSSecurityClientConfig.getMaximumAge() ).andStubReturn( new Duration( Long.MAX_VALUE ) );
 
-        KeyPair serverKeyPair = PkiTestUtils.generateKeyPair();
-        serverCertificateChain = new CertificateChain( PkiTestUtils.generateSelfSignedCertificate( serverKeyPair, "CN=linkID" ) );
-        WSSecurityConfiguration mockWSSecurityServerConfig = createMock( WSSecurityConfiguration.class );
-        expect( mockWSSecurityServerConfig.isCertificateChainTrusted( serverCertificateChain ) ).andStubReturn( true );
-        expect( mockWSSecurityServerConfig.getIdentityCertificateChain() ).andStubReturn( serverCertificateChain );
-        expect( mockWSSecurityServerConfig.getPrivateKey() ).andStubReturn( serverKeyPair.getPrivate() );
-        expect( mockWSSecurityServerConfig.isOutboundSignatureNeeded() ).andStubReturn( true );
-        expect( mockWSSecurityServerConfig.isInboundSignatureOptional() ).andStubReturn( false );
-        expect( mockWSSecurityServerConfig.getMaximumAge() ).andStubReturn( new Duration( Long.MAX_VALUE ) );
-
-        // WS Security: Client config is added to client port.
         BindingProvider bindingProvider = (BindingProvider) port;
         Binding binding = bindingProvider.getBinding();
         @SuppressWarnings("unchecked")
@@ -89,12 +75,40 @@ public abstract class AbstractWSTest<T> extends AbstractUnitTests<T> {
         handlerChain.add( wsSecurityHandler );
         binding.setHandlerChain( handlerChain );
 
-        // WS Security: Server config is found via JNDI.
-        jndiTestUtils.bindComponent( "java:comp/env/wsSecurityConfigurationServiceJndiName", wsSecurityConfigServiceJndiName );
-        jndiTestUtils.bindComponent( wsSecurityConfigServiceJndiName, mockWSSecurityServerConfig );
+        // - Server
+        mockWSSecurityServerConfig = createAndBindMock( WSSecurityConfiguration.class );
+        serverKeyPair = PkiTestUtils.generateKeyPair();
+        serverCertificateChain = new CertificateChain( PkiTestUtils.generateSelfSignedCertificate( serverKeyPair, "CN=linkID" ) );
+
+        jndiTestUtils.bindComponent( "java:comp/env/wsSecurityConfigurationServiceJndiName", "wsSecurityConfigurationServiceJndiName" );
+        jndiTestUtils.bindComponent( "wsSecurityConfigurationServiceJndiName", mockWSSecurityServerConfig );
+
+        super.setUp();
+    }
+
+    @Override
+    protected void setUpMocks()
+            throws Exception {
+
+        // WS Security
+        expect( mockWSSecurityClientConfig.isCertificateChainTrusted( clientCertificateChain ) ).andStubReturn( true );
+        expect( mockWSSecurityClientConfig.getIdentityCertificateChain() ).andStubReturn( clientCertificateChain );
+        expect( mockWSSecurityClientConfig.getPrivateKey() ).andStubReturn( clientKeyPair.getPrivate() );
+        expect( mockWSSecurityClientConfig.isOutboundSignatureNeeded() ).andStubReturn( true );
+        expect( mockWSSecurityClientConfig.isInboundSignatureOptional() ).andStubReturn( false );
+        expect( mockWSSecurityClientConfig.getMaximumAge() ).andStubReturn( new Duration( Long.MAX_VALUE ) );
+
+        expect( mockWSSecurityServerConfig.isCertificateChainTrusted( serverCertificateChain ) ).andStubReturn( true );
+        expect( mockWSSecurityServerConfig.getIdentityCertificateChain() ).andStubReturn( serverCertificateChain );
+        expect( mockWSSecurityServerConfig.getPrivateKey() ).andStubReturn( serverKeyPair.getPrivate() );
+        expect( mockWSSecurityServerConfig.isOutboundSignatureNeeded() ).andStubReturn( true );
+        expect( mockWSSecurityServerConfig.isInboundSignatureOptional() ).andStubReturn( false );
+        expect( mockWSSecurityServerConfig.getMaximumAge() ).andStubReturn( new Duration( Long.MAX_VALUE ) );
 
         // JAAS
         JaasTestUtils.initJaasLoginModule( DummyLoginModule.class );
+
+        super.setUpMocks();
     }
 
     protected void _tearDown()
