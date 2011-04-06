@@ -6,8 +6,7 @@
  */
 package net.link.util.test;
 
-import static org.easymock.EasyMock.*;
-
+import com.lyndir.lhunath.lib.system.logging.Logger;
 import java.util.*;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
@@ -16,8 +15,7 @@ import net.link.util.j2ee.FieldNamingStrategy;
 import net.link.util.test.j2ee.EJBTestUtils;
 import net.link.util.test.j2ee.JNDITestUtils;
 import net.link.util.test.jpa.EntityTestManager;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.easymock.EasyMock;
 import org.junit.*;
 
 
@@ -32,12 +30,14 @@ import org.junit.*;
  */
 public abstract class AbstractUnitTests<T> {
 
+    protected final Logger logger = Logger.get( getClass() );
+
     protected static final Random random = new Random();
 
-    protected static JNDITestUtils     jndiTestUtils;
-    protected static EntityTestManager entityTestManager;
+    protected static final JNDITestUtils     jndiTestUtils     = new JNDITestUtils();
+    protected static final EntityTestManager entityTestManager = new EntityTestManager();
 
-    protected final Log LOG = LogFactory.getLog( getClass() );
+    protected static final List<Object> mocks = new LinkedList<Object>();
 
     protected EntityManager      entityManager;
     protected T                  testedBean;
@@ -59,11 +59,8 @@ public abstract class AbstractUnitTests<T> {
     public static void init()
             throws Exception {
 
-        jndiTestUtils = new JNDITestUtils();
         jndiTestUtils.setUp();
         jndiTestUtils.setNamingStrategy( new FieldNamingStrategy() );
-
-        entityTestManager = new EntityTestManager();
     }
 
     /**
@@ -77,10 +74,10 @@ public abstract class AbstractUnitTests<T> {
      * </p>
      */
     @Before
-    public void setUp()
+    public final void setUp()
             throws Exception {
 
-        LOG.debug( "=== <SET-UP> ===" );
+        logger.dbg( "=== <SET-UP> ===" );
 
         // Set up an HSQL entity manager.
         Class<?>[] entities = getEntities();
@@ -89,16 +86,10 @@ public abstract class AbstractUnitTests<T> {
                 entityTestManager.setUp( entities );
             }
             catch (Exception err) {
-                LOG.error( "Couldn't set up entity manager", err );
+                logger.err( err, "Couldn't set up entity manager" );
                 throw new IllegalStateException( err );
             }
         entityManager = entityTestManager.getEntityManager();
-
-        // Bind our mocks into the JNDI.
-        Object[] mocks = getMocks();
-        if (mocks != null)
-            for (Object mock : mocks)
-                bindMock( mock );
 
         // Bind our service beans into the JNDI.
         Class<?>[] serviceBeanArray = getServiceBeans();
@@ -117,24 +108,41 @@ public abstract class AbstractUnitTests<T> {
                     testedBean = testedClass.cast( serviceBean );
         }
 
-        LOG.debug( "=== </SET-UP> ===" );
+        _setUp();
+
+        logger.dbg( "=== </SET-UP> ===" );
+    }
+
+    protected void _setUp()
+            throws Exception {
+
+        replayMocks();
     }
 
     /**
      * Tears down the {@link EntityTestManager} and JNDI context.
      */
     @After
-    public void tearDown()
+    public final void tearDown()
             throws Exception {
 
-        LOG.debug( "=== <TEAR-DOWN> ===" );
+        logger.dbg( "=== <TEAR-DOWN> ===" );
+
+        _tearDown();
+
+        resetMocks();
 
         if (entityTestManager != null)
             entityTestManager.tearDown();
         if (jndiTestUtils != null)
             jndiTestUtils.tearDown();
 
-        LOG.debug( "=== </TEAR-DOWN> ===" );
+        logger.dbg( "=== </TEAR-DOWN> ===" );
+    }
+
+    protected void _tearDown()
+            throws Exception {
+
     }
 
     // Utilities
@@ -150,19 +158,68 @@ public abstract class AbstractUnitTests<T> {
     /**
      * Bind the given mock object in the JNDI on its mock interface's JNDI_BINDING.
      */
-    protected static <M> M createAndBindMock(Class<M> mock)
-            throws NamingException {
+    protected static <M> M createAndBindMock(Class<M> mockType) {
 
-        return bindMock( createMock( mock ) );
+        return bindMock( createMock( mockType ) );
     }
 
     /**
      * Bind the given mock object in the JNDI on its mock interface's JNDI_BINDING.
      */
-    protected static <M> M bindMock(M mock)
-            throws NamingException {
+    protected static <M> M createMock(Class<M> mockType) {
 
-        jndiTestUtils.bindComponent( mock.getClass().getInterfaces()[0], mock );
+        M mock = EasyMock.createMock( mockType );
+        mocks.add( mock );
+
+        return mock;
+    }
+
+    protected static List<Object> getMocks() {
+
+        return mocks;
+    }
+
+    public static void reset(Void... args) {
+
+        // Not allowed!  Use #resetMocks instead.
+    }
+
+    protected static void resetMocks() {
+
+        EasyMock.reset( mocks.toArray() );
+    }
+
+    public static void replay(Void... args) {
+
+        // Not allowed!  Use #replayMocks instead.
+    }
+
+    protected static void replayMocks() {
+
+        EasyMock.replay( mocks.toArray() );
+    }
+
+    public static void verify(Void... args) {
+
+        // Not allowed!  Use #verifyMocks instead.
+    }
+
+    protected static void verifyMocks() {
+
+        EasyMock.verify( mocks.toArray() );
+    }
+
+    /**
+     * Bind the given mock object in the JNDI on its mock interface's JNDI_BINDING.
+     */
+    protected static <M> M bindMock(M mock) {
+
+        try {
+            jndiTestUtils.bindComponent( mock.getClass().getInterfaces()[0], mock );
+        }
+        catch (NamingException e) {
+            throw new RuntimeException( e );
+        }
 
         return mock;
     }
@@ -172,7 +229,7 @@ public abstract class AbstractUnitTests<T> {
     /**
      * Implement this method if your artifact provides service beans that need to be loaded into the JNDI.
      *
-     * @return All the service beans that are used by the wicket application that is being tested.
+     * @return All the service beans that are used by the tests.
      */
     protected Class<?>[] getServiceBeans() {
 
@@ -180,19 +237,9 @@ public abstract class AbstractUnitTests<T> {
     }
 
     /**
-     * Implement this method if your artifact provides service beans that need to be loaded into the JNDI.
-     *
-     * @return All the service beans that are used by the wicket application that is being tested.
-     */
-    protected Object[] getMocks() {
-
-        return null;
-    }
-
-    /**
      * Implement this method if your artifact uses persistence.
      *
-     * @return All the entity beans that are used by the wicket application that is being tested.
+     * @return All the entity beans that are used by the tests.
      */
     protected Class<?>[] getEntities() {
 

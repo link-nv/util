@@ -23,6 +23,14 @@
         <!-- Specific Dependencies: util -->
         <dependency>
             <groupId>net.lin-k.util</groupId>
+            <artifactId>util-protocol</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.lin-k.util</groupId>
+            <artifactId>util-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.lin-k.util</groupId>
             <artifactId>util-j2ee</artifactId>
         </dependency>
         <dependency>
