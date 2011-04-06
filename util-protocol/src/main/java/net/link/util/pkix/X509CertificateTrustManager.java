@@ -8,6 +8,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import javax.net.ssl.*;
+import net.link.util.common.UtilConstants;
 
 
 /**
@@ -99,6 +100,7 @@ public class X509CertificateTrustManager implements X509TrustManager {
                 throw new CertificateException( e );
             }
 
-        return false;
+        // check development flag is set, if so can trust all if no trusted certificate was specified
+        return null != System.getProperty( UtilConstants.DEVELOPMENT_MODE );
     }
 }
