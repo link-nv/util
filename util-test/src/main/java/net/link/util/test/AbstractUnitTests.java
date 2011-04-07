@@ -22,7 +22,23 @@ import org.junit.Before;
 
 
 /**
- * <h2>{@link AbstractUnitTests}</h2>
+ * <h1>How to use this class</h1>
+ * <p>When you create a unit test, have it extend this class (or an abstract implementation of it).</p>
+ * <p>Override {@link #setUp()} to initialize data that is generic to all your tests.  This code will be executed <b>once</b> for each
+ * test,
+ * before it is executed.</p>
+ * <p>Override {@link #setUpMocks()} to express mock expectations that are generic to all your tests.  This code will be executed
+ * <b>once</b>
+ * for each test  <b>AND once after each invocation of {@link #resetUpMocks()}</b> within your tests.</p>
+ * <p>When you implement each test, follow these rules:</p>
+ * <p>If you write test-specific mock expectations, begin by {@link EasyMock#reset(Object...)}ing the mocks you have custom expectations
+ * for.
+ * You should always assume that your mocks are in replay state unless you manually reset them.  After your custom expectations, but them
+ * back in replay state by calling {@link #replayMocks()}.</p>
+ * <p>After you've invoked the logic you want to test, call {@link #verifyAndResetUpMocks()} to make sure all mocks have been fully
+ * replayed
+ * in the
+ * test.
  * <p/>
  * <p>
  * <i>Nov 26, 2009</i>
@@ -46,12 +62,13 @@ public abstract class AbstractUnitTests<T> {
         jndiTestUtils.setNamingStrategy( new FieldNamingStrategy() );
     }
 
-    protected EntityManager      entityManager;
-    protected T                  testedBean;
-    protected Class<? extends T> testedClass;
+    protected       EntityManager      entityManager;
+    protected       T                  testedBean;
+    protected final Class<? extends T> testedClass;
 
     public AbstractUnitTests() {
 
+        testedClass = null;
     }
 
     public AbstractUnitTests(Class<? extends T> testedClass) {
@@ -70,7 +87,7 @@ public abstract class AbstractUnitTests<T> {
      * </p>
      */
     @Before
-    public void _setUp()
+    public final void _setUp()
             throws Exception {
 
         logger.dbg( "=== <SET-UP> ===" );
@@ -105,7 +122,6 @@ public abstract class AbstractUnitTests<T> {
         }
 
         setUp();
-        setUpMocks();
 
         logger.dbg( "=== </SET-UP> ===" );
     }
@@ -116,6 +132,7 @@ public abstract class AbstractUnitTests<T> {
     protected void setUp()
             throws Exception {
 
+        setUpMocks();
     }
 
     /**
@@ -124,21 +141,19 @@ public abstract class AbstractUnitTests<T> {
     protected void setUpMocks()
             throws Exception {
 
-        replayMocks();
+        //replayMocks(); -- should be done manually before replaying in unit tests.
     }
 
     /**
      * Tears down the {@link EntityTestManager} and JNDI context.
      */
     @After
-    public final void tearDown()
+    public final void _tearDown()
             throws Exception {
 
         logger.dbg( "=== <TEAR-DOWN> ===" );
 
-        _tearDown();
-
-        resetUpMocks();
+        tearDown();
 
         if (entityTestManager != null)
             entityTestManager.tearDown();
@@ -148,9 +163,10 @@ public abstract class AbstractUnitTests<T> {
         logger.dbg( "=== </TEAR-DOWN> ===" );
     }
 
-    protected void _tearDown()
+    protected void tearDown()
             throws Exception {
 
+        EasyMock.reset( mocks.toArray() );
     }
 
     // Utilities
@@ -187,10 +203,10 @@ public abstract class AbstractUnitTests<T> {
         return mocks;
     }
 
-    //    public static void reset(Void... args) {
-    //
-    //        // Not allowed!  Use #resetUpMocks instead.
-    //    }
+    public static void reset(Void... args) {
+
+        // Not allowed!  Use #resetUpMocks instead.
+    }
 
     protected void resetUpMocks() {
 
@@ -222,12 +238,13 @@ public abstract class AbstractUnitTests<T> {
 
     public static void verify(Void... args) {
 
-        // Not allowed!  Use #verifyMocks instead.
+        // Not allowed!  Use #verifyAndResetUpMocks instead.
     }
 
-    protected static void verifyMocks() {
+    protected void verifyAndResetUpMocks() {
 
         EasyMock.verify( mocks.toArray() );
+        resetUpMocks();
     }
 
     /**

@@ -36,6 +36,10 @@
             <groupId>tomcat</groupId>
             <artifactId>catalina</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.lyndir.lhunath.jlibs</groupId>
+            <artifactId>system</artifactId>
+        </dependency>
 
     </dependencies>
 

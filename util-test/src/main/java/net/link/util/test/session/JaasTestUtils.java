@@ -9,8 +9,6 @@ package net.link.util.test.session;
 
 import java.io.*;
 import javax.security.auth.spi.LoginModule;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -28,31 +26,31 @@ public class JaasTestUtils {
     public static void initJaasLoginModule(Class<?> clazz)
             throws IOException {
 
-        if (false == LoginModule.class.isAssignableFrom( clazz ))
+        if (!LoginModule.class.isAssignableFrom( clazz ))
             throw new IllegalArgumentException( "given class is not a subclass of LoginModule" );
         File jaasConfigFile = File.createTempFile( "jaas-", ".login" );
         PrintWriter printWriter = new PrintWriter( jaasConfigFile );
-        printWriter.println( "client-login {" );
-        printWriter.println( clazz.getName() + " required debug=true;" );
-        printWriter.println( "};" );
-        printWriter.close();
+        try {
+            printWriter.println( "client-login {" );
+            printWriter.println( clazz.getName() + " required debug=true;" );
+            printWriter.println( "};" );
+        }
+        finally {
+            printWriter.close();
+        }
         System.setProperty( "java.security.auth.login.config", jaasConfigFile.getAbsolutePath() );
 
         /*
          * We install a shutdown hook to cleanup the JAAS config file afterwards. Else we risk of flooding the /tmp directory with junk.
          */
-        Runtime runtime = Runtime.getRuntime();
-        JaasCleanupShutdownHook cleanupShutdownHook = new JaasCleanupShutdownHook( jaasConfigFile );
-        runtime.addShutdownHook( cleanupShutdownHook );
+        Runtime.getRuntime().addShutdownHook( new Thread( new JaasCleanupShutdownHook( jaasConfigFile ) ) );
     }
 
-    private static class JaasCleanupShutdownHook extends Thread {
-
-        private static final Log LOG = LogFactory.getLog( JaasCleanupShutdownHook.class );
+    static class JaasCleanupShutdownHook implements Runnable {
 
         private final File jaasConfigFile;
 
-        public JaasCleanupShutdownHook(File jaasConfigFile) {
+        JaasCleanupShutdownHook(File jaasConfigFile) {
 
             this.jaasConfigFile = jaasConfigFile;
         }
@@ -60,8 +58,7 @@ public class JaasTestUtils {
         @Override
         public void run() {
 
-            LOG.debug( "cleanup JAAS config file: " + jaasConfigFile );
-            if (false == jaasConfigFile.delete())
+            if (!jaasConfigFile.delete())
                 jaasConfigFile.deleteOnExit();
         }
     }

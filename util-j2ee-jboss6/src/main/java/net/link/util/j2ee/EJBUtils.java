@@ -8,8 +8,8 @@
 package net.link.util.j2ee;
 
 import javax.ejb.EJBException;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
+import javax.naming.*;
+import org.jetbrains.annotations.Nullable;
 
 
 /**
@@ -17,52 +17,50 @@ import javax.naming.NamingException;
  *
  * @author fcorneli
  */
-public class EJBUtils {
+public abstract class EJBUtils {
 
-    private EJBUtils() {
+    private static final NamingStrategy       NAMING_STRATEGY = new FieldNamingStrategy();
+    private static final ThreadLocal<Context> INITIAL_CONTEXT = new ThreadLocal<Context>() {
+        @Override
+        protected Context initialValue() {
 
-        // empty
-    }
+            try {
+                return new InitialContext();
+            }
+            catch (NamingException e) {
+                throw new RuntimeException( e );
+            }
+        }
+    };
 
     public static <E> E getEJB(Class<E> type) {
 
-        InitialContext initialContext = getInitialContext();
-        return getEJB( initialContext, type );
+        return getEJB( INITIAL_CONTEXT.get(), type );
     }
 
-    public static <E> E getEJB(String jndiName, Class<E> type) {
+    public static <E> E getEJB(@Nullable String jndiName, Class<E> type) {
 
-        InitialContext initialContext = getInitialContext();
-        return getEJB( initialContext, jndiName, type );
+        return getEJB( INITIAL_CONTEXT.get(), jndiName, type );
     }
 
-    public static <E> E getEJB(InitialContext initialContext, Class<E> type) {
+    public static <E> E getEJB(Context context, Class<E> type) {
 
-        String jndiName = new FieldNamingStrategy().calculateName( type );
-        return getEJB( initialContext, jndiName, type );
+        return getEJB( context, null, type );
     }
 
-    public static <E> E getEJB(InitialContext initialContext, String jndiName, Class<E> type) {
+    public static <E> E getEJB(Context context, @Nullable String jndiName, Class<E> type) {
+
+        if (jndiName == null)
+            jndiName = NAMING_STRATEGY.calculateName( type );
 
         try {
-            Object object = initialContext.lookup( jndiName );
+            Object object = context.lookup( jndiName );
 
             return type.cast( object );
         }
 
         catch (NamingException e) {
-            throw new EJBException( "naming error for: " + jndiName, e );
-        }
-    }
-
-    private static InitialContext getInitialContext() {
-
-        try {
-            return new InitialContext();
-        }
-
-        catch (NamingException e) {
-            throw new RuntimeException( "naming error: " + e.getMessage(), e );
+            throw new EJBException( "Tried to look up bean: " + type + ", from JNDI(" + context.toString() + ") at: " + jndiName, e );
         }
     }
 }

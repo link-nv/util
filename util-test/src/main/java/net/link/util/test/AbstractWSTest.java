@@ -9,13 +9,12 @@ package net.link.util.test;
 
 import static org.easymock.EasyMock.*;
 
+import com.google.common.collect.ImmutableList;
 import java.security.KeyPair;
-import java.util.List;
 import java.util.UUID;
 import javax.xml.ws.Binding;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.Handler;
-import javax.xml.ws.handler.soap.SOAPMessageContext;
 import net.link.util.common.CertificateChain;
 import net.link.util.test.pkix.PkiTestUtils;
 import net.link.util.test.session.DummyLoginModule;
@@ -55,33 +54,32 @@ public abstract class AbstractWSTest<T> extends AbstractUnitTests<T> {
         applicationId = 1234567890;
         testSubjectId = UUID.randomUUID().toString();
 
-        // WS servlet
-        webServiceTestManager = new WebServiceTestManager();
-        webServiceTestManager.setUp( newPortImplementation() );
-        webServiceTestManager.becomeEndpointOf( port = newClientPort() );
-        //InjectionInstanceResolver.clearInstanceCache();
-
         // WS Security
         // - Client
-        mockWSSecurityClientConfig = createAndBindMock( WSSecurityConfiguration.class );
+        mockWSSecurityClientConfig = createMock( WSSecurityConfiguration.class );
         clientKeyPair = PkiTestUtils.generateKeyPair();
         clientCertificateChain = new CertificateChain( PkiTestUtils.generateSelfSignedCertificate( clientKeyPair, "CN=Test" ) );
 
-        BindingProvider bindingProvider = (BindingProvider) port;
-        Binding binding = bindingProvider.getBinding();
-        @SuppressWarnings("unchecked")
-        List<Handler> handlerChain = binding.getHandlerChain();
-        Handler<SOAPMessageContext> wsSecurityHandler = new WSSecurityHandler( mockWSSecurityClientConfig );
-        handlerChain.add( wsSecurityHandler );
-        binding.setHandlerChain( handlerChain );
+        port = newClientPort();
+        Binding binding = ((BindingProvider) port).getBinding();
+        //noinspection RawUseOfParameterizedType
+        binding.setHandlerChain( ImmutableList.<Handler>builder()
+                                              .addAll( binding.getHandlerChain() )
+                                              .add( new WSSecurityHandler( mockWSSecurityClientConfig ) )
+                                              .build() );
 
         // - Server
-        mockWSSecurityServerConfig = createAndBindMock( WSSecurityConfiguration.class );
+        mockWSSecurityServerConfig = createMock( WSSecurityConfiguration.class );
         serverKeyPair = PkiTestUtils.generateKeyPair();
         serverCertificateChain = new CertificateChain( PkiTestUtils.generateSelfSignedCertificate( serverKeyPair, "CN=linkID" ) );
 
         jndiTestUtils.bindComponent( "java:comp/env/wsSecurityConfigurationServiceJndiName", "wsSecurityConfigurationServiceJndiName" );
         jndiTestUtils.bindComponent( "wsSecurityConfigurationServiceJndiName", mockWSSecurityServerConfig );
+
+        // WS servlet
+        webServiceTestManager = new WebServiceTestManager();
+        webServiceTestManager.setUp( newPortImplementation() );
+        webServiceTestManager.becomeEndpointOf( port );
 
         super.setUp();
     }
@@ -91,14 +89,14 @@ public abstract class AbstractWSTest<T> extends AbstractUnitTests<T> {
             throws Exception {
 
         // WS Security
-        expect( mockWSSecurityClientConfig.isCertificateChainTrusted( clientCertificateChain ) ).andStubReturn( true );
+        expect( mockWSSecurityClientConfig.isCertificateChainTrusted( serverCertificateChain ) ).andStubReturn( true );
         expect( mockWSSecurityClientConfig.getIdentityCertificateChain() ).andStubReturn( clientCertificateChain );
         expect( mockWSSecurityClientConfig.getPrivateKey() ).andStubReturn( clientKeyPair.getPrivate() );
         expect( mockWSSecurityClientConfig.isOutboundSignatureNeeded() ).andStubReturn( true );
         expect( mockWSSecurityClientConfig.isInboundSignatureOptional() ).andStubReturn( false );
         expect( mockWSSecurityClientConfig.getMaximumAge() ).andStubReturn( new Duration( Long.MAX_VALUE ) );
 
-        expect( mockWSSecurityServerConfig.isCertificateChainTrusted( serverCertificateChain ) ).andStubReturn( true );
+        expect( mockWSSecurityServerConfig.isCertificateChainTrusted( clientCertificateChain ) ).andStubReturn( true );
         expect( mockWSSecurityServerConfig.getIdentityCertificateChain() ).andStubReturn( serverCertificateChain );
         expect( mockWSSecurityServerConfig.getPrivateKey() ).andStubReturn( serverKeyPair.getPrivate() );
         expect( mockWSSecurityServerConfig.isOutboundSignatureNeeded() ).andStubReturn( true );
@@ -111,10 +109,11 @@ public abstract class AbstractWSTest<T> extends AbstractUnitTests<T> {
         super.setUpMocks();
     }
 
-    protected void _tearDown()
+    @Override
+    protected void tearDown()
             throws Exception {
 
-        super._tearDown();
+        super.tearDown();
 
         if (webServiceTestManager != null)
             webServiceTestManager.tearDown();

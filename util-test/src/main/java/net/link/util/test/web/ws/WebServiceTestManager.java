@@ -7,7 +7,6 @@
 
 package net.link.util.test.web.ws;
 
-import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -63,8 +62,7 @@ public class WebServiceTestManager {
         httpServer.start();
 
         String context = String.format( "%s/%s", this.contextPath, this.servlet );
-        HttpContext httpContext = httpServer.createContext( context );
-        endpoint.publish( httpContext );
+        endpoint.publish( httpServer.createContext( context ) );
     }
 
     public String getEndpointAddress() {
@@ -105,8 +103,11 @@ public class WebServiceTestManager {
             throws Exception {
 
         ServerSocket serverSocket = new ServerSocket( 0 );
-        int port = serverSocket.getLocalPort();
-        serverSocket.close();
-        return port;
+        try {
+            return serverSocket.getLocalPort();
+        }
+        finally {
+            serverSocket.close();
+        }
     }
 }
