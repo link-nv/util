@@ -19,13 +19,6 @@
 
     <dependencies>
 
-        <!-- Dependencies: Util -->
-        <dependency>
-            <groupId>net.lin-k.util</groupId>
-            <artifactId>util-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
         <!-- Dependencies: External -->
         <dependency>
             <groupId>com.lyndir.lhunath.jlibs</groupId>

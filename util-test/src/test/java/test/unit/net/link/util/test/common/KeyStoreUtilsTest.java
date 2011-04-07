@@ -5,7 +5,7 @@
  * Lin.k N.V. proprietary/confidential. Use is subject to license terms.
  */
 
-package test.unit.net.link.util.common;
+package test.unit.net.link.util.test.common;
 
 import static org.junit.Assert.*;
 
