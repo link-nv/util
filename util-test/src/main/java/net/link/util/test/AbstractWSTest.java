@@ -35,14 +35,14 @@ public abstract class AbstractWSTest<T> extends AbstractUnitTests<T> {
     protected WebServiceTestManager webServiceTestManager;
     protected T                     port;
 
-    protected long   applicationId;
+    protected long   testApplicationId;
     protected String testSubjectId;
 
-    private   KeyPair                 clientKeyPair;
+    protected KeyPair                 clientKeyPair;
     protected CertificateChain        clientCertificateChain;
     private   WSSecurityConfiguration mockWSSecurityClientConfig;
 
-    private   KeyPair                 serverKeyPair;
+    protected KeyPair                 serverKeyPair;
     protected CertificateChain        serverCertificateChain;
     private   WSSecurityConfiguration mockWSSecurityServerConfig;
 
@@ -51,7 +51,7 @@ public abstract class AbstractWSTest<T> extends AbstractUnitTests<T> {
             throws Exception {
 
         // Generic Data
-        applicationId = 1234567890;
+        testApplicationId = 1234567890;
         testSubjectId = UUID.randomUUID().toString();
 
         // WS Security
