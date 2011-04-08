@@ -70,6 +70,9 @@ public abstract class AbstractUnitTests<T> {
     public AbstractUnitTests() {
 
         testedClass = null;
+
+        // All mocks should be instance-scoped.  Clear the list so we don't replay/verify mocks from old instances.
+        mocks.clear();
     }
 
     public AbstractUnitTests(Class<? extends T> testedClass) {
