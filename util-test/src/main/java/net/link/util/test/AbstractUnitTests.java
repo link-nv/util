@@ -17,7 +17,7 @@ import net.link.util.j2ee.FieldNamingStrategy;
 import net.link.util.test.j2ee.EJBTestUtils;
 import net.link.util.test.j2ee.JNDITestUtils;
 import net.link.util.test.jpa.EntityTestManager;
-import org.easymock.EasyMock;
+import org.easymock.classextension.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 
@@ -266,7 +266,7 @@ public abstract class AbstractUnitTests<T> {
     protected static <M> M bindMock(M mock) {
 
         try {
-            jndiTestUtils.bindComponent( mock.getClass().getInterfaces()[0], mock );
+            jndiTestUtils.bindComponent( mock.getClass(), mock );
         }
         catch (NamingException e) {
             throw new RuntimeException( e );

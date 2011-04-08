@@ -7,6 +7,7 @@
 
 package net.link.util.test.j2ee;
 
+import com.lyndir.lhunath.lib.system.util.TypeUtils;
 import java.util.HashMap;
 import java.util.Map;
 import javax.ejb.Local;
@@ -142,12 +143,13 @@ public class JNDITestUtils {
 
     private String resolveJndiBinding(Class<?> beanClass) {
 
-        if (beanClass.isAnnotationPresent( LocalBinding.class ))
-            return beanClass.getAnnotation( LocalBinding.class ).jndiBinding();
-        else if (beanClass.isAnnotationPresent( Local.class ) && namingStrategy != null)
+        LocalBinding localBinding = TypeUtils.findAnnotation( beanClass, LocalBinding.class );
+        if (localBinding != null)
+            return localBinding.jndiBinding();
+        else if (TypeUtils.hasAnnotation( beanClass, Local.class ) && namingStrategy != null)
             return namingStrategy.calculateName( beanClass );
 
         throw new IllegalArgumentException(
-                "Could not determine the JNDI binding for:" + beanClass + " (has no LocalBinding or Local annotation?)" );
+                "Could not determine the JNDI binding for: " + beanClass + " (has no LocalBinding or Local annotation?)" );
     }
 }
