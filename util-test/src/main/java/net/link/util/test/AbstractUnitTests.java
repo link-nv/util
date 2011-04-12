@@ -243,8 +243,12 @@ public abstract class AbstractUnitTests<T> {
 
     protected void verifyAndResetUpMocks() {
 
-        EasyMock.verify( mocks.toArray() );
-        resetUpMocks();
+        try {
+            EasyMock.verify( mocks.toArray() );
+        }
+        finally {
+            resetUpMocks();
+        }
     }
 
     /**
