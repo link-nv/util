@@ -7,6 +7,7 @@
 package net.link.util.test;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableSet;
 import com.lyndir.lhunath.lib.system.logging.Logger;
 import java.util.*;
 import javax.naming.NamingException;
@@ -16,7 +17,7 @@ import net.link.util.j2ee.FieldNamingStrategy;
 import net.link.util.test.j2ee.EJBTestUtils;
 import net.link.util.test.j2ee.JNDITestUtils;
 import net.link.util.test.jpa.EntityTestManager;
-import org.easymock.EasyMock;
+import org.easymock.classextension.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 
@@ -55,7 +56,7 @@ public abstract class AbstractUnitTests<T> {
     protected static final JNDITestUtils     jndiTestUtils     = new JNDITestUtils();
     protected static final EntityTestManager entityTestManager = new EntityTestManager();
 
-    protected static final List<Object> mocks = new LinkedList<Object>();
+    protected static final List<Object> mocks = new ArrayList<Object>();
 
     static {
         jndiTestUtils.setUp();
@@ -69,6 +70,9 @@ public abstract class AbstractUnitTests<T> {
     public AbstractUnitTests() {
 
         testedClass = null;
+
+        // All mocks should be instance-scoped.  Clear the list so we don't replay/verify mocks from old instances.
+        mocks.clear();
     }
 
     public AbstractUnitTests(Class<? extends T> testedClass) {
@@ -108,17 +112,18 @@ public abstract class AbstractUnitTests<T> {
         Class<?>[] serviceBeanArray = getServiceBeans();
         if (serviceBeanArray == null)
             serviceBeanArray = new Class<?>[0];
-        LinkedList<Class<?>> serviceBeans = new LinkedList<Class<?>>( Arrays.asList( serviceBeanArray ) );
-        if (null != testedClass && !testedClass.isInterface() && !serviceBeans.contains( testedClass ))
-            serviceBeans.add( testedClass );
-        for (Class<?> beanClass : serviceBeans) {
+        ImmutableSet.Builder<Class<?>> serviceBeansBuilder = ImmutableSet.<Class<?>>builder().add( serviceBeanArray );
+        if (null != testedClass && !testedClass.isInterface())
+            serviceBeansBuilder.add( testedClass );
+        ImmutableSet<Class<?>> serviceBeans = serviceBeansBuilder.build();
+        Class<?>[] container = serviceBeans.toArray( new Class[0] );
 
-            Object serviceBean = EJBTestUtils.newInstance( beanClass, serviceBeanArray, entityManager );
+        for (Class<?> beanClass : serviceBeans) {
+            Object serviceBean = EJBTestUtils.newInstance( beanClass, container, entityManager );
             jndiTestUtils.bindComponent( beanClass, serviceBean );
 
-            if (null != testedClass)
-                if (testedClass.isAssignableFrom( beanClass ))
-                    testedBean = testedClass.cast( serviceBean );
+            if (testedClass != null && testedClass.isAssignableFrom( beanClass ))
+                testedBean = testedClass.cast( serviceBean );
         }
 
         setUp();
@@ -166,7 +171,12 @@ public abstract class AbstractUnitTests<T> {
     protected void tearDown()
             throws Exception {
 
-        EasyMock.reset( mocks.toArray() );
+        try {
+            EasyMock.verify( mocks.toArray() );
+            EasyMock.reset( mocks.toArray() );
+        }
+        catch (IllegalStateException ignored) {
+        }
     }
 
     // Utilities
@@ -203,6 +213,7 @@ public abstract class AbstractUnitTests<T> {
         return mocks;
     }
 
+    @Deprecated
     public static void reset(Void... args) {
 
         // Not allowed!  Use #resetUpMocks instead.
@@ -220,6 +231,7 @@ public abstract class AbstractUnitTests<T> {
         }
     }
 
+    @Deprecated
     public static void replay(Void... args) {
 
         // Not allowed!  Use #replayMocks instead.
@@ -236,6 +248,7 @@ public abstract class AbstractUnitTests<T> {
             }
     }
 
+    @Deprecated
     public static void verify(Void... args) {
 
         // Not allowed!  Use #verifyAndResetUpMocks instead.
@@ -257,7 +270,7 @@ public abstract class AbstractUnitTests<T> {
     protected static <M> M bindMock(M mock) {
 
         try {
-            jndiTestUtils.bindComponent( mock.getClass().getInterfaces()[0], mock );
+            jndiTestUtils.bindComponent( mock.getClass(), mock );
         }
         catch (NamingException e) {
             throw new RuntimeException( e );
