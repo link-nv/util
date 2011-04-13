@@ -175,7 +175,7 @@ exists() {
 # Return termination punctuation for a message, if necessary.
 #
 eol() {
-    [[ $1 && $1 != *[\!\?.,:\;\|] ]] && printf .. ||:
+    : #[[ $1 && $1 != *[\!\?.,:\;\|] ]] && printf .. ||:
 } # _____________________________________________________________________
 
 
@@ -706,6 +706,48 @@ trim() {
 
 
 #  ______________________________________________________________________
+# |__ Reverse ___________________________________________________________|
+#
+#       reverse [-0] [elements ...] [<<< elements]
+#
+# Reverse the order of the given elements.  Elements are read from command
+# arguments or standard input if no element arguments are given.
+# They are reversed and output on standard output.
+#
+# If the -0 option is given, input and output are delimited by NUL bytes.
+# Otherwise, they are delimited by newlines.
+#
+reverse() {
+   
+    # Initialize the vars.
+    local elements delimitor=$'\n'
+
+    # Parse the options.
+    while [[ $1 = -* ]]; do
+        case $1 in
+            -0) delimitor=$'\0' ;;
+            --) shift; break ;;
+        esac
+        shift
+    done
+
+    # Get the elements.
+    elements=( "$@" )
+    if (( ! ${#elements[@]} )); then
+        while IFS= read -r -d "$delimitor"; do
+            elements+=("$REPLY")
+        done
+    fi
+
+    # Iterate in reverse order.
+    for (( i=${#elements[@]} - 1; i >=0; --i )); do
+        printf '%s%s' "${elements[i]}" "$delimitor"
+    done
+} # _____________________________________________________________________
+
+
+
+#  ______________________________________________________________________
 # |__ SWait _____________________________________________________________|
 #
 #       swait pid...
@@ -891,6 +933,7 @@ quote() {
     while [[ $1 = -* ]]; do
         case $1 in
             -e) escape=1    ;;
+            --) shift; break ;;
         esac
         shift
     done

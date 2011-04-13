@@ -10,14 +10,9 @@ package net.link.util.ws.security;
 import com.google.common.collect.ImmutableSet;
 import com.lyndir.lhunath.lib.system.logging.Logger;
 import java.security.cert.X509Certificate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 import javax.annotation.PostConstruct;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
+import javax.naming.*;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPPart;
@@ -33,9 +28,7 @@ import net.link.util.j2ee.EJBUtils;
 import net.link.util.pkix.ClientCrypto;
 import net.link.util.pkix.ServerCrypto;
 import org.apache.ws.security.*;
-import org.apache.ws.security.message.WSSecHeader;
-import org.apache.ws.security.message.WSSecSignature;
-import org.apache.ws.security.message.WSSecTimestamp;
+import org.apache.ws.security.message.*;
 import org.apache.ws.security.message.token.Timestamp;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.joda.time.Duration;
@@ -54,16 +47,27 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
     public static final String TO_BE_SIGNED_IDS_SET        = WSSecurityHandler.class + ".toBeSignedIDs";
     public static final String SIGNED_ELEMENTS_CONTEXT_KEY = WSSecurityHandler.class + ".signed.elements";
 
-    private WSSecurityConfiguration configuration;
+    private final WSSecurityConfiguration configuration;
 
     public WSSecurityHandler() {
 
         try {
             Context ctx = new InitialContext();
-            Context env = (Context) ctx.lookup( "java:comp/env" );
-            String configurationServiceJndiName = (String) env.lookup( "wsSecurityConfigurationServiceJndiName" );
-            configuration = EJBUtils.getEJB( configurationServiceJndiName, WSSecurityConfiguration.class );
-        } catch (NamingException e) {
+            try {
+                Context env = (Context) ctx.lookup( "java:comp/env" );
+                String configurationServiceJndiName = (String) env.lookup( "wsSecurityConfigurationServiceJndiName" );
+                configuration = EJBUtils.getEJB( configurationServiceJndiName, WSSecurityConfiguration.class );
+            }
+            finally {
+                try {
+                    ctx.close();
+                }
+                catch (NamingException e) {
+                    logger.err( e, "While closing: %s", ctx );
+                }
+            }
+        }
+        catch (NamingException e) {
             throw new RuntimeException( "'wsSecurityConfigurationServiceJndiName' not specified", e );
         }
     }
@@ -153,7 +157,8 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
             wsSecSignature.prependToHeader( wsSecHeader );
             wsSecSignature.prependBSTElementToHeader( wsSecHeader );
             wsSecSignature.computeSignature();
-        } catch (WSSecurityException e) {
+        }
+        catch (WSSecurityException e) {
             logger.err( "While handling outbound WS request", e );
             return false;
         }
@@ -169,7 +174,8 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
         try {
             //noinspection unchecked
             wsSecurityEngineResults = WSSecurityEngine.getInstance().processSecurityHeader( document, null, null, new ServerCrypto() );
-        } catch (WSSecurityException e) {
+        }
+        catch (WSSecurityException e) {
             throw SOAPUtils.createSOAPFaultException( "The signature or decryption was invalid", "FailedCheck", e );
         }
         logger.dbg( "results: %s", wsSecurityEngineResults );
@@ -214,7 +220,8 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
                 throw SOAPUtils.createSOAPFaultException( "SOAP Body should have a wsu:Id attribute", "FailedCheck" );
             if (!isElementSigned( soapMessageContext, bodyId ))
                 throw SOAPUtils.createSOAPFaultException( "SOAP Body was not signed", "FailedCheck" );
-        } catch (SOAPException e) {
+        }
+        catch (SOAPException e) {
             throw SOAPUtils.createSOAPFaultException( "error retrieving SOAP Body", "FailedCheck", e );
         }
 

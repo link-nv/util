@@ -35,13 +35,14 @@ checkExit() {
     (( r )) && {
         case $step in
             0)  emit -R "Failed while preparing.  You may resume the process with the command:"
-                echo "$0 $*" ;;
+                printf "\tmvn-release %s\n" "$*" ;;
             1)  emit -R "Failed while performing.  You may resume the process with the command:"
-                echo "$0 -p $*" ;;
+                printf "\tmvn-release -p %s\n" "$*" ;;
             2)  emit -R "Failed while branching.  You may resume the process with the command:"
-                echo "$0 -b $*" ;;
+                printf "\tmvn-release -b %s\n" "$*" ;;
         esac
     }
+
     return $r
 }
 trap checkExit EXIT
@@ -68,8 +69,11 @@ shift $((OPTIND-1))
 
 # Ask for the to-be-released version number.
 while true; do
-    version=${1:-$(xpathNodes '/project/properties/release.version/text()' pom.xml)}
-    version=$(ask "Which version are you releasing? [$version] " || echo "$version")
+    [[ $version ]] || version=$(git describe --tags --abbrev=0)
+    [[ $version ]] || version=${1:-$(xpathNodes '/project/properties/release.version/text()' pom.xml)}
+    until version=$(ask "Which version are you releasing? [$version] " || echo "$version") && [[ $version ]]
+    do true; done
+
     if (( prepare )) && [[ $(git tag -l "$version") ]]; then
         emit -r "Version '$version' is already tagged."
     else
@@ -86,24 +90,30 @@ fi
 if (( prepare )); then
     emit "Updating Maven and GIT for the release of $version"
     if (( releasePom )); then
-        mvn -Prelease --batch-mode release:clean release:prepare-with-pom -Dtag="$version" -DreleaseVersion="$version" ||:
+        mvn -Prelease --batch-mode release:clean release:prepare-with-pom -DpushChanges=false -Dtag="$version" -DreleaseVersion="$version" ||:
         # Workaround for <http://jira.codehaus.org/browse/MRELEASE-539> -- Let normal release:prepare finish it off.
         git commit -vF <(echo '[maven-release-plugin] [workaround] release cleanup')
-        mvn -Prelease release:prepare
+        mvn -Prelease release:prepare -DpushChanges=false
     else
-        mvn -Prelease --batch-mode release:clean release:prepare -Dtag="$version" -DreleaseVersion="$version"
+        mvn -Prelease --batch-mode release:clean release:prepare -DpushChanges=false -Dtag="$version" -DreleaseVersion="$version"
     fi
 fi
 step=1
 
 # Perform the release by deploying the changes.
 if (( perform )); then
+    if (( prepare )); then
+        if ask -y!N "Release $version has been prepared.  Interrupt deployment for testing?"; then
+            exit 1
+        fi
+    fi
+
     emit "Deploying the code for the release of $version"
     if (( releasePom )); then
         # Workaround for <http://jira.codehaus.org/browse/MRELEASE-542> -- Force use of release-pom.xml
         mvn -Prelease release:perform -D"arguments=-f release-pom.xml"
     else
-        mvn -Prelease release:perform
+        mvn -Prelease release:perform -DpushChanges=true -Dtag="$version"
     fi
 fi
 step=2
