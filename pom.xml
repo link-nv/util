@@ -85,6 +85,7 @@
         <snapshotRepository>
             <id>repo.linkid.be</id>
             <url>scpexe://repo.linkid.be/home/maven/repository/snapshots</url>
+            <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
     </distributionManagement>
     <reporting>
