@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.*;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.*;
+import com.lyndir.lhunath.lib.system.logging.Logger;
 import com.lyndir.lhunath.lib.system.logging.exception.InternalInconsistencyException;
 import com.lyndir.lhunath.lib.system.util.TypeUtils;
 import java.io.File;
@@ -19,8 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.format.ISODateTimeFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -32,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DefaultConfigFactory {
 
-    private static final Logger logger = LoggerFactory.getLogger( DefaultConfigFactory.class );
+    static final Logger logger = Logger.get( DefaultConfigFactory.class );
 
     private static final String  DEFAULT_CONFIG_RESOURCE = "config";
     private static final Pattern SYSTEM_PROPERTY         = Pattern.compile( "\\$\\{([^\\}]*)\\}" );
@@ -63,14 +62,14 @@ public class DefaultConfigFactory {
                 if (configUrl != null)
                     try {
                         properties.loadFromXML( configUrl.openStream() );
-                        logger.info( "Loaded config from: " + configUrl );
+                        logger.dbg( "Loaded config from: %s", configUrl );
                         for (Map.Entry<Object, Object> config : properties.entrySet())
-                            logger.info( String.format( "    - %-30s = %s", config.getKey(), config.getValue() ) );
+                            logger.dbg( "    - %-30s = %s", config.getKey(), config.getValue() );
 
                         return properties;
                     }
                     catch (IOException e) {
-                        logger.error( "While loading config from: " + configUrl, e );
+                        logger.err( e, "While loading config from: %s", configUrl, e );
                     }
             }
 
@@ -80,19 +79,19 @@ public class DefaultConfigFactory {
                 if (configUrl != null)
                     try {
                         properties.load( configUrl.openStream() );
-                        logger.info( "Loaded config from: " + configUrl );
+                        logger.dbg( "Loaded config from: %s", configUrl );
                         for (Map.Entry<Object, Object> config : properties.entrySet())
-                            logger.info( String.format( "    - %30s = %s", config.getKey(), config.getValue() ) );
+                            logger.dbg( "    - %30s = %s", config.getKey(), config.getValue() );
 
                         return properties;
                     }
                     catch (IOException e) {
-                        logger.error( "While loading config from: " + configUrl, e );
+                        logger.err( e, "While loading config from: " + configUrl );
                     }
             }
 
             // No properties files loaded.
-            logger.debug( "No properties found." );
+            logger.dbg( "No properties found." );
             return properties;
         }
     };
@@ -643,8 +642,8 @@ public class DefaultConfigFactory {
                 if (value == null)
                     value = getDefaultValueFor( method );
 
-            logger.debug( String.format( "%s %s#%s = %s", //
-                    method.getReturnType().getSimpleName(), method.getDeclaringClass().getSimpleName(), method.getName(), value ) );
+            logger.dbg( "%s %s#%s = %s", method.getReturnType().getSimpleName(), method.getDeclaringClass().getSimpleName(),
+                    method.getName(), value );
             return value;
         }
 

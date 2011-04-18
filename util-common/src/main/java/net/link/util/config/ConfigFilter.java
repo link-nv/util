@@ -3,10 +3,10 @@ package net.link.util.config;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static net.link.util.config.ConfigHolder.factory;
 
+import com.lyndir.lhunath.lib.system.logging.Logger;
 import java.io.IOException;
 import javax.servlet.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.servlet.http.HttpServletRequest;
 
 
 /**
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class ConfigFilter implements Filter {
 
-    private static final Logger logger = LoggerFactory.getLogger( ConfigFilter.class );
+    static final Logger logger = Logger.get( ConfigFilter.class );
 
     private final ConfigHolder<?> configHolder;
 
@@ -51,7 +51,8 @@ public abstract class ConfigFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        logger.debug( "Setting config context={}: configHolder={}", servletContext.getServletContextName(), configHolder );
+        logger.dbg( "[>>>] %s: %s @ %s", servletContext.getServletContextName(), configHolder.getClass().getSimpleName(),
+                request instanceof HttpServletRequest? ((HttpServletRequest) request).getRequestURL(): null );
 
         try {
             ConfigHolder.setLocalConfigHolder( configHolder );
@@ -64,7 +65,7 @@ public abstract class ConfigFilter implements Filter {
             factory().unsetServletRequest();
             factory().unsetServletContext();
             ConfigHolder.unsetLocalConfigHolder();
-            logger.debug( "Unset config context={}: configHolder={}", servletContext.getServletContextName(), configHolder );
+            logger.dbg( "[<<<] %s: %s", configHolder.getClass().getSimpleName(), servletContext.getServletContextName() );
         }
     }
 
