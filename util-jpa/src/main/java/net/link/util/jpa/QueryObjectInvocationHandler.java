@@ -66,8 +66,16 @@ public class QueryObjectInvocationHandler implements InvocationHandler {
     private Object query(QueryMethod queryMethodAnnotation, Method method, Object[] args) {
 
         String namedQueryName = queryMethodAnnotation.value();
-        if (namedQueryName == null || namedQueryName.isEmpty())
-            namedQueryName = method.getDeclaringClass().getSimpleName() + '.' + method.getName();
+        if (namedQueryName == null || namedQueryName.isEmpty()) {
+            StringBuilder name = new StringBuilder( method.getName() );
+            Class<?> type = method.getDeclaringClass();
+            do {
+                name.insert( 0, '.' ).insert( 0, type.getSimpleName() );
+                type = type.getEnclosingClass();
+            }
+            while (type != null);
+            namedQueryName = name.toString();
+        }
         Query query = entityManager.createNamedQuery( namedQueryName );
 
         setParameters( method, args, query );

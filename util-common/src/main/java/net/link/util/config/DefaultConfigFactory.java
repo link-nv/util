@@ -1,9 +1,9 @@
 package net.link.util.config;
 
-import static com.google.common.base.Preconditions.*;
-
+import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.*;
+import com.google.common.io.Resources;
 import com.lyndir.lhunath.lib.system.logging.Logger;
 import com.lyndir.lhunath.lib.system.logging.exception.InternalInconsistencyException;
 import com.lyndir.lhunath.lib.system.util.TypeUtils;
@@ -11,15 +11,20 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.*;
 import java.net.URL;
+import java.security.KeyStore;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
+import net.link.util.common.KeyStoreUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.format.ISODateTimeFormat;
+
+import static com.google.common.base.Preconditions.*;
 
 
 /**
@@ -221,7 +226,7 @@ public class DefaultConfigFactory {
     public final <C> C getDefaultWrapper(final C config) {
 
         // Check whether the type is a config group and determine the prefix to use for finding keys in this type.
-        Config.Group configGroupAnnotation = checkNotNull( TypeUtils.findAnnotation( config.getClass(), Config.Group.class ),
+        checkNotNull( TypeUtils.findAnnotation( config.getClass(), Config.Group.class ),
                 "Can't create a config wrapper for %s, it is not a config group (has no @Group).", config.getClass() );
 
         // Get the proxy that will service this type.
@@ -314,6 +319,7 @@ public class DefaultConfigFactory {
      *
      * @return The default value for the configuration item or <code>null</code>  if there is no default value.
      */
+    @Nullable
     protected String findDefaultValueFor(Method method) {
 
         Config.Property propertyAnnotation = checkNotNull( TypeUtils.findAnnotation( method, Config.Property.class ),
@@ -323,8 +329,17 @@ public class DefaultConfigFactory {
         if (propertyAnnotation.unset().equals( Config.Property.AUTO ))
             value = generateValue( method );
 
-        else if (!propertyAnnotation.unset().equals( Config.Property.NONE ))
+        else if (!propertyAnnotation.unset().equals( Config.Property.NONE )) {
             value = propertyAnnotation.unset();
+            if (value.startsWith( "load:" ))
+                try {
+                    value = Resources.toString( method.getDeclaringClass().getClassLoader().getResource( value.substring( 5 ) ),
+                            Charsets.UTF_8 );
+                }
+                catch (IOException e) {
+                    logger.err( e, "While loading unset value for " + method );
+                }
+        }
 
         return value;
     }
@@ -346,6 +361,7 @@ public class DefaultConfigFactory {
      *
      * @return The generated value.
      */
+    @Nullable
     protected String generateValueExtension(@NotNull final Method method) {
 
         return null;
@@ -356,6 +372,7 @@ public class DefaultConfigFactory {
      *
      * @return The value for the given property.
      */
+    @Nullable
     protected String getProperty(String key) {
 
         // logger.debug( "Getting property: {}", key );
@@ -387,6 +404,16 @@ public class DefaultConfigFactory {
             return type.cast( new Duration( Long.valueOf( value ).longValue() ) );
 
         // KeyStores
+        if (KeyStore.class.isAssignableFrom( type )) {
+            Iterator<String> values = Splitter.on( ':' ).split( value ).iterator();
+            String resource = values.hasNext()? values.next(): null;
+            String password = values.hasNext()? values.next(): null;
+            String format = values.hasNext()? values.next(): "JKS";
+
+            return type.cast(
+                    KeyStoreUtils.loadKeyStore( format, Thread.currentThread().getContextClassLoader().getResourceAsStream( resource ),
+                            password == null? null: password.toCharArray() ) );
+        }
         if (KeyProvider.class.isAssignableFrom( type )) {
 
             Matcher matcher = KEYSTORE_PATTERN.matcher( value );
@@ -524,6 +551,7 @@ public class DefaultConfigFactory {
      *
      * @return The value, converted to an instance of the given type.
      */
+    @Nullable
     protected <T> T toTypeExtension(@NotNull final String value, @NotNull final Class<T> type) {
 
         return null;
@@ -538,6 +566,7 @@ public class DefaultConfigFactory {
      *
      * @return The given data, processed by the specified filter operations.
      */
+    @Nullable
     protected static String filter(String value) {
 
         if (value == null)
@@ -584,6 +613,7 @@ public class DefaultConfigFactory {
             this.proxyPrefix = proxyPrefix;
         }
 
+        @Override
         public Object invoke(Object proxy, Method method, Object[] args)
                 throws Throwable {
 
@@ -620,6 +650,7 @@ public class DefaultConfigFactory {
             this.config = config;
         }
 
+        @Override
         public Object invoke(Object proxy, Method method, Object[] args)
                 throws Throwable {
 

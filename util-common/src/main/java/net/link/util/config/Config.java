@@ -60,5 +60,11 @@ public interface Config {
         boolean required();
 
         String unset() default NONE;
+
+        EditField editAs() default EditField.TYPE_DEFAULT;
+    }
+
+    enum EditField {
+        TYPE_DEFAULT, ONE_LINE, MULTI_LINE, BINARY
     }
 }

@@ -6,8 +6,6 @@
  */
 package net.link.util.j2ee;
 
-import static com.google.common.base.Preconditions.*;
-
 import com.google.common.base.*;
 import com.lyndir.lhunath.lib.system.logging.Logger;
 import com.lyndir.lhunath.lib.system.util.ObjectUtils;
@@ -18,6 +16,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.ejb3.annotation.LocalBinding;
 import org.jboss.ejb3.annotation.RemoteBinding;
+import org.jetbrains.annotations.Nullable;
+
+import static com.google.common.base.Preconditions.*;
 
 
 /**
@@ -44,7 +45,8 @@ public class FieldNamingStrategy implements NamingStrategy {
         @Override
         public String apply(final TypeUtils.LastResult<Class<?>, String> from) {
 
-            return ObjectUtils.getOrDefault( from.getLastResult(), new Supplier<String>() {
+            return ObjectUtils.ifNotNullElse( from.getLastResult(), new Supplier<String>() {
+                @Nullable
                 @Override
                 public String get() {
 
@@ -83,6 +85,7 @@ public class FieldNamingStrategy implements NamingStrategy {
                 + "interfaces: " + ObjectUtils.describe( ejbType.getInterfaces() ) );
     }
 
+    @Override
     public boolean isSupported(Field field) {
 
         return field.isAnnotationPresent( EJB.class );

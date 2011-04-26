@@ -51,8 +51,8 @@ public abstract class ConfigFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        logger.dbg( "[>>>] %s: %s @ %s", servletContext.getServletContextName(), configHolder.getClass().getSimpleName(),
-                request instanceof HttpServletRequest? ((HttpServletRequest) request).getRequestURL(): null );
+        logger.dbg( "[>>>] %s: %s @ %s", configHolder.getClass().getSimpleName(), servletContext.getServletContextName(),
+                    request instanceof HttpServletRequest? ((HttpServletRequest) request).getRequestURL(): null );
 
         try {
             ConfigHolder.setLocalConfigHolder( configHolder );
