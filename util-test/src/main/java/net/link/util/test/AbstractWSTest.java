@@ -7,8 +7,6 @@
 
 package net.link.util.test;
 
-import static org.easymock.EasyMock.*;
-
 import com.google.common.collect.ImmutableList;
 import java.security.KeyPair;
 import java.util.UUID;
@@ -23,6 +21,8 @@ import net.link.util.test.web.ws.WebServiceTestManager;
 import net.link.util.ws.security.WSSecurityConfiguration;
 import net.link.util.ws.security.WSSecurityHandler;
 import org.joda.time.Duration;
+
+import static org.easymock.EasyMock.*;
 
 
 /**
@@ -54,11 +54,21 @@ public abstract class AbstractWSTest<T> extends AbstractUnitTests<T> {
         testApplicationId = 1234567890;
         testSubjectId = UUID.randomUUID().toString();
 
-        // WS Security
+        // Dummy WS Servlet & WS Security Handlers
+        webServiceTestManager = new WebServiceTestManager();
+        // - Server
+        mockWSSecurityServerConfig = createMock( WSSecurityConfiguration.class );
+        serverKeyPair = PkiTestUtils.generateKeyPair();
+        serverCertificateChain = new CertificateChain( PkiTestUtils.generateSelfSignedCertificate( serverKeyPair, "CN=server" ) );
+
+        jndiTestUtils.bindComponent( "java:comp/env/wsSecurityConfigurationServiceJndiName", "wsSecurityConfigurationServiceJndiName" );
+        jndiTestUtils.bindComponent( "wsSecurityConfigurationServiceJndiName", mockWSSecurityServerConfig );
+        webServiceTestManager.setUp( newPortImplementation() );
+
         // - Client
         mockWSSecurityClientConfig = createMock( WSSecurityConfiguration.class );
         clientKeyPair = PkiTestUtils.generateKeyPair();
-        clientCertificateChain = new CertificateChain( PkiTestUtils.generateSelfSignedCertificate( clientKeyPair, "CN=Test" ) );
+        clientCertificateChain = new CertificateChain( PkiTestUtils.generateSelfSignedCertificate( clientKeyPair, "CN=client" ) );
 
         port = newClientPort();
         Binding binding = ((BindingProvider) port).getBinding();
@@ -67,18 +77,6 @@ public abstract class AbstractWSTest<T> extends AbstractUnitTests<T> {
                                               .addAll( binding.getHandlerChain() )
                                               .add( new WSSecurityHandler( mockWSSecurityClientConfig ) )
                                               .build() );
-
-        // - Server
-        mockWSSecurityServerConfig = createMock( WSSecurityConfiguration.class );
-        serverKeyPair = PkiTestUtils.generateKeyPair();
-        serverCertificateChain = new CertificateChain( PkiTestUtils.generateSelfSignedCertificate( serverKeyPair, "CN=linkID" ) );
-
-        jndiTestUtils.bindComponent( "java:comp/env/wsSecurityConfigurationServiceJndiName", "wsSecurityConfigurationServiceJndiName" );
-        jndiTestUtils.bindComponent( "wsSecurityConfigurationServiceJndiName", mockWSSecurityServerConfig );
-
-        // WS servlet
-        webServiceTestManager = new WebServiceTestManager();
-        webServiceTestManager.setUp( newPortImplementation() );
         webServiceTestManager.becomeEndpointOf( port );
 
         super.setUp();
@@ -117,6 +115,11 @@ public abstract class AbstractWSTest<T> extends AbstractUnitTests<T> {
 
         if (webServiceTestManager != null)
             webServiceTestManager.tearDown();
+    }
+
+    protected BindingProvider getBindingProvider() {
+
+        return (BindingProvider) port;
     }
 
     protected abstract T newClientPort();
