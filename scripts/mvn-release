@@ -89,14 +89,18 @@ fi
 
 # Prepare the release by updating versions and tagging in SCM.
 if (( prepare )); then
+    if [[ -e pom.xml.releaseBackup ]]; then
+        ask -Y!n "A release preparation is already in progress.  Resume it?"  || cleanRelease=release:clean
+    fi
+
     emit "Updating Maven and GIT for the release of $version"
     if (( releasePom )); then
-        mvn -Prelease --batch-mode release:clean release:prepare-with-pom -DpushChanges=false -Dtag="$version" -DreleaseVersion="$version" ||:
+        mvn -Prelease --batch-mode $cleanRelease release:prepare-with-pom -DpushChanges=false -Dtag="$version" -DreleaseVersion="$version" ||:
         # Workaround for <http://jira.codehaus.org/browse/MRELEASE-539> -- Let normal release:prepare finish it off.
         git commit -vF <(echo '[maven-release-plugin] [workaround] release cleanup')
         mvn -Prelease release:prepare -DpushChanges=false
     else
-        mvn -Prelease --batch-mode release:clean release:prepare -DpushChanges=false -Dtag="$version" -DreleaseVersion="$version"
+        mvn -Prelease --batch-mode $cleanRelease release:prepare -DpushChanges=false -Dtag="$version" -DreleaseVersion="$version"
     fi
 fi
 step=1
