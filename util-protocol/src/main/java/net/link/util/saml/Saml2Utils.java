@@ -7,8 +7,6 @@
 
 package net.link.util.saml;
 
-import static com.google.common.base.Preconditions.*;
-
 import be.fedict.trust.MemoryCertificateRepository;
 import be.fedict.trust.TrustValidator;
 import com.google.common.base.Charsets;
@@ -28,7 +26,10 @@ import javax.xml.namespace.QName;
 import net.link.util.common.CertificateChain;
 import net.link.util.common.DomUtils;
 import net.link.util.error.ValidationFailedException;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
+import org.joda.time.ReadableDateTime;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLObject;
 import org.opensaml.common.SignableSAMLObject;
@@ -63,6 +64,8 @@ import org.opensaml.xml.signature.impl.SignatureBuilder;
 import org.opensaml.xml.util.Base64;
 import org.opensaml.xml.validation.ValidationException;
 import org.w3c.dom.Element;
+
+import static com.google.common.base.Preconditions.*;
 
 
 /**
@@ -238,29 +241,33 @@ public abstract class Saml2Utils {
     /**
      * Validate the signature on specified {@link Signature}.
      *
-     *
      * @param signature           Signature to validate if not using HTTP Redirect binding.
      * @param request             Request to obtain signature from if using HTTP Redirect binding.
      * @param trustedCertificates Certificates that are trusted.  The signature must validate against one of these.
      *
+     * @return The certificate chain provided by the request or <code>null</code> if the binding does not support passing certificate
+     *         information. The chain can be empty if the binding supports passing certificate information but none are provided.
+     *
      * @throws ValidationFailedException The signature could not be trusted.
      */
+    @Nullable
     public static CertificateChain validateSignature(Signature signature, HttpServletRequest request,
                                                      Collection<X509Certificate> trustedCertificates)
             throws ValidationFailedException {
 
         if (signature != null)
-            return validateSignature( signature, trustedCertificates );
+            return validatePostSignature( signature, trustedCertificates );
 
         // No signature inside the SAML object, must be in the queryString (SAML HTTP Redirect Binding)
-        validateSignature(
+        validateRedirectSignature(
                 checkNotNull( request, "No signature found in SAML object and no query data provided to search for a signature." ),
                 trustedCertificates );
 
         return null;
     }
 
-    private static CertificateChain validateSignature(Signature signature, Collection<X509Certificate> trustedCertificates)
+    @NotNull
+    private static CertificateChain validatePostSignature(Signature signature, Collection<X509Certificate> trustedCertificates)
             throws ValidationFailedException {
 
         logger.dbg( "validate[HTTP POST], Signature:\n%s", DomUtils.domToString( signature.getDOM(), true ) );
@@ -303,7 +310,7 @@ public abstract class Saml2Utils {
         }
     }
 
-    private static void validateSignature(HttpServletRequest request, Collection<X509Certificate> trustedCertificates)
+    private static void validateRedirectSignature(HttpServletRequest request, Collection<X509Certificate> trustedCertificates)
             throws ValidationFailedException {
 
         logger.dbg( "validate[HTTP Redirect], Query:\n%s", request.getQueryString() );
@@ -375,33 +382,36 @@ public abstract class Saml2Utils {
     }
 
     /**
-     * Validate the specified {@link Assertion}.
+     * Checks whether the assertion is well formed and validates against some given data.
      *
      * @param assertion        the assertion to validate
-     * @param now              time to validate the conditions in the assertion against.
+     * @param now              Check whether the assertion is valid at this instant.
      * @param expectedAudience expected audience matching the optional audience restriction
      *
      * @throws ValidationFailedException validation failed.
      */
-    public static void validateAssertion(Assertion assertion, DateTime now, String expectedAudience)
+    public static void validateAssertion(@NotNull Assertion assertion, @Nullable ReadableDateTime now, @Nullable String expectedAudience)
             throws ValidationFailedException {
 
         Conditions conditions = assertion.getConditions();
         DateTime notBefore = conditions.getNotBefore();
         DateTime notOnOrAfter = conditions.getNotOnOrAfter();
 
-        logger.dbg( "now: %s", now.toString() );
-        logger.dbg( "notBefore: %s", notBefore.toString() );
-        logger.dbg( "notOnOrAfter : %s", notOnOrAfter.toString() );
+        logger.dbg( "now: %s", now );
+        logger.dbg( "notBefore: %s", notBefore );
+        logger.dbg( "notOnOrAfter : %s", notOnOrAfter );
 
-        if (now.isBefore( notBefore )) {
-            // time skew
-            if (now.plusMinutes( 5 ).isBefore( notBefore ) || now.minusMinutes( 5 ).isAfter( notOnOrAfter ))
+        if (now != null) {
+            if (now.isBefore( notBefore )) {
+                // time skew
+                DateTime nowDt = now.toDateTime();
+                if (nowDt.plusMinutes( 5 ).isBefore( notBefore ) || nowDt.minusMinutes( 5 ).isAfter( notOnOrAfter ))
+                    throw new ValidationFailedException(
+                            "SAML2 assertion validation audience=" + expectedAudience + " : invalid SAML message timeframe" );
+            } else if (now.isBefore( notBefore ) || now.isAfter( notOnOrAfter ))
                 throw new ValidationFailedException(
                         "SAML2 assertion validation audience=" + expectedAudience + " : invalid SAML message timeframe" );
-        } else if (now.isBefore( notBefore ) || now.isAfter( notOnOrAfter ))
-            throw new ValidationFailedException(
-                    "SAML2 assertion validation audience=" + expectedAudience + " : invalid SAML message timeframe" );
+        }
 
         Subject subject = assertion.getSubject();
         if (null == subject)
@@ -445,7 +455,7 @@ public abstract class Saml2Utils {
      *
      * @throws ValidationFailedException validation failed.
      */
-    public static void validateAudienceRestriction(Conditions conditions, String expectedAudience)
+    public static void validateAudienceRestriction(@NotNull Conditions conditions, @NotNull String expectedAudience)
             throws ValidationFailedException {
 
         List<AudienceRestriction> audienceRestrictions = conditions.getAudienceRestrictions();
