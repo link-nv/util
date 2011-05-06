@@ -6,19 +6,18 @@
  */
 package net.link.util.j2ee;
 
-import com.google.common.base.*;
+import static com.google.common.base.Preconditions.*;
+
+import com.google.common.base.Function;
+import com.google.common.base.Throwables;
 import com.lyndir.lhunath.lib.system.logging.Logger;
 import com.lyndir.lhunath.lib.system.util.ObjectUtils;
 import com.lyndir.lhunath.lib.system.util.TypeUtils;
 import java.lang.reflect.Field;
 import javax.ejb.EJB;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.ejb3.annotation.LocalBinding;
 import org.jboss.ejb3.annotation.RemoteBinding;
 import org.jetbrains.annotations.Nullable;
-
-import static com.google.common.base.Preconditions.*;
 
 
 /**
@@ -42,30 +41,21 @@ public class FieldNamingStrategy implements NamingStrategy {
     static final Logger logger = Logger.get( FieldNamingStrategy.class );
 
     private static final Function<TypeUtils.LastResult<Class<?>, String>, String> findJNDIBindingFunction = new Function<TypeUtils.LastResult<Class<?>, String>, String>() {
+        @Nullable
         @Override
         public String apply(final TypeUtils.LastResult<Class<?>, String> from) {
 
-            return ObjectUtils.ifNotNullElse( from.getLastResult(), new Supplier<String>() {
-                @Nullable
-                @Override
-                public String get() {
+            try {
+                Field jndiBinding = from.getCurrent().getDeclaredField( "JNDI_BINDING" );
+                throw new TypeUtils.BreakException( jndiBinding.get( null ).toString() );
+            }
 
-                    try {
-                        Field jndiBinding = from.getCurrent().getDeclaredField( "JNDI_BINDING" );
-                        if (jndiBinding == null)
-                            return null;
-
-                        return jndiBinding.get( null ).toString();
-                    }
-
-                    catch (NoSuchFieldException ignored) {
-                        return null;
-                    }
-                    catch (IllegalAccessException e) {
-                        throw Throwables.propagate( e );
-                    }
-                }
-            } );
+            catch (NoSuchFieldException ignored) {
+                return null;
+            }
+            catch (IllegalAccessException e) {
+                throw Throwables.propagate( e );
+            }
         }
     };
 
@@ -81,18 +71,13 @@ public class FieldNamingStrategy implements NamingStrategy {
             return remoteBinding.jndiBinding();
 
         return checkNotNull( TypeUtils.forEachSuperTypeOf( ejbType, findJNDIBindingFunction, findJNDIBindingFunction ),
-                "JNDI Binding not found for type: " + ejbType + "(super: " + ejbType.getSuperclass() + "), " //
-                + "interfaces: " + ObjectUtils.describe( ejbType.getInterfaces() ) );
+                "JNDI Binding not found for type: %s (super: %s), interfaces: %s", ejbType, ejbType.getSuperclass(),
+                ObjectUtils.describe( ejbType.getInterfaces() ) );
     }
 
     @Override
     public boolean isSupported(Field field) {
 
         return field.isAnnotationPresent( EJB.class );
-    }
-
-    private Log getLog() {
-
-        return LogFactory.getLog( getClass() );
     }
 }

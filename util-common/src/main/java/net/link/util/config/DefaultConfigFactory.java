@@ -1,5 +1,7 @@
 package net.link.util.config;
 
+import static com.google.common.base.Preconditions.*;
+
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.*;
@@ -13,18 +15,19 @@ import java.lang.reflect.*;
 import java.net.URL;
 import java.security.KeyStore;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import net.link.util.common.KeyStoreUtils;
+import net.link.util.config.Config.Group;
+import net.link.util.config.Config.Property;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.format.ISODateTimeFormat;
-
-import static com.google.common.base.Preconditions.*;
 
 
 /**
@@ -44,17 +47,16 @@ public class DefaultConfigFactory {
     private static final Pattern TRAILING_WHITESPACE     = Pattern.compile( "\\s+$" );
     private static final Pattern COMMA_DELIMITOR         = Pattern.compile( "\\s*,\\s*" );
     /**
-     * <p>type:[alias[:pass1[:pass2]]@]path</p>
+     * <p>type://[alias[:pass1[:pass2]]@]path</p>
      * <p/>
      * Note: <b>passwords and aliases cannot contain ':' or '@' symbols</b>
      */
     private static final Pattern KEYSTORE_PATTERN        = Pattern.compile( "^(.*?)://(?:([^:@]*)(?::([^:@]*)(?::([^:@]*))?)?@)?(.*)" );
 
-    private final ClassToInstanceMap<Object>  proxyMap       = MutableClassToInstanceMap.create();
-    private final Map<Object, Object>         wrapperMap     = Maps.newHashMap();
-    private final ThreadLocal<ServletContext> servletContext = new ThreadLocal<ServletContext>();
-    private final ThreadLocal<ServletRequest> servletRequest = new ThreadLocal<ServletRequest>();
-    private final ThreadLocal<Properties>     properties     = new ThreadLocal<Properties>() {
+    private static final ThreadLocal<ServletContext> servletContextTL = new ThreadLocal<ServletContext>();
+    private static final ThreadLocal<ServletRequest> servletRequestTL = new ThreadLocal<ServletRequest>();
+    @SuppressWarnings("ThreadLocalNotStaticFinal")
+    private final        ThreadLocal<Properties>     propertiesTL     = new ThreadLocal<Properties>() {
         @Override
         protected Properties initialValue() {
 
@@ -68,7 +70,7 @@ public class DefaultConfigFactory {
                     try {
                         properties.loadFromXML( configUrl.openStream() );
                         logger.dbg( "Loaded config from: %s", configUrl );
-                        for (Map.Entry<Object, Object> config : properties.entrySet())
+                        for (Entry<Object, Object> config : properties.entrySet())
                             logger.dbg( "    - %-30s = %s", config.getKey(), config.getValue() );
 
                         return properties;
@@ -85,13 +87,13 @@ public class DefaultConfigFactory {
                     try {
                         properties.load( configUrl.openStream() );
                         logger.dbg( "Loaded config from: %s", configUrl );
-                        for (Map.Entry<Object, Object> config : properties.entrySet())
+                        for (Entry<Object, Object> config : properties.entrySet())
                             logger.dbg( "    - %30s = %s", config.getKey(), config.getValue() );
 
                         return properties;
                     }
                     catch (IOException e) {
-                        logger.err( e, "While loading config from: " + configUrl );
+                        logger.err( e, "While loading config from: %s", configUrl );
                     }
             }
 
@@ -101,6 +103,8 @@ public class DefaultConfigFactory {
         }
     };
 
+    private final ClassToInstanceMap<Object> proxyMap   = MutableClassToInstanceMap.create();
+    private final Map<Object, Object>        wrapperMap = Maps.newHashMap();
     private final String configResourceName;
 
     public DefaultConfigFactory() {
@@ -113,46 +117,48 @@ public class DefaultConfigFactory {
         this.configResourceName = configResourceName;
     }
 
+    @SuppressWarnings("HardcodedFileSeparator")
     protected Iterable<String> getXMLResources() {
 
-        return ImmutableList.of( configResourceName + ".xml", "../conf/" + configResourceName + ".xml",
-                "../etc/" + configResourceName + ".xml" );
+        return ImmutableList.of( String.format( "%s.xml", configResourceName ), String.format( "../conf/%s.xml", configResourceName ),
+                String.format( "../etc/%s.xml", configResourceName ) );
     }
 
+    @SuppressWarnings("HardcodedFileSeparator")
     protected Iterable<String> getPlainResources() {
 
-        return ImmutableList.of( configResourceName + ".properties", "../conf/" + configResourceName + ".properties",
-                "../etc/" + configResourceName + ".properties" );
+        return ImmutableList.of( String.format( "%s.properties", configResourceName ),
+                String.format( "../conf/%s.properties", configResourceName ), String.format( "../etc/%s.properties", configResourceName ) );
     }
 
     protected ServletContext getServletContext() {
 
-        return servletContext.get();
+        return servletContextTL.get();
     }
 
     public void setServletContext(ServletContext servletContext) {
 
-        this.servletContext.set( servletContext );
+        servletContextTL.set( servletContext );
     }
 
     public void unsetServletContext() {
 
-        servletContext.remove();
+        servletContextTL.remove();
     }
 
     protected ServletRequest getServletRequest() {
 
-        return servletRequest.get();
+        return servletRequestTL.get();
     }
 
     public void setServletRequest(ServletRequest servletRequest) {
 
-        this.servletRequest.set( servletRequest );
+        servletRequestTL.set( servletRequest );
     }
 
     public void unsetServletRequest() {
 
-        servletRequest.remove();
+        servletRequestTL.remove();
     }
 
     /**
@@ -198,9 +204,9 @@ public class DefaultConfigFactory {
 
         // Check whether the type is a config group and determine the prefix to use for finding keys in this type.
         checkArgument( type.isInterface(), "Can't create a config proxy for %s, it is not an interface.", type );
-        Config.Group configGroupAnnotation = checkNotNull( TypeUtils.findAnnotation( type, Config.Group.class ),
+        Group configGroupAnnotation = checkNotNull( TypeUtils.findAnnotation( type, Group.class ),
                 "Can't create a config proxy for %s, it is not a config group (has no @Group).", type );
-        String proxyPrefix = prefix + configGroupAnnotation.prefix();
+        String proxyPrefix = String.format( "%s%s", prefix, configGroupAnnotation.prefix() );
         if (!configGroupAnnotation.prefix().isEmpty())
             proxyPrefix += '.';
 
@@ -214,7 +220,7 @@ public class DefaultConfigFactory {
     }
 
     /**
-     * Get a wrapper for the given configuration implementation that tries to resolve <code>null</code> return values from the method's
+     * Get a wrapper for the given configuration implementation that tries to resolve {@code null} return values from the method's
      * annotations.
      *
      * @param config The configuration implementation that we should wrap.
@@ -222,11 +228,11 @@ public class DefaultConfigFactory {
      *
      * @return A wrapper for the given config implementation.
      */
-    @SuppressWarnings( { "unchecked" })
+    @SuppressWarnings("unchecked")
     public final <C> C getDefaultWrapper(final C config) {
 
         // Check whether the type is a config group and determine the prefix to use for finding keys in this type.
-        checkNotNull( TypeUtils.findAnnotation( config.getClass(), Config.Group.class ),
+        checkNotNull( TypeUtils.findAnnotation( config.getClass(), Group.class ),
                 "Can't create a config wrapper for %s, it is not a config group (has no @Group).", config.getClass() );
 
         // Get the proxy that will service this type.
@@ -257,7 +263,7 @@ public class DefaultConfigFactory {
      * implementation handler couldn't resolve a value.
      *
      * @param config The configuration object which provides the normal values.  Invoke the handled method on this object to see if the
-     *               implementation has a value to provide.  If the return value of this call is <code>null</code> , provide a default
+     *               implementation has a value to provide.  If the return value of this call is {@code null} , provide a default
      *               value
      *               for the method call.
      *
@@ -277,12 +283,12 @@ public class DefaultConfigFactory {
      *               delimitor.
      * @param method The method identifies the configuration item that was requested.
      *
-     * @return The value for the configuration item or <code>null</code>  if there is no value.  <b>Should be of the same type as the
+     * @return The value for the configuration item or {@code null}  if there is no value.  <b>Should be of the same type as the
      *         method's return type.</b>  See {@link #toType(String, Class)} for type conversion.
      */
     protected Object getValueFor(@NotNull String prefix, Method method) {
 
-        String value = getProperty( prefix + method.getName() );
+        String value = getProperty( String.format( "%s%s", prefix, method.getName() ) );
 
         return toType( value, method.getReturnType() );
     }
@@ -290,7 +296,7 @@ public class DefaultConfigFactory {
     /**
      * Resolve the default value for a method invocation on a configuration object.  This method is invoked by the default wrapper when it
      * detects that the configuration object's implementation failed to provide a value for the method call.  The standard behaviour is to
-     * look at the method call's {@link Config.Property} annotation and get a default value out of it.  The call fails (with an unchecked
+     * look at the method call's {@link Property} annotation and get a default value out of it.  The call fails (with an unchecked
      * exception) if no default value is available and the method's annotation indicates that a value is required.
      *
      * @param method The method identifies the configuration item that was requested.
@@ -300,12 +306,11 @@ public class DefaultConfigFactory {
      */
     protected final Object getDefaultValueFor(Method method) {
 
-        Config.Property propertyAnnotation = checkNotNull( TypeUtils.findAnnotation( method, Config.Property.class ),
-                "Missing @Property on " + method );
+        Property propertyAnnotation = checkNotNull( TypeUtils.findAnnotation( method, Property.class ), "Missing @Property on %s", method );
 
         String value = findDefaultValueFor( method );
         if (propertyAnnotation.required())
-            checkNotNull( value, "A required configuration property (for " + method + ") is unset." );
+            checkNotNull( value, "A required configuration property (for %s) is unset.", method );
 
         return toType( value, method.getReturnType() );
     }
@@ -313,23 +318,22 @@ public class DefaultConfigFactory {
     /**
      * Resolve the default value for a method invocation on a configuration object.  This method is invoked by the default wrapper when it
      * detects that the configuration object's implementation failed to provide a value for the method call.  The standard behaviour is to
-     * look at the method call's {@link Config.Property} annotation and get a default value out of it.
+     * look at the method call's {@link Property} annotation and get a default value out of it.
      *
      * @param method The method identifies the configuration item that was requested.
      *
-     * @return The default value for the configuration item or <code>null</code>  if there is no default value.
+     * @return The default value for the configuration item or {@code null}  if there is no default value.
      */
     @Nullable
     protected String findDefaultValueFor(Method method) {
 
-        Config.Property propertyAnnotation = checkNotNull( TypeUtils.findAnnotation( method, Config.Property.class ),
-                "Missing @Property on " + method );
+        Property propertyAnnotation = checkNotNull( TypeUtils.findAnnotation( method, Property.class ), "Missing @Property on %s", method );
 
         String value = null;
-        if (propertyAnnotation.unset().equals( Config.Property.AUTO ))
+        if (propertyAnnotation.unset().equals( Property.AUTO ))
             value = generateValue( method );
 
-        else if (!propertyAnnotation.unset().equals( Config.Property.NONE )) {
+        else if (!propertyAnnotation.unset().equals( Property.NONE )) {
             value = propertyAnnotation.unset();
             if (value.startsWith( "load:" ))
                 try {
@@ -337,7 +341,7 @@ public class DefaultConfigFactory {
                             Charsets.UTF_8 );
                 }
                 catch (IOException e) {
-                    logger.err( e, "While loading unset value for " + method );
+                    logger.err( e, "While loading unset value for %s", method );
                 }
         }
 
@@ -377,14 +381,14 @@ public class DefaultConfigFactory {
 
         // logger.debug( "Getting property: {}", key );
         String value = null;
-        if (properties != null && !properties.get().isEmpty())
+        if (propertiesTL != null && !propertiesTL.get().isEmpty())
             // First, try the properties, if set.
-            value = properties.get().getProperty( key );
+            value = propertiesTL.get().getProperty( key );
         // logger.debug( "Properties provided: {}", value );
         if (value == null)
             // Second, try the application's servlet context, if set.
-            if (servletContext.get() != null) {
-                value = servletContext.get().getInitParameter( key );
+            if (servletContextTL.get() != null) {
+                value = servletContextTL.get().getInitParameter( key );
                 // logger.debug( "Context provided: {}", value );
             }
 
@@ -499,14 +503,14 @@ public class DefaultConfigFactory {
         // Collections: Split the value
         if (Collection.class.isAssignableFrom( type )) {
 
-            @SuppressWarnings( { "unchecked" })
+            @SuppressWarnings("unchecked")
             Class<? extends Collection> collectionType = (Class<? extends Collection>) type;
             String trimmedValue = LEADING_WHITESPACE.matcher( TRAILING_WHITESPACE.matcher( value ).replaceFirst( "" ) ).replaceFirst( "" );
             Iterable<String> splitValues = Splitter.on( COMMA_DELIMITOR ).split( trimmedValue );
 
             // In case type is a concrete collection
             try {
-                @SuppressWarnings( { "unchecked" })
+                @SuppressWarnings("unchecked")
                 Collection<String> values = collectionType.getConstructor().newInstance();
                 Iterables.addAll( values, splitValues );
                 return type.cast( values );
@@ -614,8 +618,8 @@ public class DefaultConfigFactory {
         }
 
         @Override
-        public Object invoke(Object proxy, Method method, Object[] args)
-                throws Throwable {
+        public Object invoke(Object proxy, Method method, Object... args)
+                throws InvocationTargetException, IllegalArgumentException, IllegalAccessException {
 
             if (method.getDeclaringClass().equals( Object.class ))
                 return method.invoke( this, args );
@@ -624,7 +628,7 @@ public class DefaultConfigFactory {
                 //noinspection unchecked
                 return getAppImplementation( (Class<AppConfig>) args[0] );
 
-            Config.Group configGroupAnnotation = TypeUtils.findAnnotation( method.getReturnType(), Config.Group.class );
+            Group configGroupAnnotation = TypeUtils.findAnnotation( method.getReturnType(), Group.class );
             if (configGroupAnnotation != null)
                 // Method return type is annotated with @Group, it's a config group: return a proxy for it.
                 return getDefaultImplementation( proxyPrefix, method.getReturnType() );
@@ -651,8 +655,8 @@ public class DefaultConfigFactory {
         }
 
         @Override
-        public Object invoke(Object proxy, Method method, Object[] args)
-                throws Throwable {
+        public Object invoke(Object proxy, Method method, Object... args)
+                throws InvocationTargetException, IllegalArgumentException, IllegalAccessException {
 
             if (method.getDeclaringClass().equals( Object.class ))
                 return method.invoke( this, args );
@@ -660,11 +664,11 @@ public class DefaultConfigFactory {
             Object value = method.invoke( config, args );
 
             // If method return type is annotated with @Group, it's a config group: wrap the value or provide a default implementation if no value
-            if (TypeUtils.findAnnotation( method.getReturnType(), Config.Group.class ) != null)
+            if (TypeUtils.findAnnotation( method.getReturnType(), Group.class ) != null)
                 if (value == null) {
                     // FIXME: prefix-lookup probably needs to be recursive...
-                    String prefix = checkNotNull( TypeUtils.findAnnotation( method.getDeclaringClass(), Config.Group.class ),
-                            "Missing @Group on " + method.getDeclaringClass() ).prefix();
+                    String prefix = checkNotNull( TypeUtils.findAnnotation( method.getDeclaringClass(), Group.class ),
+                            "Missing @Group on %s", method.getDeclaringClass() ).prefix();
                     value = getDefaultImplementation( prefix, method.getReturnType() );
                 } else
                     value = getDefaultWrapper( value );
