@@ -167,7 +167,7 @@
 
 
         <!-- DEFAULT VERSIONS, SEE DEPENDENCIES -->
-        <release.version>1.17</release.version>
+        <release.version>1.25</release.version>
         <servlet-api.version>2.4</servlet-api.version>
 
         <wicket.version>1.4.17</wicket.version>
@@ -211,7 +211,7 @@
         <catalina.version>5.5.15</catalina.version>
         <slf4j.version>1.5.11</slf4j.version>
         <logback.version>0.9.15</logback.version>
-        <jlibs.version>1.4-p10</jlibs.version>
+        <jlibs.version>1.4-p11</jlibs.version>
         <commons-lang.version>2.3</commons-lang.version>
         <jetbrains-annotations.version>7.0.2</jetbrains-annotations.version>
 

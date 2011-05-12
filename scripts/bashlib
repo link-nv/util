@@ -223,6 +223,118 @@ latest() (
 
 
 #  ______________________________________________________________________
+# |__ Logging ___________________________________________________________|
+#
+#       log [level] [format] [arguments...]
+#
+# Log an event at a certain importance level.  The event is expressed as a printf(1) format argument.
+# The current exit code remains unaffected by the execution of this function.
+#
+log() {
+    local exitcode=$? level=$1 supported=0 end=$'\n' type=msg conMsg= logMsg= format= colorFormat= date= info= args=() colorArgs=()
+
+    # Handle options.
+    [[ $1 = -p ]] && {
+        shift
+        level=$1
+        end='.. '
+        type=startProgress
+    }
+    [[ $1 = -P ]] && {
+        shift
+        level=$1
+        type=doneProgress
+    }
+    shift
+    format=$1
+    args=( "${@:2}" )
+
+    # Level-specific settings.
+    case $level in
+        DBG)    (( supported = _logVerbosity >= 3 ))
+                color=$blue ;;
+        INF)    (( supported = _logVerbosity >= 2 ))
+                color=$white ;;
+        WRN)    (( supported = _logVerbosity >= 1 ))
+                color=$yellow ;;
+        ERR)    (( supported = _logVerbosity >= 0 ))
+                color=$red ;;
+        FTL)    (( supported = 1 ))
+                color=$bold$red ;;
+        *)
+                log FTL "Log level %s does not exist" "$level"
+                exit 1 ;;
+    esac
+    (( ! supported )) && return "$exitcode"
+
+    # Generate the log message.
+    date=$(date +"${_logDate:-%H:%M}")
+    case $type in
+        msg|startProgress)
+            printf -v logMsg "[%s %-3s] $format$end" "$date" "$level" "${args[@]}"
+            if (( _logColor )); then
+                colorFormat=$(sed -e "s/$(requote "$reset")/$reset$color/g" -e "s/%[^a-z]*[a-z]/$reset$bold$color&$reset$color/g" <<< "$format")
+                colorArgs=("${args[@]//$reset/$reset$bold$color}")
+                printf -v conMsg "[%s %-3s] $color$colorFormat$reset$end" "$date" "$level" "${colorArgs[@]}"
+            else
+                conMsg=$logMsg
+            fi
+        ;;
+
+        doneProgress)
+            case $exitcode in
+                0)  info=${format:+$(printf " ($format)" "${args[@]}")}
+                    printf -v logMsg "done%s.\n" "$info"
+                    if (( _logColor )); then
+                        printf -v conMsg "${green}${bold}done${reset}%s.\n" "$info"
+                    else
+                        conMsg=$logMsg
+                    fi
+                ;;
+
+                *)  info=${format:+$(printf ": $format" "${args[@]}")}
+                    printf -v logMsg "error(%d%s).\n" "$exitcode" "$info"
+                    if (( _logColor )); then
+                        printf -v conMsg "${red}error${reset}(${bold}${red}%d${reset}%s).\n" "$exitcode" "$info"
+                    else
+                        conMsg=$logMsg
+                    fi
+                ;;
+            esac
+        ;;
+    esac
+
+    # Output the log message.
+    printf '%s' "$conMsg"
+    [[ $_logFile && ! -e $_logFile ]] && touch "$_logFile"
+    [[ -w $_logFile ]] \
+        && printf '%s' "$logMsg" >> "$_logFile"
+
+    return $exitcode
+}
+dbg() { log DBG "$@"; }
+inf() { log INF "$@"; }
+wrn() { log WRN "$@"; }
+err() { log ERR "$@"; }
+ftl() { log FTL "$@"; }
+plog() { log -p "$@"; }
+golp() { log -P "$@" "$golp"; }
+pdbg() { plog DBG "$@"; }
+pinf() { plog INF "$@"; }
+pwrn() { plog WRN "$@"; }
+perr() { plog ERR "$@"; }
+pftl() { plog FTL "$@"; }
+gbdp() { golp=$gbdp golp DBG "$@"; }
+fnip() { golp=$fnip golp INF "$@"; }
+nrwp() { golp=$nrwp golp WRN "$@"; }
+rrep() { golp=$rrep golp ERR "$@"; }
+ltfp() { golp=$ltfp golp FTL "$@"; }
+{ _logColor=${_logColor:-$([[ -t 2 ]] && echo 1)} _logVerbosity=2; } 2>&1
+# _______________________________________________________________________
+
+
+
+#  ______________________________________________________________________
 # |__ Emit ______________________________________________________________|
 #
 #       emit [options] message... [-- [command args...]]
@@ -975,6 +1087,26 @@ quote() {
     done
 
     printf '%s\n' "$(IFS=' '; echo "${quotedArgs[*]}")"
+} # _____________________________________________________________________
+
+
+
+#  ______________________________________________________________________
+# |__ ReQuote __________________________________________________________|
+#
+#       requote [string]
+#
+# Output a single string where the first argument is escaped
+# for safe usage as a literal in a regular expression.
+#
+requote() {
+
+    # Initialize the defaults.
+    local char
+
+    printf '%s' "$1" | while IFS= read -r -d '' -n1 char; do
+        printf '[%s]' "$char"
+    done
 } # _____________________________________________________________________
 
 
