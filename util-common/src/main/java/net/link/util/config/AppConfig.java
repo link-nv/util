@@ -10,7 +10,7 @@ package net.link.util.config;
  *
  * @author lhunath
  */
-@Config.Group(prefix = "app")
+@Group(prefix = "app")
 public interface AppConfig {
 
 }

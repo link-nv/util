@@ -10,13 +10,13 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * <h2>{@link ConfigContextListener}<br> <sub>A servlet context listener that makes {@link Config} available.</sub></h2>
+ * <h2>{@link ConfigContextListener}<br> <sub>A servlet context listener that makes {@link RootConfig} available.</sub></h2>
  *
  * <p> Any application that wants {@link DefaultConfigFactory} to gain access to their web.xml for configuration parameters needs to use
  * this filter. The filter will make the servlet context available to the default config from within the current thread, allowing it to gain
  * access to the context parameters contained within. </p>
  *
- * <p> The context listener also provides a reliable way for an application to provide their own {@link Config} and/or {@link AppConfig}
+ * <p> The context listener also provides a reliable way for an application to provide their own {@link RootConfig} and/or {@link AppConfig}
  * implementation. The context listener will set the configs it was created with as active within the current thread for servlet context
  * event that goes through it. </p>
  *

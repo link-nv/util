@@ -10,13 +10,13 @@ import javax.servlet.http.HttpServletRequest;
 
 
 /**
- * <h2>{@link ConfigFilter}<br> <sub>A filter that provides some non-default {@link Config} behaviour.</sub></h2>
+ * <h2>{@link ConfigFilter}<br> <sub>A filter that provides some non-default {@link RootConfig} behaviour.</sub></h2>
  *
  * <p> Any application that wants {@link DefaultConfigFactory} to gain access to their web.xml for configuration parameters needs to use
  * this filter. The filter will make the servlet context available the default config from within the current thread, allowing it to gain
  * access to the context parameters contained within. </p>
  *
- * <p> The filter also provides a reliable way for an application to provide their own {@link Config} and/or {@link AppConfig}
+ * <p> The filter also provides a reliable way for an application to provide their own {@link RootConfig} and/or {@link AppConfig}
  * implementation. The filter will set the configs it was created with as active within the current thread for each request that goes
  * through it. </p>
  *

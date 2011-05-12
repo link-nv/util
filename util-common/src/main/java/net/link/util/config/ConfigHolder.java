@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author lhunath
  */
-public class ConfigHolder<C extends Config> {
+public class ConfigHolder<C extends RootConfig> {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigHolder.class);
     private static final ThreadLocal<Boolean> holderActivated = new ThreadLocal<Boolean>() {
@@ -109,7 +109,7 @@ public class ConfigHolder<C extends Config> {
     }
 
     @SuppressWarnings({"unchecked"})
-    public static <C extends Config> ConfigHolder<C> get() {
+    public static <C extends RootConfig> ConfigHolder<C> get() {
 
         return checkNotNull( (ConfigHolder<C>) holder.get(),
                 "No config holder set.  Set a global config holder or activate a local one (eg. using the ConfigFilter)." );
@@ -130,7 +130,7 @@ public class ConfigHolder<C extends Config> {
         ConfigHolder.holderActivated.remove();
     }
 
-    public static <C extends Config> C config() {
+    public static <C extends RootConfig> C config() {
 
         return ConfigHolder.<C>get().getConfig();
     }

@@ -21,8 +21,7 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import net.link.util.common.KeyStoreUtils;
-import net.link.util.config.Config.Group;
-import net.link.util.config.Config.Property;
+import org.bouncycastle.util.encoders.Base64;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
@@ -366,6 +365,7 @@ public class DefaultConfigFactory {
      * @return The generated value.
      */
     @Nullable
+    @SuppressWarnings( { "UnusedParameters" })
     protected String generateValueExtension(@NotNull final Method method) {
 
         return null;
@@ -400,6 +400,20 @@ public class DefaultConfigFactory {
         // Simple cases: null value & String type.
         if (value == null || type.isAssignableFrom( String.class ))
             return type.cast( value );
+
+        // byte array
+        if (type.isAssignableFrom( byte[].class ))
+            return type.cast( Base64.decode( value ) );
+
+        // Byte array
+        if (type.isAssignableFrom( Byte[].class )) {
+            byte[] srcBytes = Base64.decode( value );
+            Byte[] dstBytes = ObjectArrays.newArray( Byte.class, srcBytes.length );
+            for (int b = 0; b < srcBytes.length; ++b)
+                dstBytes[b] = srcBytes[b];
+
+            return type.cast( dstBytes );
+        }
 
         // Joda-Time
         if (type.isAssignableFrom( DateTime.class ))
@@ -556,6 +570,7 @@ public class DefaultConfigFactory {
      * @return The value, converted to an instance of the given type.
      */
     @Nullable
+    @SuppressWarnings( { "UnusedParameters" })
     protected <T> T toTypeExtension(@NotNull final String value, @NotNull final Class<T> type) {
 
         return null;
@@ -624,14 +639,19 @@ public class DefaultConfigFactory {
             if (method.getDeclaringClass().equals( Object.class ))
                 return method.invoke( this, args );
 
-            if ("app".equals( method.getName() ) && method.getDeclaringClass().equals( Config.class ))
+            if ("app".equals( method.getName() ) && method.getDeclaringClass().equals( RootConfig.class ))
                 //noinspection unchecked
                 return getAppImplementation( (Class<AppConfig>) args[0] );
 
             Group configGroupAnnotation = TypeUtils.findAnnotation( method.getReturnType(), Group.class );
-            if (configGroupAnnotation != null)
+            if (configGroupAnnotation != null) {
+                checkState( configGroupAnnotation.prefix().equals( method.getName() ),
+                        "Method (%s) returns a group with a prefix (%s) that doesn't match the method's name.", method,
+                        configGroupAnnotation.prefix() );
+
                 // Method return type is annotated with @Group, it's a config group: return a proxy for it.
                 return getDefaultImplementation( proxyPrefix, method.getReturnType() );
+            }
 
             // Method does not return a config group; get its value.
             return getValueFor( proxyPrefix, method );
@@ -669,6 +689,9 @@ public class DefaultConfigFactory {
                     // FIXME: prefix-lookup probably needs to be recursive...
                     String prefix = checkNotNull( TypeUtils.findAnnotation( method.getDeclaringClass(), Group.class ),
                             "Missing @Group on %s", method.getDeclaringClass() ).prefix();
+                    checkState( prefix.equals( method.getName() ),
+                            "Method (%s) returns a group with a prefix (%s) that doesn't match the method's name.", method, prefix );
+
                     value = getDefaultImplementation( prefix, method.getReturnType() );
                 } else
                     value = getDefaultWrapper( value );
