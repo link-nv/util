@@ -2,6 +2,7 @@ package net.link.util.config;
 
 import com.google.common.io.Resources;
 import java.net.URL;
+import net.link.util.common.URLUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

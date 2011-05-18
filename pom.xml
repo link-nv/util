@@ -148,6 +148,7 @@
         <module>util-j2ee-jboss6</module>
         <module>util-wicket</module>
         <module>util-common</module>
+        <module>util-config-manual</module>
         <module>util-protocol</module>
     </modules>
 
@@ -164,6 +165,8 @@
         <maven-dependency-plugin.version>2.1</maven-dependency-plugin.version>
         <maven-javadoc-plugin.version>2.5</maven-javadoc-plugin.version>
         <maven-export-plugin.version>1.4</maven-export-plugin.version>
+        <maven-jdocbook-plugin.version>2.1.1</maven-jdocbook-plugin.version>
+        <maven-assembly-plugin.version>2.2-beta-5</maven-assembly-plugin.version>
 
 
         <!-- DEFAULT VERSIONS, SEE DEPENDENCIES -->
@@ -211,7 +214,7 @@
         <catalina.version>5.5.15</catalina.version>
         <slf4j.version>1.5.11</slf4j.version>
         <logback.version>0.9.15</logback.version>
-        <jlibs.version>1.4-p11</jlibs.version>
+        <jlibs.version>SNAPSHOT</jlibs.version>
         <commons-lang.version>2.3</commons-lang.version>
         <jetbrains-annotations.version>7.0.2</jetbrains-annotations.version>
 
@@ -348,6 +351,79 @@
                             <addMavenDescriptor>false</addMavenDescriptor>
                         </archive>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.jboss.maven.plugins</groupId>
+                    <artifactId>maven-jdocbook-plugin</artifactId>
+                    <version>${maven-jdocbook-plugin.version}</version>
+                    <dependencies>
+					    <dependency>
+						    <groupId>org.jboss</groupId>
+						    <artifactId>jbossorg-docbook-xslt</artifactId>
+						    <version>1.1.0</version>
+					    </dependency>
+					    <dependency>
+						    <groupId>org.jboss</groupId>
+						    <artifactId>jbossorg-jdocbook-style</artifactId>
+						    <version>1.1.0</version>
+						    <type>jdocbook-style</type>
+					    </dependency>
+				    </dependencies>
+                    <configuration>
+					    <formats>
+						    <format>
+							    <formatName>pdf</formatName>
+							    <stylesheetResource>classpath:/xslt/org/jboss/pdf.xsl</stylesheetResource>
+                                <finalName>${project.artifactId}.pdf</finalName>
+						    </format>
+					    </formats>
+                        <sourceDocumentName>${project.artifactId}.xml</sourceDocumentName>
+                        <imageResource>
+                            <directory>${basedir}/src/main/images</directory>
+                        </imageResource>
+                        <options>
+                            <xincludeSupported>true</xincludeSupported>
+                            <xmlTransformerType>saxon</xmlTransformerType>
+                            <docbookVersion>1.72.0</docbookVersion>
+                        </options>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>resources</id>
+                            <phase>process-resources</phase>
+                            <goals>
+                                <goal>resources</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>generate</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>generate</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>${maven-assembly-plugin.version}</version>
+                    <configuration>
+                        <descriptors>
+                            <descriptor>
+                                src/main/assembly/${project.artifactId}.xml
+                            </descriptor>
+                        </descriptors>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>package</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

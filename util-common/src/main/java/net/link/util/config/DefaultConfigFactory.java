@@ -1,6 +1,7 @@
 package net.link.util.config;
 
 import static com.google.common.base.Preconditions.*;
+import static com.lyndir.lhunath.lib.system.util.ObjectUtils.*;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
@@ -21,6 +22,7 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import net.link.util.common.KeyStoreUtils;
+import net.link.util.common.URLUtils;
 import org.bouncycastle.util.encoders.Base64;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,11 +47,6 @@ public class DefaultConfigFactory {
     private static final Pattern LEADING_WHITESPACE      = Pattern.compile( "^\\s+" );
     private static final Pattern TRAILING_WHITESPACE     = Pattern.compile( "\\s+$" );
     private static final Pattern COMMA_DELIMITOR         = Pattern.compile( "\\s*,\\s*" );
-    /**
-     * <p>type://[alias[:pass1[:pass2]]@]path</p>
-     * <p/>
-     * Note: <b>passwords and aliases cannot contain ':' or '@' symbols</b>
-     */
     private static final Pattern KEYSTORE_PATTERN        = Pattern.compile( "^(.*?)://(?:([^:@]*)(?::([^:@]*)(?::([^:@]*))?)?@)?(.*)" );
 
     private static final ThreadLocal<ServletContext> servletContextTL = new ThreadLocal<ServletContext>();
@@ -75,7 +72,7 @@ public class DefaultConfigFactory {
                         return properties;
                     }
                     catch (IOException e) {
-                        logger.err( e, "While loading config from: %s", configUrl, e );
+                        logger.err( e, "While loading config from: %s", configUrl );
                     }
             }
 
@@ -108,12 +105,12 @@ public class DefaultConfigFactory {
 
     public DefaultConfigFactory() {
 
-        this( DEFAULT_CONFIG_RESOURCE );
+        this( null );
     }
 
-    protected DefaultConfigFactory(String configResourceName) {
+    protected DefaultConfigFactory(@Nullable String configResourceName) {
 
-        this.configResourceName = configResourceName;
+        this.configResourceName = ifNotNullElse( configResourceName, DEFAULT_CONFIG_RESOURCE );
     }
 
     @SuppressWarnings("HardcodedFileSeparator")
@@ -282,14 +279,27 @@ public class DefaultConfigFactory {
      *               delimitor.
      * @param method The method identifies the configuration item that was requested.
      *
-     * @return The value for the configuration item or {@code null}  if there is no value.  <b>Should be of the same type as the
-     *         method's return type.</b>  See {@link #toType(String, Class)} for type conversion.
+     * @return The value for the configuration item or {@code null}  if there is no value.
      */
-    protected Object getValueFor(@NotNull String prefix, Method method) {
+    @Nullable
+    protected final Object getValueFor(final String prefix, final Method method) {
 
-        String value = getProperty( String.format( "%s%s", prefix, method.getName() ) );
+        return toType( filter( getStringValueFor( prefix, method ) ), method.getReturnType() );
+    }
 
-        return toType( value, method.getReturnType() );
+    /**
+     * Resolve the value for a method invocation on a configuration object of the given prefix.
+     *
+     * @param prefix The prefix identifies the configuration group that the method was invoked on.  If not empty, it should end with a
+     *               delimitor.
+     * @param method The method identifies the configuration item that was requested.
+     *
+     * @return The value for the configuration item or {@code null}  if there is no value.
+     */
+    @Nullable
+    protected String getStringValueFor(final String prefix, final Method method) {
+
+        return getProperty( String.format( "%s%s", prefix, method.getName() ) );
     }
 
     /**
@@ -303,6 +313,7 @@ public class DefaultConfigFactory {
      * @return The default value for the configuration item. <b>Should be of the same type as the method's return type .</b> See {@link
      *         #toType(String, Class)} for type conversion.
      */
+    @Nullable
     protected final Object getDefaultValueFor(Method method) {
 
         Property propertyAnnotation = checkNotNull( TypeUtils.findAnnotation( method, Property.class ), "Missing @Property on %s", method );
@@ -311,7 +322,7 @@ public class DefaultConfigFactory {
         if (propertyAnnotation.required())
             checkNotNull( value, "A required configuration property (for %s) is unset.", method );
 
-        return toType( value, method.getReturnType() );
+        return toType( filter( value ), method.getReturnType() );
     }
 
     /**
@@ -332,17 +343,8 @@ public class DefaultConfigFactory {
         if (propertyAnnotation.unset().equals( Property.AUTO ))
             value = generateValue( method );
 
-        else if (!propertyAnnotation.unset().equals( Property.NONE )) {
+        else if (!propertyAnnotation.unset().equals( Property.NONE ))
             value = propertyAnnotation.unset();
-            if (value.startsWith( "load:" ))
-                try {
-                    value = Resources.toString( method.getDeclaringClass().getClassLoader().getResource( value.substring( 5 ) ),
-                            Charsets.UTF_8 );
-                }
-                catch (IOException e) {
-                    logger.err( e, "While loading unset value for %s", method );
-                }
-        }
 
         return value;
     }
@@ -377,25 +379,21 @@ public class DefaultConfigFactory {
      * @return The value for the given property.
      */
     @Nullable
-    protected String getProperty(String key) {
+    private String getProperty(String key) {
 
-        // logger.debug( "Getting property: {}", key );
         String value = null;
-        if (propertiesTL != null && !propertiesTL.get().isEmpty())
-            // First, try the properties, if set.
-            value = propertiesTL.get().getProperty( key );
-        // logger.debug( "Properties provided: {}", value );
+        if (servletContextTL.get() != null)
+            // If a servlet context is active, check it for a value.
+            value = servletContextTL.get().getInitParameter( key );
         if (value == null)
-            // Second, try the application's servlet context, if set.
-            if (servletContextTL.get() != null) {
-                value = servletContextTL.get().getInitParameter( key );
-                // logger.debug( "Context provided: {}", value );
-            }
+            // No servlet context or it has no value, check the properties file.
+            value = propertiesTL.get().getProperty( key );
 
-        return filter( value );
+        return value;
     }
 
-    protected final <T> T toType(String value, Class<T> type) {
+    @Nullable
+    protected final <T> T toType(@Nullable String value, Class<T> type) {
 
         // Simple cases: null value & String type.
         if (value == null || type.isAssignableFrom( String.class ))
@@ -421,7 +419,7 @@ public class DefaultConfigFactory {
         if (type.isAssignableFrom( Duration.class ))
             return type.cast( new Duration( Long.valueOf( value ).longValue() ) );
 
-        // KeyStores
+        // KeyStores: resource[:password[:format]] -- password defaults to no password, format defaults to JKS.
         if (KeyStore.class.isAssignableFrom( type )) {
             Iterator<String> values = Splitter.on( ':' ).split( value ).iterator();
             String resource = values.hasNext()? values.next(): null;
@@ -432,6 +430,7 @@ public class DefaultConfigFactory {
                     KeyStoreUtils.loadKeyStore( format, Thread.currentThread().getContextClassLoader().getResourceAsStream( resource ),
                             password == null? null: password.toCharArray() ) );
         }
+        // KeyProviders: type://[alias[:pass1[:pass2]]@]path -- passwords and aliases cannot contain ':' or '@' symbols
         if (KeyProvider.class.isAssignableFrom( type )) {
 
             Matcher matcher = KEYSTORE_PATTERN.matcher( value );
@@ -583,7 +582,7 @@ public class DefaultConfigFactory {
      *
      * @param value The data to filter.
      *
-     * @return The given data, processed by the specified filter operations.
+     * @return The given value after being processed by the filter operations.
      */
     @Nullable
     protected static String filter(String value) {
@@ -591,10 +590,13 @@ public class DefaultConfigFactory {
         if (value == null)
             return null;
 
+        String filteredValue = value;
+
+        // System properties filter.
         Map<Integer, Integer> ends = new TreeMap<Integer, Integer>();
         Map<Integer, String> replacements = new TreeMap<Integer, String>();
 
-        Matcher matcher = SYSTEM_PROPERTY.matcher( value );
+        Matcher matcher = SYSTEM_PROPERTY.matcher( filteredValue );
         while (matcher.find()) {
             String property = matcher.group( 1 );
 
@@ -605,12 +607,24 @@ public class DefaultConfigFactory {
         SortedSet<Integer> reverseKeys = new TreeSet<Integer>( Collections.reverseOrder() );
         reverseKeys.addAll( replacements.keySet() );
 
-        StringBuilder filteredData = new StringBuilder( value );
+        StringBuilder filteredData = new StringBuilder( filteredValue );
         for (Integer key : reverseKeys)
             filteredData.replace( key, ends.get( key ), replacements.get( key ) );
+        filteredValue = filteredData.toString();
 
-        // logger.debug( "Filtered to: {}", filteredData );
-        return filteredData.toString();
+        // Resource loading filter.
+        if (value.startsWith( "load:" )) {
+            String resourceName = filteredValue.substring( 5 );
+            try {
+                filteredValue = Resources.toString( Resources.getResource( resourceName ), Charsets.UTF_8 );
+            }
+            catch (IOException e) {
+                logger.err( e, "While loading value for: %s", resourceName );
+                return null;
+            }
+        }
+
+        return filteredValue;
     }
 
     @Override

@@ -4,7 +4,7 @@
  * Copyright 2006-2009 Lin.k N.V. All rights reserved.
  * Lin.k N.V. proprietary/confidential. Use is subject to license terms.
  */
-package net.link.util.config;
+package net.link.util.common;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
