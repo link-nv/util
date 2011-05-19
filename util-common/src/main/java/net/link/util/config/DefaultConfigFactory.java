@@ -3,12 +3,12 @@ package net.link.util.config;
 import static com.google.common.base.Preconditions.*;
 import static com.lyndir.lhunath.lib.system.util.ObjectUtils.*;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Splitter;
+import com.google.common.base.*;
 import com.google.common.collect.*;
 import com.google.common.io.Resources;
 import com.lyndir.lhunath.lib.system.logging.Logger;
 import com.lyndir.lhunath.lib.system.logging.exception.InternalInconsistencyException;
+import com.lyndir.lhunath.lib.system.util.StringUtils;
 import com.lyndir.lhunath.lib.system.util.TypeUtils;
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +43,6 @@ public class DefaultConfigFactory {
     static final Logger logger = Logger.get( DefaultConfigFactory.class );
 
     private static final String  DEFAULT_CONFIG_RESOURCE = "config";
-    private static final Pattern SYSTEM_PROPERTY         = Pattern.compile( "\\$\\{([^\\}]*)\\}" );
     private static final Pattern LEADING_WHITESPACE      = Pattern.compile( "^\\s+" );
     private static final Pattern TRAILING_WHITESPACE     = Pattern.compile( "\\s+$" );
     private static final Pattern COMMA_DELIMITOR         = Pattern.compile( "\\s*,\\s*" );
@@ -284,22 +283,20 @@ public class DefaultConfigFactory {
     @Nullable
     protected final Object getValueFor(final String prefix, final Method method) {
 
-        return toType( filter( getStringValueFor( prefix, method ) ), method.getReturnType() );
+        return toType( filter( getStringValueFor( String.format( "%s%s", prefix, method.getName() ) ) ), method.getReturnType() );
     }
 
     /**
      * Resolve the value for a method invocation on a configuration object of the given prefix.
      *
-     * @param prefix The prefix identifies the configuration group that the method was invoked on.  If not empty, it should end with a
-     *               delimitor.
-     * @param method The method identifies the configuration item that was requested.
+     * @param internalName The internal name that identifies the property to load the value for.
      *
      * @return The value for the configuration item or {@code null}  if there is no value.
      */
     @Nullable
-    protected String getStringValueFor(final String prefix, final Method method) {
+    protected String getStringValueFor(final String internalName) {
 
-        return getProperty( String.format( "%s%s", prefix, method.getName() ) );
+        return getProperty( internalName );
     }
 
     /**
@@ -318,7 +315,7 @@ public class DefaultConfigFactory {
 
         Property propertyAnnotation = checkNotNull( TypeUtils.findAnnotation( method, Property.class ), "Missing @Property on %s", method );
 
-        String value = findDefaultValueFor( method );
+        String value = getDefaultStringValueFor( method );
         if (propertyAnnotation.required())
             checkNotNull( value, "A required configuration property (for %s) is unset.", method );
 
@@ -335,7 +332,7 @@ public class DefaultConfigFactory {
      * @return The default value for the configuration item or {@code null}  if there is no default value.
      */
     @Nullable
-    protected String findDefaultValueFor(Method method) {
+    protected String getDefaultStringValueFor(Method method) {
 
         Property propertyAnnotation = checkNotNull( TypeUtils.findAnnotation( method, Property.class ), "Missing @Property on %s", method );
 
@@ -347,6 +344,30 @@ public class DefaultConfigFactory {
             value = propertyAnnotation.unset();
 
         return value;
+    }
+
+    @Nullable
+    protected Method findMethodFor(String internalName) {
+
+        roots:
+        for (Class<?> group : ConfigHolder.get().getRootTypes()) {
+
+            Method method = null;
+            for (String element : Splitter.on( '.' ).split( internalName ))
+                try {
+                    method = group.getDeclaredMethod( element );
+                    group = method.getReturnType();
+                }
+                catch (NoSuchMethodException ignored) {
+                    // Element not found: Method not found while descending this root.
+                    continue roots;
+                }
+
+            // Passed final element: Method found.
+            return method;
+        }
+
+        return null;
     }
 
     protected final String generateValue(final Method method) {
@@ -374,20 +395,20 @@ public class DefaultConfigFactory {
     }
 
     /**
-     * @param key The key that identifies the property.
+     * @param internalName The internal name that identifies the property to load the value for.
      *
      * @return The value for the given property.
      */
     @Nullable
-    private String getProperty(String key) {
+    private String getProperty(String internalName) {
 
         String value = null;
         if (servletContextTL.get() != null)
             // If a servlet context is active, check it for a value.
-            value = servletContextTL.get().getInitParameter( key );
+            value = servletContextTL.get().getInitParameter( internalName );
         if (value == null)
             // No servlet context or it has no value, check the properties file.
-            value = propertiesTL.get().getProperty( key );
+            value = propertiesTL.get().getProperty( internalName );
 
         return value;
     }
@@ -585,32 +606,34 @@ public class DefaultConfigFactory {
      * @return The given value after being processed by the filter operations.
      */
     @Nullable
-    protected static String filter(String value) {
+    protected String filter(String value) {
 
         if (value == null)
             return null;
 
         String filteredValue = value;
 
+        // Config properties filter.
+        filteredValue = StringUtils.expand( filteredValue, "%", new Function<String, String>() {
+            @Override
+            public String apply(final String internalName) {
+
+                String value = getStringValueFor( internalName );
+                if (value == null)
+                    value = getDefaultStringValueFor( findMethodFor( internalName ) );
+
+                return filter( value );
+            }
+        } );
+
         // System properties filter.
-        Map<Integer, Integer> ends = new TreeMap<Integer, Integer>();
-        Map<Integer, String> replacements = new TreeMap<Integer, String>();
+        filteredValue = StringUtils.expand( filteredValue, "$", new Function<String, String>() {
+            @Override
+            public String apply(final String from) {
 
-        Matcher matcher = SYSTEM_PROPERTY.matcher( filteredValue );
-        while (matcher.find()) {
-            String property = matcher.group( 1 );
-
-            ends.put( matcher.start(), matcher.end() );
-            replacements.put( matcher.start(), System.getProperty( property, "" ) );
-        }
-
-        SortedSet<Integer> reverseKeys = new TreeSet<Integer>( Collections.reverseOrder() );
-        reverseKeys.addAll( replacements.keySet() );
-
-        StringBuilder filteredData = new StringBuilder( filteredValue );
-        for (Integer key : reverseKeys)
-            filteredData.replace( key, ends.get( key ), replacements.get( key ) );
-        filteredValue = filteredData.toString();
+                return System.getProperty( from, "" );
+            }
+        } );
 
         // Resource loading filter.
         if (value.startsWith( "load:" )) {

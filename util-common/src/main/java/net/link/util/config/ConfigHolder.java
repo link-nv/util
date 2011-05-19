@@ -1,8 +1,8 @@
 package net.link.util.config;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.*;
 
+import com.google.common.collect.ImmutableSet;
 import java.lang.reflect.InvocationTargetException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,16 +19,16 @@ import org.slf4j.LoggerFactory;
  */
 public class ConfigHolder<C extends RootConfig> {
 
-    static final Logger logger = LoggerFactory.getLogger(ConfigHolder.class);
+    static final Logger logger = LoggerFactory.getLogger( ConfigHolder.class );
 
-    private static final ThreadLocal<Boolean> holderActivated = new ThreadLocal<Boolean>() {
+    private static final ThreadLocal<Boolean>         holderActivated = new ThreadLocal<Boolean>() {
         @Override
         protected Boolean initialValue() {
 
             return false;
         }
     };
-    private static final ThreadLocal<ConfigHolder<?>> holder = new ThreadLocal<ConfigHolder<?>>() {
+    private static final ThreadLocal<ConfigHolder<?>> holder          = new ThreadLocal<ConfigHolder<?>>() {
         @Override
         protected ConfigHolder<?> initialValue() {
 
@@ -40,16 +40,16 @@ public class ConfigHolder<C extends RootConfig> {
                     return globalConfigHolderType.getConstructor().newInstance();
                 }
                 catch (InstantiationException e) {
-                    throw new RuntimeException(e);
+                    throw new RuntimeException( e );
                 }
                 catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
+                    throw new RuntimeException( e );
                 }
                 catch (NoSuchMethodException e) {
-                    throw new RuntimeException(e);
+                    throw new RuntimeException( e );
                 }
                 catch (InvocationTargetException e) {
-                    throw new RuntimeException(e);
+                    throw new RuntimeException( e );
                 }
 
             return super.initialValue();
@@ -57,14 +57,15 @@ public class ConfigHolder<C extends RootConfig> {
     };
 
     private static Class<ConfigHolder<?>> globalConfigHolderType;
-    private static ConfigHolder<?> globalConfigHolder;
+    private static ConfigHolder<?>        globalConfigHolder;
 
-    private final Class<C> configType;
-    private final C config;
+    private final Class<C>             configType;
+    private final C                    config;
     private final DefaultConfigFactory defaultConfigFactory;
 
     /**
-     * Call this method to globally set the type that will be used to instantiate new config holders when no specific config holder has been
+     * Call this method to globally set the type that will be used to instantiate new config holders when no specific config holder has
+     * been
      * {@link #setLocalConfigHolder(ConfigHolder)}d.
      * <p/>
      * You could do this in a {@code static} block in your config holder implementation:
@@ -110,7 +111,7 @@ public class ConfigHolder<C extends RootConfig> {
         ConfigHolder.globalConfigHolder = globalConfigHolder;
     }
 
-    @SuppressWarnings({"unchecked"})
+    @SuppressWarnings( { "unchecked" })
     public static ConfigHolder<?> get() {
 
         return checkNotNull( holder.get(),
@@ -119,11 +120,11 @@ public class ConfigHolder<C extends RootConfig> {
 
     public static synchronized void setLocalConfigHolder(ConfigHolder<?> instance) {
 
-        checkState( !holderActivated.get(), "Tried to activate config holder: %s, but one is already active: %s", instance, holder.get());
+        checkState( !holderActivated.get(), "Tried to activate config holder: %s, but one is already active: %s", instance, holder.get() );
         checkNotNull( instance, "Tried to activate a config holder but none was given." );
 
-        ConfigHolder.holderActivated.set(true);
-        ConfigHolder.holder.set(instance);
+        ConfigHolder.holderActivated.set( true );
+        ConfigHolder.holder.set( instance );
     }
 
     public static synchronized void unsetLocalConfigHolder() {
@@ -150,7 +151,7 @@ public class ConfigHolder<C extends RootConfig> {
      */
     public ConfigHolder(@NotNull final Class<C> configType) {
 
-        this(new DefaultConfigFactory(), configType, null);
+        this( new DefaultConfigFactory(), configType, null );
     }
 
     /**
@@ -160,7 +161,7 @@ public class ConfigHolder<C extends RootConfig> {
      */
     public ConfigHolder(@NotNull C customConfig) {
 
-        this(new DefaultConfigFactory(), null, customConfig);
+        this( new DefaultConfigFactory(), null, customConfig );
     }
 
     /**
@@ -170,9 +171,11 @@ public class ConfigHolder<C extends RootConfig> {
      * @param configType           The type of configuration that this holder provides.
      * @param config               The configuration implementation to use.  May be {@code null}, in which case a default
      *                             implementation of configType is used as generated by defaultConfigFactory.
+     *
      * @see DefaultConfigFactory The default configuration
      */
-    protected ConfigHolder(@NotNull final DefaultConfigFactory defaultConfigFactory, @Nullable final Class<C> configType, @Nullable C config) {
+    protected ConfigHolder(@NotNull final DefaultConfigFactory defaultConfigFactory, @Nullable final Class<C> configType,
+                           @Nullable C config) {
 
         this.defaultConfigFactory = defaultConfigFactory;
         this.configType = configType;
@@ -187,10 +190,34 @@ public class ConfigHolder<C extends RootConfig> {
     protected C getConfig() {
 
         if (config != null)
-            return defaultConfigFactory.getDefaultWrapper(config);
+            return defaultConfigFactory.getDefaultWrapper( config );
 
         return defaultConfigFactory.getDefaultImplementation(
-                checkNotNull(configType, "No config implementation OR config type class set."));
+                checkNotNull( configType, "No config implementation OR config type class set." ) );
+    }
+
+    /**
+     * @return The type of the holder's root configuration interface.
+     */
+    protected Class<C> getConfigType() {
+
+        if (config != null)
+            //noinspection unchecked
+            return (Class<C>) config.getClass();
+
+        return configType;
+    }
+
+    /**
+     * By default, this method only returns your root configuration interface.  If your holder will be used for application extensions, you
+     * should return the extensions here, if possible.  It will allow searching through them for operations such as %{word} property value
+     * expansions.
+     *
+     * @return All root configuration interfaces that this holder will used with.
+     */
+    protected Iterable<Class<?>> getRootTypes() {
+
+        return ImmutableSet.<Class<?>>of( getConfigType() );
     }
 
     /**

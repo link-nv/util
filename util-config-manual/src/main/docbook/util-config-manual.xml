@@ -751,11 +751,32 @@
             <para>
                 After a value for a property has been loaded by the <code>DefaultConfigFactory</code>, the string value first undergoes
                 filtering.  Filtering is a process that is applied to a loaded value to modify or interpret it in a runtime-specific manner.
-                The standard <code>DefaultConfigFactory</code> performs two filtering operations, in the following order:
+                The standard <code>DefaultConfigFactory</code> performs the following filtering operations, in order:
                 <?dbfo-need height="5cm" ?>
                 <variablelist>
                     <title>Standard filtering operations</title>
                     <varlistentry>
+                        <term>Config property expansion</term>
+                        <listitem>
+                            <para>
+                                The string value is scanned for words of the syntax: <code>%{[internal-name]}</code>.  If such a word is
+                                found in the value, it is removed and replaced by the value of the configuration property that is
+                                referenced.
+                            </para>
+                            <para>
+                                Note that this can only expand string values, so it doesn't work with custom config implementations.  If you
+                                have one active and reference a property that has a custom implementation, that custom implementation will
+                                simply be skipped.
+                            </para>
+                            <para>
+                                Also note that in order for this to work with properties defined by or in groups referenced from application
+                                extension interfaces, those application extension interfaces must be returned by the active
+                                <code>ConfigHolder</code>'s <code>getRootTypes</code>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <?dbfo-need height="5cm" ?>
                         <term>System property expansion</term>
                         <listitem>
                             <para>

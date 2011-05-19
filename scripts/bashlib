@@ -18,7 +18,7 @@
 # ___________________________________________________________________________ #
 #                                                                             #
 #                                                                             #
-# Copyright 2007-2010, lhunath                                                #
+# Copyright 2007-2011, lhunath                                                #
 #   * http://www.lhunath.com                                                  #
 #   * Maarten Billemont                                                       #
 #                                                                             #
@@ -30,15 +30,15 @@
 # |                                         .:: GLOBAL CONFIGURATION ::. |
 # |______________________________________________________________________|
 
+# Unset all exported functions.  Exported functions are evil.
+while read _ _ func; do
+    command unset -f "$func"
+done < <(command declare -Fx)
+
 {
 shopt -s extglob
 shopt -s globstar
 } 2>/dev/null ||:
-
-# Unset all exported functions.  Exported functions are evil.
-while read _ _ func; do
-    unset -f "$func"
-done < <(declare -Fx)
 
 
 
