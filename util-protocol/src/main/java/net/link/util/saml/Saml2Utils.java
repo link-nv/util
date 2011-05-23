@@ -7,6 +7,8 @@
 
 package net.link.util.saml;
 
+import static com.google.common.base.Preconditions.*;
+
 import be.fedict.trust.MemoryCertificateRepository;
 import be.fedict.trust.TrustValidator;
 import com.google.common.base.Charsets;
@@ -25,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
 import net.link.util.common.CertificateChain;
 import net.link.util.common.DomUtils;
+import net.link.util.config.KeyProvider;
 import net.link.util.error.ValidationFailedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -64,8 +67,6 @@ import org.opensaml.xml.signature.impl.SignatureBuilder;
 import org.opensaml.xml.util.Base64;
 import org.opensaml.xml.validation.ValidationException;
 import org.w3c.dom.Element;
-
-import static com.google.common.base.Preconditions.*;
 
 
 /**
@@ -150,7 +151,12 @@ public abstract class Saml2Utils {
         return Base64.encodeBytes( bytesOut.toByteArray(), Base64.DONT_BREAK_LINES );
     }
 
-    public static Element signAsElement(SignableSAMLObject samlObject, KeyPair signerKeyPair, CertificateChain certificateChain) {
+    public static Element sign(SignableSAMLObject samlObject, KeyProvider keyProvider) {
+
+        return sign( samlObject, keyProvider.getIdentityKeyPair(), keyProvider.getIdentityCertificateChain() );
+    }
+
+    public static Element sign(SignableSAMLObject samlObject, KeyPair signerKeyPair, CertificateChain certificateChain) {
 
         XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
         SignatureBuilder signatureBuilder = (SignatureBuilder) builderFactory.getBuilder( Signature.DEFAULT_ELEMENT_NAME );
@@ -219,23 +225,6 @@ public abstract class Saml2Utils {
         KeyInfoHelper.addPublicKey( keyInfo, publicKey );
 
         return keyInfo;
-    }
-
-    /**
-     * Signs the given {@link SignableSAMLObject}.
-     *
-     * @param samlObject       signable SAML object so sign.
-     * @param signerKeyPair    keypair used to sign.
-     * @param certificateChain optional certificate chain for offline validation
-     *
-     * @return The signed {@link SignableSAMLObject}, marshaled and serialized.
-     */
-    public static String sign(SignableSAMLObject samlObject, KeyPair signerKeyPair, CertificateChain certificateChain) {
-
-        Element samlElement = signAsElement( samlObject, signerKeyPair, certificateChain );
-
-        // Dump our XML element to a string.
-        return DomUtils.domToString( samlElement );
     }
 
     /**
