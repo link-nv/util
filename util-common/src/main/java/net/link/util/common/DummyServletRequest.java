@@ -1,4 +1,4 @@
-package net.link.util.servlet;
+package net.link.util.common;
 
 import java.io.BufferedReader;
 import java.io.IOException;
