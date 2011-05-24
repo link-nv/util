@@ -116,10 +116,11 @@ if (( perform )); then
     emit "Deploying the code for the release of $version"
     if (( releasePom )); then
         # Workaround for <http://jira.codehaus.org/browse/MRELEASE-542> -- Force use of release-pom.xml
-        mvn -Prelease release:perform -D"arguments=-f release-pom.xml"
+        mvn -Prelease release:perform -DpushChanges=true -D"arguments=-f release-pom.xml"
     else
         mvn -Prelease release:perform -DpushChanges=true -Dtag="$version"
     fi
+    git push --all
 fi
 step=2
 
