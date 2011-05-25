@@ -214,7 +214,7 @@
         <catalina.version>5.5.15</catalina.version>
         <slf4j.version>1.5.11</slf4j.version>
         <logback.version>0.9.15</logback.version>
-        <jlibs.version>1.4-p12</jlibs.version>
+        <opal.version>1.5</opal.version>
         <commons-lang.version>2.3</commons-lang.version>
         <jetbrains-annotations.version>7.0.2</jetbrains-annotations.version>
 
@@ -942,14 +942,14 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.lyndir.lhunath.jlibs</groupId>
-                <artifactId>system</artifactId>
-                <version>${jlibs.version}</version>
+                <groupId>com.lyndir.lhunath.opal</groupId>
+                <artifactId>opal-system</artifactId>
+                <version>${opal.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.lyndir.lhunath.jlibs</groupId>
-                <artifactId>wayward</artifactId>
-                <version>${jlibs.version}</version>
+                <groupId>com.lyndir.lhunath.opal</groupId>
+                <artifactId>opal-wicket</artifactId>
+                <version>${opal.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-lang</groupId>

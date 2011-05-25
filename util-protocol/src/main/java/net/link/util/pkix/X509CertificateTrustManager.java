@@ -1,7 +1,7 @@
 package net.link.util.pkix;
 
 import com.google.common.collect.ObjectArrays;
-import com.lyndir.lhunath.lib.system.logging.Logger;
+import com.lyndir.lhunath.opal.system.logging.Logger;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;

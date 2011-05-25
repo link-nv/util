@@ -10,9 +10,9 @@ import static com.google.common.base.Preconditions.*;
 
 import com.google.common.base.Function;
 import com.google.common.base.Throwables;
-import com.lyndir.lhunath.lib.system.logging.Logger;
-import com.lyndir.lhunath.lib.system.util.ObjectUtils;
-import com.lyndir.lhunath.lib.system.util.TypeUtils;
+import com.lyndir.lhunath.opal.system.logging.Logger;
+import com.lyndir.lhunath.opal.system.util.ObjectUtils;
+import com.lyndir.lhunath.opal.system.util.TypeUtils;
 import java.lang.reflect.Field;
 import javax.ejb.EJB;
 import org.jboss.ejb3.annotation.LocalBinding;

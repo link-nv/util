@@ -3,7 +3,7 @@ package net.link.util.config;
 import com.google.common.base.Throwables;
 import com.google.common.io.Closeables;
 import com.google.common.io.InputSupplier;
-import com.lyndir.lhunath.lib.system.util.ObjectUtils;
+import com.lyndir.lhunath.opal.system.util.ObjectUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;

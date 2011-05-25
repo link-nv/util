@@ -8,7 +8,7 @@
 package net.link.util.ws.security;
 
 import com.google.common.collect.ImmutableSet;
-import com.lyndir.lhunath.lib.system.logging.Logger;
+import com.lyndir.lhunath.opal.system.logging.Logger;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import javax.annotation.PostConstruct;

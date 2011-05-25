@@ -1,15 +1,15 @@
 package net.link.util.config;
 
 import static com.google.common.base.Preconditions.*;
-import static com.lyndir.lhunath.lib.system.util.ObjectUtils.*;
+import static com.lyndir.lhunath.opal.system.util.ObjectUtils.*;
 
 import com.google.common.base.*;
 import com.google.common.collect.*;
 import com.google.common.io.Resources;
-import com.lyndir.lhunath.lib.system.logging.Logger;
-import com.lyndir.lhunath.lib.system.logging.exception.InternalInconsistencyException;
-import com.lyndir.lhunath.lib.system.util.StringUtils;
-import com.lyndir.lhunath.lib.system.util.TypeUtils;
+import com.lyndir.lhunath.opal.system.logging.Logger;
+import com.lyndir.lhunath.opal.system.logging.exception.InternalInconsistencyException;
+import com.lyndir.lhunath.opal.system.util.StringUtils;
+import com.lyndir.lhunath.opal.system.util.TypeUtils;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.*;

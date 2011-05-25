@@ -37,8 +37,8 @@
             <artifactId>catalina</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.lyndir.lhunath.jlibs</groupId>
-            <artifactId>system</artifactId>
+            <groupId>com.lyndir.lhunath.opal</groupId>
+            <artifactId>opal-system</artifactId>
         </dependency>
 
     </dependencies>

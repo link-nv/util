@@ -7,7 +7,7 @@
 
 package net.link.util.test.j2ee;
 
-import com.lyndir.lhunath.lib.system.util.TypeUtils;
+import com.lyndir.lhunath.opal.system.util.TypeUtils;
 import java.util.HashMap;
 import java.util.Map;
 import javax.ejb.Local;

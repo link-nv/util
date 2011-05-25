@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.*;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.lyndir.lhunath.lib.system.util.ObjectUtils;
+import com.lyndir.lhunath.opal.system.util.ObjectUtils;
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.*;
