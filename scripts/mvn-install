@@ -19,7 +19,7 @@
 #                                                                             #
 #                                                                             #
 # Copyright 2010, lhunath                                                     #
-#   * http://lhunath.lyndir.com                                               #
+#   * http://www.lhunath.com                                                  #
 #   * Maarten Billemont.                                                      #
 #                                                                             #
 source bashlib
@@ -31,7 +31,7 @@ while getopts :fdu:h opt; do
         f) force=1
             ;;
         d) deploy=1
-           url=$(ask +"${url:-scpexe://maven.lyndir.com/usr/local/scm/maven2}" "Deploy to:")
+           url=$(ask +"${url:-scpexe://devel@maven.lyndir.com/usr/local/scm/maven2}" "Deploy to:")
             ;;
         u) url=$OPTARG
             ;;

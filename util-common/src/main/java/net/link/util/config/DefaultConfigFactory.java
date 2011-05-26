@@ -167,7 +167,7 @@ public class DefaultConfigFactory {
      *
      * @return An implementation of the configuration class.
      */
-    protected <A extends AppConfig> A getAppImplementation(final Class<A> type) {
+    protected <A extends AppConfig> A getAppImplementation(@NotNull final Class<A> type) {
 
         return getDefaultImplementation( "", type );
     }
@@ -180,7 +180,7 @@ public class DefaultConfigFactory {
      *
      * @return A default implementation of the configuration class.
      */
-    public final <C> C getDefaultImplementation(final Class<C> type) {
+    public final <C> C getDefaultImplementation(@NotNull final Class<C> type) {
 
         return getDefaultImplementation( "", type );
     }
@@ -195,7 +195,7 @@ public class DefaultConfigFactory {
      *
      * @return A default implementation of the configuration class.
      */
-    public final <C> C getDefaultImplementation(@NotNull String prefix, final Class<C> type) {
+    public final <C> C getDefaultImplementation(@NotNull String prefix, @NotNull final Class<C> type) {
 
         // Check whether the type is a config group and determine the prefix to use for finding keys in this type.
         checkArgument( type.isInterface(), "Can't create a config proxy for %s, it is not an interface.", type );
@@ -224,7 +224,7 @@ public class DefaultConfigFactory {
      * @return A wrapper for the given config implementation.
      */
     @SuppressWarnings("unchecked")
-    public final <C> C getDefaultWrapper(final C config) {
+    public final <C> C getDefaultWrapper(@NotNull final C config) {
 
         // Check whether the type is a config group and determine the prefix to use for finding keys in this type.
         checkNotNull( TypeUtils.findAnnotation( config.getClass(), Group.class ),
@@ -266,7 +266,7 @@ public class DefaultConfigFactory {
      *         implementation
      *         yield no value.
      */
-    protected InvocationHandler newDefaultWrapperHandler(Object config) {
+    protected InvocationHandler newDefaultWrapperHandler(@NotNull Object config) {
 
         return new DefaultWrapperHandler( config );
     }
@@ -281,7 +281,7 @@ public class DefaultConfigFactory {
      * @return The value for the configuration item or {@code null}  if there is no value.
      */
     @Nullable
-    protected final Object getValueFor(final String prefix, final Method method) {
+    protected final Object getValueFor(@NotNull final String prefix, @NotNull final Method method) {
 
         return toType( filter( getStringValueFor( String.format( "%s%s", prefix, method.getName() ) ) ), method.getReturnType() );
     }
@@ -294,7 +294,7 @@ public class DefaultConfigFactory {
      * @return The value for the configuration item or {@code null}  if there is no value.
      */
     @Nullable
-    protected String getStringValueFor(final String internalName) {
+    protected String getStringValueFor(@NotNull final String internalName) {
 
         return getProperty( internalName );
     }
@@ -311,7 +311,7 @@ public class DefaultConfigFactory {
      *         #toType(String, Class)} for type conversion.
      */
     @Nullable
-    protected final Object getDefaultValueFor(Method method) {
+    protected final Object getDefaultValueFor(@NotNull Method method) {
 
         Property propertyAnnotation = checkNotNull( TypeUtils.findAnnotation( method, Property.class ), "Missing @Property on %s", method );
 
@@ -332,7 +332,7 @@ public class DefaultConfigFactory {
      * @return The default value for the configuration item or {@code null}  if there is no default value.
      */
     @Nullable
-    protected String getDefaultStringValueFor(Method method) {
+    protected String getDefaultStringValueFor(@NotNull Method method) {
 
         Property propertyAnnotation = checkNotNull( TypeUtils.findAnnotation( method, Property.class ), "Missing @Property on %s", method );
 
@@ -347,7 +347,7 @@ public class DefaultConfigFactory {
     }
 
     @Nullable
-    protected Method findMethodFor(String internalName) {
+    protected Method findMethodFor(@NotNull String internalName) {
 
         roots:
         for (Class<?> group : ConfigHolder.get().getRootTypes()) {
@@ -355,7 +355,7 @@ public class DefaultConfigFactory {
             Method method = null;
             for (String element : Splitter.on( '.' ).split( internalName ))
                 try {
-                    method = group.getDeclaredMethod( element );
+                    method = group.getMethod( element );
                     group = method.getReturnType();
                 }
                 catch (NoSuchMethodException ignored) {
@@ -370,7 +370,7 @@ public class DefaultConfigFactory {
         return null;
     }
 
-    protected final String generateValue(final Method method) {
+    protected final String generateValue(@NotNull final Method method) {
 
         String customGeneratedValue = generateValueExtension( method );
         if (customGeneratedValue != null)
@@ -400,7 +400,7 @@ public class DefaultConfigFactory {
      * @return The value for the given property.
      */
     @Nullable
-    private String getProperty(String internalName) {
+    private String getProperty(@NotNull String internalName) {
 
         String value = null;
         if (servletContextTL.get() != null)
@@ -414,7 +414,7 @@ public class DefaultConfigFactory {
     }
 
     @Nullable
-    protected final <T> T toType(@Nullable String value, Class<T> type) {
+    protected final <T> T toType(@Nullable String value, @NotNull Class<T> type) {
 
         // Simple cases: null value & String type.
         if (value == null || type.isAssignableFrom( String.class ))
@@ -606,7 +606,7 @@ public class DefaultConfigFactory {
      * @return The given value after being processed by the filter operations.
      */
     @Nullable
-    protected String filter(String value) {
+    protected String filter(@Nullable String value) {
 
         if (value == null)
             return null;
@@ -619,8 +619,15 @@ public class DefaultConfigFactory {
             public String apply(final String internalName) {
 
                 String value = getStringValueFor( internalName );
-                if (value == null)
-                    value = getDefaultStringValueFor( findMethodFor( internalName ) );
+                if (value == null) {
+                    Method method = findMethodFor( internalName );
+                    if (method == null)
+                        logger.wrn(
+                                "Couldn't find method for property: %s, in config holder: %s.  Please return the property's root config in your config holder's getRootTypes.",
+                                internalName, ConfigHolder.get() );
+                    else
+                        value = getDefaultStringValueFor( method );
+                }
 
                 return filter( value );
             }
