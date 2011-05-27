@@ -7,7 +7,7 @@
     <inceptionYear>2010</inceptionYear>
     <groupId>net.lin-k</groupId>
     <artifactId>util</artifactId>
-    <version>SNAPSHOT</version>
+    <version>GIT-SNAPSHOT</version>
     <packaging>pom</packaging>
     <organization>
         <name>Lin.k N.V.</name>
@@ -271,7 +271,7 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <configuration>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
-                    <developmentVersion>SNAPSHOT</developmentVersion>
+                    <developmentVersion>GIT-SNAPSHOT</developmentVersion>
                     <localCheckout>true</localCheckout>
                     <preparationGoals>clean install</preparationGoals>
                     <goals>deploy</goals>
