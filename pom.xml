@@ -214,7 +214,7 @@
         <catalina.version>5.5.15</catalina.version>
         <slf4j.version>1.5.11</slf4j.version>
         <logback.version>0.9.15</logback.version>
-        <opal.version>1.5</opal.version>
+        <opal.version>GIT-SNAPSHOT</opal.version>
         <commons-lang.version>2.3</commons-lang.version>
         <jetbrains-annotations.version>7.0.2</jetbrains-annotations.version>
 

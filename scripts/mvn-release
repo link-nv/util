@@ -137,7 +137,7 @@ if (( branch && maintBranch )); then
     # Create a fake branch because release:branch fails when not on a branch.
     git checkout -b "_$version-rel" "$version"
 
-    mvn -Prelease --batch-mode release:branch -DreleaseVersion=SNAPSHOT
+    mvn -Prelease --batch-mode release:branch -DreleaseVersion=GIT-SNAPSHOT
 
     # Go back to where we came from.
     git checkout "${before##refs/heads/}"

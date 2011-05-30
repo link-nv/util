@@ -33,7 +33,7 @@ installTools() {
 
     for file in "${tools[@]/#/$from/}"; do
         if [[ $to/${file##*/} -nt $file ]]; then
-            emit -y "$to/${file##*/} is newer than $file, won't overwrite."
+            cmp "$to/${file##*/}" "$file" || emit -y "$to/${file##*/} is newer than but different from $file, won't overwrite.  Please manually check which version to keep."
             continue
         fi
         cp "$file" "$to/"

@@ -240,7 +240,7 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
         if (null == timestamp)
             throw SOAPUtils.createSOAPFaultException( "missing Timestamp in WS-Security header", "InvalidSecurity" );
         String timestampId = timestamp.getID();
-        if (!signedElements.contains( timestampId ))
+        if (!isElementSigned( soapMessageContext, timestampId ))
             throw SOAPUtils.createSOAPFaultException( "Timestamp not signed", "FailedCheck" );
         Duration age = new Duration( timestamp.getCreated().getTimeInMillis(), System.currentTimeMillis() );
         Duration maximumAge = configuration.getMaximumAge();

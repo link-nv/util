@@ -70,7 +70,7 @@ public class FieldNamingStrategy implements NamingStrategy {
         if (remoteBinding != null)
             return remoteBinding.jndiBinding();
 
-        return checkNotNull( TypeUtils.forEachSuperTypeOf( ejbType, findJNDIBindingFunction, findJNDIBindingFunction ),
+        return checkNotNull( TypeUtils.forEachSuperTypeOf( ejbType, findJNDIBindingFunction, findJNDIBindingFunction, null ),
                 "JNDI Binding not found for type: %s (super: %s), interfaces: %s", ejbType, ejbType.getSuperclass(),
                 ObjectUtils.describe( ejbType.getInterfaces() ) );
     }
