@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import net.link.util.common.KeyStoreUtils;
+import net.link.util.common.KeyUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,7 +33,7 @@ public class KeyStoreKeyProvider extends KeyProviderImpl {
 
     protected KeyStoreKeyProvider(@NotNull KeyStore keyStore, @Nullable String keyEntryAlias, @Nullable String keyEntryPassword) {
 
-        super( getIdentity( keyStore, keyEntryAlias, keyEntryPassword ), KeyStoreUtils.getCertificates( keyStore, null ) );
+        super( getIdentity( keyStore, keyEntryAlias, keyEntryPassword ), KeyUtils.getCertificates( keyStore, null ) );
     }
 
     private static KeyStore.PrivateKeyEntry getIdentity(final KeyStore keyStore, final String keyEntryAlias,
@@ -57,7 +57,7 @@ public class KeyStoreKeyProvider extends KeyProviderImpl {
             InputStream stream = streamSupplier.getInput();
 
             try {
-                return KeyStoreUtils.loadKeyStore( "JKS", stream, null != keyStorePassword? keyStorePassword.toCharArray(): null );
+                return KeyUtils.loadKeyStore( "JKS", stream, null != keyStorePassword? keyStorePassword.toCharArray(): null );
             }
             finally {
                 Closeables.closeQuietly( stream );

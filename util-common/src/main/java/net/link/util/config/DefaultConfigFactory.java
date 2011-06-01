@@ -21,7 +21,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
-import net.link.util.common.KeyStoreUtils;
+import net.link.util.common.KeyUtils;
 import net.link.util.common.URLUtils;
 import org.bouncycastle.util.encoders.Base64;
 import org.jetbrains.annotations.NotNull;
@@ -448,7 +448,7 @@ public class DefaultConfigFactory {
             String format = values.hasNext()? values.next(): "JKS";
 
             return type.cast(
-                    KeyStoreUtils.loadKeyStore( format, Thread.currentThread().getContextClassLoader().getResourceAsStream( resource ),
+                    KeyUtils.loadKeyStore( format, Thread.currentThread().getContextClassLoader().getResourceAsStream( resource ),
                             password == null? null: password.toCharArray() ) );
         }
         // KeyProviders: type://[alias[:pass1[:pass2]]@]path -- passwords and aliases cannot contain ':' or '@' symbols

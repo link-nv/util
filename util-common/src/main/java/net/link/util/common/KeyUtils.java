@@ -20,11 +20,7 @@ import java.security.interfaces.DSAKeyPairGenerator;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Enumeration;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -37,9 +33,7 @@ import org.joda.time.DateTime;
  *
  * @author fcorneli
  */
-public abstract class KeyStoreUtils {
-
-    private static final Log LOG = LogFactory.getLog( KeyStoreUtils.class );
+public abstract class KeyUtils {
 
     static {
         if (null == Security.getProvider( BouncyCastleProvider.PROVIDER_NAME ))
@@ -48,9 +42,9 @@ public abstract class KeyStoreUtils {
 
     /**
      * Loads a private key entry from a input stream.
-     *
+     * <p/>
      * <p> The supported types of keystores depend on the configured java security providers. Example: "pkcs12". </p>
-     *
+     * <p/>
      * <p> A good alternative java security provider is <a href="http://www.bouncycastle.org/">Bouncy Castle</a>. </p>
      *
      * @param keystoreType the type of the keystore.
@@ -222,8 +216,13 @@ public abstract class KeyStoreUtils {
 
     public static KeyPair generateKeyPair() {
 
+        return generateKeyPair( KeyAlgorithm.RSA );
+    }
+
+    public static KeyPair generateKeyPair(KeyAlgorithm keyAlgorithm) {
+
         try {
-            return generateKeyPair( "RSA" );
+            return generateKeyPair( keyAlgorithm.getJCAName() );
         }
         catch (NoSuchAlgorithmException e) {
             throw new RuntimeException( "RSA not supported", e );
@@ -232,7 +231,12 @@ public abstract class KeyStoreUtils {
 
     public static PrivateKeyEntry generatePrivateKeyEntry(String dn) {
 
-        KeyPair keyPair = generateKeyPair();
+        return generatePrivateKeyEntry( KeyAlgorithm.RSA, dn );
+    }
+
+    public static PrivateKeyEntry generatePrivateKeyEntry(KeyAlgorithm keyAlgorithm, String dn) {
+
+        KeyPair keyPair = generateKeyPair( keyAlgorithm );
         X509Certificate certificate;
         try {
             certificate = generateSelfSignedCertificate( keyPair, dn );
@@ -347,7 +351,7 @@ public abstract class KeyStoreUtils {
          */
         try {
             return (X509Certificate) CertificateFactory.getInstance( "X.509" )
-                    .generateCertificate( new ByteArrayInputStream( certificate.getEncoded() ) );
+                                                       .generateCertificate( new ByteArrayInputStream( certificate.getEncoded() ) );
         }
         catch (CertificateException e) {
             throw new RuntimeException( "X.509 is not supported.", e );
