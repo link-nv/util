@@ -298,7 +298,7 @@ public abstract class KeyUtils {
 
         String signatureAlgorithm = inSignatureAlgorithm;
         if (null == signatureAlgorithm)
-            signatureAlgorithm = "SHA512WithRSAEncryption";
+            signatureAlgorithm = String.format( "SHA1With%s", issuerPrivateKey.getAlgorithm() );
         X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
         certificateGenerator.reset();
         certificateGenerator.setPublicKey( subjectPublicKey );
