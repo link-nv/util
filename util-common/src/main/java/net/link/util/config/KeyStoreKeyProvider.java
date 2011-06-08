@@ -1,5 +1,7 @@
 package net.link.util.config;
 
+import static com.google.common.base.Preconditions.*;
+
 import com.google.common.base.Throwables;
 import com.google.common.io.Closeables;
 import com.google.common.io.InputSupplier;
@@ -11,8 +13,6 @@ import java.security.KeyStore;
 import net.link.util.common.KeyUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import static com.google.common.base.Preconditions.*;
 
 
 /**
@@ -40,10 +40,13 @@ public class KeyStoreKeyProvider extends KeyProviderImpl {
                                                         final String keyEntryPassword) {
 
         try {
-            KeyStore.Entry entry = keyStore.getEntry( ObjectUtils.ifNotNullElse( keyEntryAlias, IDENTITY_ALIAS ), //
-                    new KeyStore.PasswordProtection( keyEntryPassword.toCharArray() ) );
+            String alias = ObjectUtils.ifNotNullElse( keyEntryAlias, IDENTITY_ALIAS );
+            KeyStore.Entry entry = keyStore.getEntry( alias, new KeyStore.PasswordProtection( keyEntryPassword.toCharArray() ) );
 
-            checkState( entry instanceof KeyStore.PrivateKeyEntry, "Identity entry in the key store should be a private key" );
+            checkNotNull( entry, "Identity entry (alias: %s) missing from the key store", alias );
+            checkState( entry instanceof KeyStore.PrivateKeyEntry, "Identity entry (alias: %s) in the key store should be a private key",
+                    alias );
+
             return (KeyStore.PrivateKeyEntry) entry;
         }
         catch (GeneralSecurityException e) {
