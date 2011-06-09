@@ -447,9 +447,8 @@ public class DefaultConfigFactory {
             String password = values.hasNext()? values.next(): null;
             String format = values.hasNext()? values.next(): "JKS";
 
-            return type.cast(
-                    KeyUtils.loadKeyStore( format, Thread.currentThread().getContextClassLoader().getResourceAsStream( resource ),
-                            password == null? null: password.toCharArray() ) );
+            return type.cast( KeyUtils.loadKeyStore( format, Thread.currentThread().getContextClassLoader().getResourceAsStream( resource ),
+                    password == null? null: password.toCharArray() ) );
         }
         // KeyProviders: type://[alias[:pass1[:pass2]]@]path -- passwords and aliases cannot contain ':' or '@' symbols
         if (KeyProvider.class.isAssignableFrom( type )) {
@@ -728,18 +727,22 @@ public class DefaultConfigFactory {
             Object value = method.invoke( config, args );
 
             // If method return type is annotated with @Group, it's a config group: wrap the value or provide a default implementation if no value
-            if (TypeUtils.findAnnotation( method.getReturnType(), Group.class ) != null)
+            Group configGroupAnnotation = TypeUtils.findAnnotation( method.getReturnType(), Group.class );
+            if (configGroupAnnotation != null) {
+                checkState( configGroupAnnotation.prefix().equals( method.getName() ),
+                        "Method (%s) returns a group with a prefix (%s) that doesn't match the method's name.", method,
+                        configGroupAnnotation.prefix() );
+
                 if (value == null) {
-                    // FIXME: prefix-lookup probably needs to be recursive...
+                    // FIXME: prefix is currently only of declaring class, but this breaks for methods deep in the hierarchy
+                    // eg. foo.bar.baz, prefix should be "foo.bar", but it will be "bar"
                     String prefix = checkNotNull( TypeUtils.findAnnotation( method.getDeclaringClass(), Group.class ),
                             "Missing @Group on %s", method.getDeclaringClass() ).prefix();
-                    checkState( prefix.equals( method.getName() ),
-                            "Method (%s) returns a group with a prefix (%s) that doesn't match the method's name.", method, prefix );
 
                     value = getDefaultImplementation( prefix, method.getReturnType() );
                 } else
                     value = getDefaultWrapper( value );
-            else
+            } else
                 // Not a group.
                 if (value == null)
                     value = getDefaultValueFor( method );
