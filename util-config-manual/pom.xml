@@ -5,7 +5,7 @@
     <parent>
         <groupId>net.lin-k</groupId>
         <artifactId>util</artifactId>
-        <version>1.31</version>
+        <version>GIT-SNAPSHOT</version>
     </parent>
 
     <name>Util Config Manual</name>
