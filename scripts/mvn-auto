@@ -253,7 +253,7 @@ if [[ -e $distribution ]] && (( ! nodeploy && ! nodistribution )); then
         *.zip)
             emit "Unpacking distribution"
             unzip -uo "$package"
-            src=("${package%.*}"/*/); src=("${src[@]%/}")
+            src=("${distribution##*/}"-*/*/); src=("${src[@]%/}")
 
             emit "Shutting down remote distribution"
             ssh -qt ${deployToPort:+-p "$deployToPort"} "$deployToHost" "$(printf 's=%q/scripts/stop; [[ -e $s ]] || exit 0; "$s"' "${deployToPath:-~}/${src%%/*}")"

@@ -21,7 +21,7 @@ public class ResourceKeyStoreKeyProvider extends KeyStoreKeyProvider {
         this( keyStoreResource, null, null, null );
     }
 
-    protected ResourceKeyStoreKeyProvider(@NotNull final String keyStoreResource, @Nullable String keyStorePassword,
+    public ResourceKeyStoreKeyProvider(@NotNull final String keyStoreResource, @Nullable String keyStorePassword,
                                           @Nullable String keyEntryAlias, @Nullable String keyEntryPassword) {
 
         super( loadKeyStore( new InputSupplier<InputStream>() {

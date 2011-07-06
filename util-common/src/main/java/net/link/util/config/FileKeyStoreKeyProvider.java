@@ -25,7 +25,7 @@ public class FileKeyStoreKeyProvider extends KeyStoreKeyProvider {
         this( keyStoreFile, null, null, null );
     }
 
-    protected FileKeyStoreKeyProvider(@NotNull File keyStoreFile, @Nullable String keyStorePassword, @Nullable String keyEntryAlias,
+    public FileKeyStoreKeyProvider(@NotNull File keyStoreFile, @Nullable String keyStorePassword, @Nullable String keyEntryAlias,
                                       @Nullable String keyEntryPassword) {
 
         super( loadKeyStore( Files.newInputStreamSupplier( keyStoreFile ), keyStorePassword ), keyEntryAlias, keyEntryPassword );

@@ -270,7 +270,7 @@ public abstract class Saml2Utils {
             else if (!publicKeys.isEmpty() && publicKeys.size() == 1)
                 credential.setPublicKey( publicKeys.get( 0 ) );
             else
-                throw new ValidationException( "Failed to validate XML Signature, no suitable KeyInfo found..." );
+                throw new ValidationFailedException( "Failed to validate XML Signature, no suitable KeyInfo found..." );
 
             // Validate the profile.
             SAMLSignatureProfileValidator pv = new SAMLSignatureProfileValidator();

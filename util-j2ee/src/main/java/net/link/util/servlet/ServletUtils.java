@@ -6,15 +6,11 @@
  */
 package net.link.util.servlet;
 
-import java.io.ByteArrayOutputStream;
+import com.google.common.base.Throwables;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Locale;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import java.util.*;
+import javax.servlet.http.*;
 
 
 /**
@@ -91,11 +87,8 @@ public class ServletUtils {
             if (logMessage.length() > 0)
                 logMessage.append( '\n' );
             logMessage.append( errorMessage.getName() ).append( ": " ).append( errorMessage.getMessage() );
-            if (errorMessage.getError() != null) {
-                ByteArrayOutputStream errorDump = new ByteArrayOutputStream();
-                errorMessage.getError().printStackTrace( new PrintWriter( errorDump ) );
-                logMessage.append( '\n' ).append( new String( errorDump.toByteArray() ) );
-            }
+            if (errorMessage.getError() != null)
+                logMessage.append( '\n' ).append( Throwables.getStackTraceAsString( errorMessage.getError() ) );
         }
         if (null == errorPage)
             /*

@@ -31,7 +31,7 @@ public class KeyStoreKeyProvider extends KeyProviderImpl {
         this( keyStore, null, null );
     }
 
-    protected KeyStoreKeyProvider(@NotNull KeyStore keyStore, @Nullable String keyEntryAlias, @Nullable String keyEntryPassword) {
+    public KeyStoreKeyProvider(@NotNull KeyStore keyStore, @Nullable String keyEntryAlias, @Nullable String keyEntryPassword) {
 
         super( getIdentity( keyStore, keyEntryAlias, keyEntryPassword ), KeyUtils.getCertificates( keyStore, null ) );
     }
