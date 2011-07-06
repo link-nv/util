@@ -637,7 +637,7 @@ public class DefaultConfigFactory {
             @Override
             public String apply(final String from) {
 
-                return System.getProperty( from, "" );
+                return System.getProperty( from );
             }
         } );
 
