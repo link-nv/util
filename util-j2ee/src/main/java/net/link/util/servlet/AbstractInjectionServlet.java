@@ -8,13 +8,10 @@
 package net.link.util.servlet;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.UnavailableException;
+import java.util.*;
+import javax.servlet.*;
 import javax.servlet.http.*;
 import net.link.util.servlet.annotation.*;
 import org.apache.commons.logging.Log;
@@ -23,7 +20,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Abstract Injection Servlet.
- *
+ * <p/>
  * <ul>
  * <li>Injects request parameters into servlet fields.
  * <li>Injects and outjects session parameters.
@@ -59,8 +56,17 @@ public abstract class AbstractInjectionServlet extends HttpServlet {
     protected void service(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // force UTF-8 encoding
+        try {
+            request.setCharacterEncoding( "UTF8" );
+            response.setCharacterEncoding( "UTF8" );
+        }
+        catch (UnsupportedEncodingException e) {
+            throw new RuntimeException( e );
+        }
+
         LOG.debug( "servlet " + getClass() + " beginning service" );
-        String endpoint = getWrapperEndpoint(request);
+        String endpoint = getWrapperEndpoint( request );
         if (endpoint != null) {
             HttpServletRequestEndpointWrapper wrappedRequest = new HttpServletRequestEndpointWrapper( request, endpoint );
             HttpServletResponseEndpointWrapper wrappedResponse = new HttpServletResponseEndpointWrapper( response, endpoint );
@@ -75,20 +81,22 @@ public abstract class AbstractInjectionServlet extends HttpServlet {
 
     /**
      * <b>REQUEST AND RESPONSE WRAPPING</b>:
-     *
+     * <p/>
      * <p>
      * When we're behind a proxy or load balancer, the servlet request URI that the container gives us points to this machine rather than
-     * the server that the request was actually sent to. This causes validation issues in OpenSAML and problems when redirecting to relative
+     * the server that the request was actually sent to. This causes validation issues in OpenSAML and problems when redirecting to
+     * relative
      * URIs.
      * </p>
-     *
+     * <p/>
      * <p>
      * <code>[User] >--[ https://linkid.be/app/foo ]--> [Proxy] >--[ http://provider.com/linkid/app/foo ]--> [linkID]</code> <br>
-     * <code>[linkID: redirect to bar] >--[ redirect: http://provider.com/linkid/app/bar ]--> [Proxy] >--[ redirect: http://provider.com/linkid/app/bar]--> [User]</code>
+     * <code>[linkID: redirect to bar] >--[ redirect: http://provider.com/linkid/app/bar ]--> [Proxy] >--[ redirect:
+     * http://provider.com/linkid/app/bar]--> [User]</code>
      * <br>
      * <code>[User] >--[ http://provider.com/linkid/app/bar ]--> [Problem!]</code>
      * </p>
-     *
+     * <p/>
      * <p>
      * To solve this problem, we wrap the servlet request and response such that the request URI in the HttpServletRequest is the request
      * URI of the client's request (the request to the proxy/load balancer), and such that sendRedirects with relative URIs are translated
@@ -217,9 +225,11 @@ public abstract class AbstractInjectionServlet extends HttpServlet {
                 field.setAccessible( true );
                 try {
                     field.set( this, value );
-                } catch (IllegalArgumentException e) {
+                }
+                catch (IllegalArgumentException e) {
                     throw new ServletException( "illegal argument: " + e.getMessage(), e );
-                } catch (IllegalAccessException e) {
+                }
+                catch (IllegalAccessException e) {
                     throw new ServletException( "illegal access: " + e.getMessage(), e );
                 }
             }
@@ -243,9 +253,11 @@ public abstract class AbstractInjectionServlet extends HttpServlet {
                 field.setAccessible( true );
                 try {
                     field.set( this, value );
-                } catch (IllegalArgumentException e) {
+                }
+                catch (IllegalArgumentException e) {
                     throw new ServletException( "illegal argument: " + e.getMessage(), e );
-                } catch (IllegalAccessException e) {
+                }
+                catch (IllegalAccessException e) {
                     throw new ServletException( "illegal access: " + e.getMessage(), e );
                 }
             }
@@ -283,9 +295,11 @@ public abstract class AbstractInjectionServlet extends HttpServlet {
                 field.setAccessible( true );
                 try {
                     field.set( this, value );
-                } catch (IllegalArgumentException e) {
+                }
+                catch (IllegalArgumentException e) {
                     throw new ServletException( "illegal argument: " + e.getMessage(), e );
-                } catch (IllegalAccessException e) {
+                }
+                catch (IllegalAccessException e) {
                     throw new ServletException( "illegal access: " + e.getMessage(), e );
                 }
             }
@@ -328,9 +342,11 @@ public abstract class AbstractInjectionServlet extends HttpServlet {
                 field.setAccessible( true );
                 try {
                     field.set( this, value );
-                } catch (IllegalArgumentException e) {
+                }
+                catch (IllegalArgumentException e) {
                     throw new ServletException( "illegal argument: " + e.getMessage(), e );
-                } catch (IllegalAccessException e) {
+                }
+                catch (IllegalAccessException e) {
                     throw new ServletException( "illegal access: " + e.getMessage(), e );
                 }
             }
@@ -362,9 +378,11 @@ public abstract class AbstractInjectionServlet extends HttpServlet {
                     value = field.get( this );
                     if (value == null && outAnnotation.required())
                         throw new ServletException( "missing required session attribute: " + outName );
-                } catch (IllegalArgumentException e) {
+                }
+                catch (IllegalArgumentException e) {
                     throw new ServletException( "illegal argument: " + e.getMessage(), e );
-                } catch (IllegalAccessException e) {
+                }
+                catch (IllegalAccessException e) {
                     throw new ServletException( "illegal access: " + e.getMessage(), e );
                 }
                 LOG.debug( "outjecting to session attribute: " + outName );
