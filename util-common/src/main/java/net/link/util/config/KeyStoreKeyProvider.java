@@ -3,6 +3,8 @@ package net.link.util.config;
 import static com.google.common.base.Preconditions.*;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterators;
 import com.google.common.io.Closeables;
 import com.google.common.io.InputSupplier;
 import com.lyndir.lhunath.opal.system.util.ObjectUtils;
@@ -43,9 +45,10 @@ public class KeyStoreKeyProvider extends KeyProviderImpl {
             String alias = ObjectUtils.ifNotNullElse( keyEntryAlias, IDENTITY_ALIAS );
             KeyStore.Entry entry = keyStore.getEntry( alias, new KeyStore.PasswordProtection( keyEntryPassword.toCharArray() ) );
 
-            checkNotNull( entry, "Identity entry (alias: %s) missing from the key store", alias );
-            checkState( entry instanceof KeyStore.PrivateKeyEntry, "Identity entry (alias: %s) in the key store should be a private key",
-                    alias );
+            checkNotNull( entry, "Identity entry (alias: %s) missing from the key store.  Known entries: ", alias,
+                    ImmutableList.copyOf( Iterators.forEnumeration( keyStore.aliases() ) ) );
+            checkState( entry instanceof KeyStore.PrivateKeyEntry,
+                    "Identity entry (alias: %s) in the key store should be a private key.  Found a: %s", alias, entry.getClass() );
 
             return (KeyStore.PrivateKeyEntry) entry;
         }
@@ -60,7 +63,8 @@ public class KeyStoreKeyProvider extends KeyProviderImpl {
             InputStream stream = streamSupplier.getInput();
 
             try {
-                return KeyUtils.loadKeyStore( "JKS", stream, null != keyStorePassword? keyStorePassword.toCharArray(): null );
+                return KeyUtils.loadKeyStore( "JKS", checkNotNull( stream, "Keystore input stream cannot be null." ),
+                        null != keyStorePassword? keyStorePassword.toCharArray(): null );
             }
             finally {
                 Closeables.closeQuietly( stream );
