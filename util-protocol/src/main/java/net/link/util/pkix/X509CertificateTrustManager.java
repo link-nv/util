@@ -8,7 +8,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import javax.net.ssl.*;
-import net.link.util.common.UtilConstants;
+import net.link.util.common.ApplicationMode;
 
 
 /**
@@ -74,7 +74,7 @@ public class X509CertificateTrustManager implements X509TrustManager {
      * @param chain    The request's certificate chain.
      * @param authType The request's authentication type.
      *
-     * @return <code>true</code> if the chain was checked and trusted.  <code>false</code> if no check could be performed.
+     * @return {@code true} if the chain was checked and trusted.  {@code false} if no check could be performed.
      *
      * @throws CertificateException if the chain was checked and was not trusted.
      */
@@ -100,7 +100,14 @@ public class X509CertificateTrustManager implements X509TrustManager {
                 throw new CertificateException( e );
             }
 
-        // check development flag is set, if so can trust all if no trusted certificate was specified
-        return null != System.getProperty( UtilConstants.DEVELOPMENT_MODE );
+        switch (ApplicationMode.get()) {
+            case DEBUG:
+            case DEMO:
+                return true;
+            case DEPLOYMENT:
+                return false;
+        }
+
+        return false;
     }
 }
