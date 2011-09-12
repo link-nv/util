@@ -872,7 +872,8 @@ reverse() {
 # exec 9>&-
 #
 mutex() {
-    local file=$1 pid pids
+    local file=${1:-${BASH_SOURCE[-1]}} pid pids
+    [[ -e $file ]] || err "No such file: $file" || return
 
     exec 9>>"$file"
     { pids=$(fuser -f "$file"); } 2>&- 9>&-

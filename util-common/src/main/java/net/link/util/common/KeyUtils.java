@@ -22,6 +22,7 @@ import java.util.Enumeration;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
@@ -289,6 +290,20 @@ public abstract class KeyUtils {
 
         return generateCertificate( keyPair.getPublic(), dn, keyPair.getPrivate(), null, notBefore, notAfter, signatureAlgorithm, caCert,
                 timeStampingPurpose, null );
+    }
+
+    public static X509Certificate generateCertificate(PKCS10CertificationRequest csr, PrivateKey issuerPrivateKey,
+                                                      X509Certificate issuerCert, DateTime notBefore, DateTime notAfter,
+                                                      String inSignatureAlgorithm, boolean caCert, boolean timeStampingPurpose, URI ocspUri)
+            throws InvalidKeyException, NoSuchAlgorithmException {
+
+        try {
+            return generateCertificate( csr.getPublicKey(), csr.getCertificationRequestInfo().getSubject().toString(), issuerPrivateKey,
+                    issuerCert, notBefore, notAfter, inSignatureAlgorithm, caCert, timeStampingPurpose, ocspUri );
+        }
+        catch (NoSuchProviderException e) {
+            throw new RuntimeException( e );
+        }
     }
 
     public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn, PrivateKey issuerPrivateKey,
