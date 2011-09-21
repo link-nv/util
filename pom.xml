@@ -89,6 +89,18 @@
     </distributionManagement>
     <reporting>
         <outputDirectory>target/site</outputDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven-javadoc-plugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>${maven-surefire-report-plugin}</version>
+            </plugin>
+        </plugins>
     </reporting>
 
     <profiles>
@@ -200,9 +212,11 @@
         <maven-dependency-plugin.version>2.1</maven-dependency-plugin.version>
         <maven-javadoc-plugin.version>2.5</maven-javadoc-plugin.version>
         <maven-source-plugin.version>2.1.2</maven-source-plugin.version>
+        <maven-resources-plugin.version>2.5</maven-resources-plugin.version>
         <maven-export-plugin.version>1.4</maven-export-plugin.version>
         <maven-jdocbook-plugin.version>2.1.1</maven-jdocbook-plugin.version>
         <maven-assembly-plugin.version>2.2-beta-5</maven-assembly-plugin.version>
+        <maven-surefire-report-plugin>2.5</maven-surefire-report-plugin>
 
 
         <!-- DEFAULT VERSIONS, SEE DEPENDENCIES -->
@@ -482,6 +496,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
                     <version>${maven-source-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${maven-resources-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>com.stackoverflow</groupId>
