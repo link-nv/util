@@ -8,11 +8,6 @@
 package net.link.util.test;
 
 import com.google.common.collect.ImmutableList;
-import java.security.KeyPair;
-import java.util.UUID;
-import javax.xml.ws.Binding;
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.handler.Handler;
 import net.link.util.common.CertificateChain;
 import net.link.util.test.pkix.PkiTestUtils;
 import net.link.util.test.session.DummyLoginModule;
@@ -22,7 +17,13 @@ import net.link.util.ws.security.WSSecurityConfiguration;
 import net.link.util.ws.security.WSSecurityHandler;
 import org.joda.time.Duration;
 
-import static org.easymock.EasyMock.*;
+import javax.xml.ws.Binding;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.handler.Handler;
+import java.security.KeyPair;
+import java.util.UUID;
+
+import static org.easymock.EasyMock.expect;
 
 
 /**
@@ -40,11 +41,11 @@ public abstract class AbstractWSTest<T> extends AbstractUnitTests<T> {
 
     protected KeyPair                 clientKeyPair;
     protected CertificateChain        clientCertificateChain;
-    private   WSSecurityConfiguration mockWSSecurityClientConfig;
+    protected WSSecurityConfiguration mockWSSecurityClientConfig;
 
     protected KeyPair                 serverKeyPair;
     protected CertificateChain        serverCertificateChain;
-    private   WSSecurityConfiguration mockWSSecurityServerConfig;
+    protected WSSecurityConfiguration mockWSSecurityServerConfig;
 
     @Override
     protected void setUp()
