@@ -1,10 +1,11 @@
-package net.link.util.config;
+package net.link.util.data;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Data {
+public @interface DataLocation {
 
     String location();
 }
