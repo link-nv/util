@@ -15,8 +15,35 @@ import org.codehaus.jackson.map.SerializerProvider;
  */
 public class JsonDataSerializer extends JsonSerializer<Data> {
 
+    // output mode
+    public enum Mode {
+
+        ENCODED,
+        NOTHING
+    }
+
+
+    private final Mode mode;
+
+    public JsonDataSerializer(Mode mode) {
+
+        this.mode = mode;
+    }
+
     @Override
     public void serialize(Data value, JsonGenerator jgen, SerializerProvider provider)
+            throws IOException {
+
+        switch (mode) {
+            case ENCODED:
+                serializeEncoded( value, jgen );
+                break;
+            case NOTHING:
+                jgen.writeString( JsonToken.VALUE_NULL.asString() );
+        }
+    }
+
+    private static void serializeEncoded(Data value, JsonGenerator jgen)
             throws IOException {
 
         if (null != value.data) {

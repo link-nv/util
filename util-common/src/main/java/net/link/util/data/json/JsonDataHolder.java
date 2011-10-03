@@ -19,8 +19,6 @@ public class JsonDataHolder<C> extends AbstractDataHolder<C> {
 
     static final Logger logger = Logger.get( JsonDataHolder.class );
 
-    private static ObjectMapper mapper;
-
     /**
      * Override me to add custom deserialization/serialization modules here
      *
@@ -31,36 +29,36 @@ public class JsonDataHolder<C> extends AbstractDataHolder<C> {
         return new LinkedList<Module>();
     }
 
-    private void initMapper() {
+    private ObjectMapper initMapper() {
 
-        if (null == mapper) {
-            mapper = new ObjectMapper();
-            mapper.setDateFormat( new SimpleDateFormat( "dd-MM-yyyy H:mm:ss" ) );
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setDateFormat( new SimpleDateFormat( "dd-MM-yyyy H:mm:ss" ) );
 
-            // add image module for Image class, it will load it in the image data from the location
-            SimpleModule imageModule = new SimpleModule( "ImageModule", new Version( 1, 0, 0, null ) );
-            imageModule.addDeserializer( Data.class, new JsonDataDeserializer() {
+        // add data module for Data class, it will load it in the data from the location
+        SimpleModule dataModule = new SimpleModule( "DataModule", new Version( 1, 0, 0, null ) );
+        dataModule.addDeserializer( Data.class, new JsonDataDeserializer() {
 
-                @Nullable
-                @Override
-                protected byte[] getData(String location) {
+            @Nullable
+            @Override
+            protected byte[] getData(String location) {
 
-                    return JsonDataHolder.this.getData( location );
-                }
-            } );
-            mapper.registerModule( imageModule );
-
-            List<Module> customModules = getCustomModules();
-            for (Module module : customModules) {
-                mapper.registerModule( module );
+                return JsonDataHolder.this.getData( location );
             }
+        } );
+        mapper.registerModule( dataModule );
+
+        List<Module> customModules = getCustomModules();
+        for (Module module : customModules) {
+            mapper.registerModule( module );
         }
+
+        return mapper;
     }
 
     @Override
     protected C loadData(FileReader reader) {
 
-        initMapper();
+        ObjectMapper mapper = initMapper();
 
         try {
             return mapper.readValue( reader, dataType );
@@ -81,11 +79,9 @@ public class JsonDataHolder<C> extends AbstractDataHolder<C> {
             throws IOException {
 
         ObjectMapper exportMapper = new ObjectMapper();
-
-        SimpleModule clientModule = new SimpleModule( "ClientModule", new Version( 1, 0, 0, null ) );
-        // only want to output the data content, not the location
-        clientModule.addSerializer( Data.class, new JsonDataSerializer() );
-        exportMapper.registerModule( clientModule );
+        for (Module module : getCustomModules()) {
+            exportMapper.registerModule( module );
+        }
 
         exportMapper.writeValue( writer, value );
     }
