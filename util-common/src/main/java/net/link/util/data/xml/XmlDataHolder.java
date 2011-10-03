@@ -3,12 +3,13 @@ package net.link.util.data.xml;
 import com.lyndir.lhunath.opal.system.logging.Logger;
 import com.lyndir.lhunath.opal.system.logging.exception.InternalInconsistencyException;
 import java.io.*;
+import java.security.cert.CertificateException;
 import java.util.LinkedList;
 import java.util.List;
 import javax.xml.bind.*;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
-import net.link.util.data.AbstractDataHolder;
-import net.link.util.data.Data;
+import net.link.util.common.CertificateUtils;
+import net.link.util.data.*;
 
 
 public class XmlDataHolder<C> extends AbstractDataHolder<C> {
@@ -138,6 +139,20 @@ public class XmlDataHolder<C> extends AbstractDataHolder<C> {
             Data data = (Data) target;
             if (null != data.location) {
                 data.data = getData( data.location );
+            }
+        }
+
+        if (target instanceof CertificateData) {
+
+            // load X509Certificate from data
+            CertificateData certificateData = (CertificateData) target;
+            if (null != certificateData.data) {
+                try {
+                    certificateData.certificate = CertificateUtils.decodeCertificate( certificateData.data );
+                }
+                catch (CertificateException e) {
+                    throw new InternalInconsistencyException( e );
+                }
             }
         }
     }

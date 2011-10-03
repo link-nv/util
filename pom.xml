@@ -269,6 +269,7 @@
         <commons-lang.version>2.3</commons-lang.version>
         <jetbrains-annotations.version>7.0.2</jetbrains-annotations.version>
         <jackson.version>1.8.1</jackson.version>
+        <jaxb-impl.version>2.1.13</jaxb-impl.version>
 
         <!-- JBoss 4 -->
         <jboss.version>4.2.3.GA</jboss.version>
