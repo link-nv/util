@@ -5,7 +5,7 @@
     <parent>
         <groupId>net.lin-k</groupId>
         <artifactId>util</artifactId>
-        <version>1.36</version>
+        <version>1.36-SNAPSHOT</version>
     </parent>
 
     <name>Util Protocol</name>
