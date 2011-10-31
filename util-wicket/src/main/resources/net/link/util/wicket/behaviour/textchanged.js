@@ -3,6 +3,8 @@
   * @author Stein Desmet
   */
 
+ ;
+ 
  if (typeof(Wicket) == "undefined")
  	Wicket = { };
 
@@ -24,5 +26,5 @@
                var wcall = wicketAjaxGet(callbackUrl+ (callbackUrl.indexOf("?")>-1 ? "&" : "?") + "tval="+txtField.val(), function() { }, function() { });
          }
       }
- }
+ };
 

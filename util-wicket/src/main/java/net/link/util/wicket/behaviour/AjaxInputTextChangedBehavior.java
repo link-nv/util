@@ -18,7 +18,7 @@ import org.apache.wicket.util.string.Strings;
  */
 public abstract class AjaxInputTextChangedBehavior extends AbstractDefaultAjaxBehavior{
 
-    	private static final ResourceReference TEXTCHANGED_JS = new JavascriptResourceReference(AjaxInputTextChangedBehavior.class, "textchanged.js");
+    private static final ResourceReference TEXTCHANGED_JS = new JavascriptResourceReference(AjaxInputTextChangedBehavior.class, "textchanged.js");
 
 	private static final long serialVersionUID = 1L;
 
