@@ -183,6 +183,12 @@ public class ConfigHolder {
     protected <C extends RootConfig> ConfigHolder(@NotNull final DefaultConfigFactory defaultConfigFactory,
                                                   @Nullable final Class<C> configType, @Nullable C config) {
 
+        add( defaultConfigFactory, configType, config );
+    }
+
+    public <C extends RootConfig> void add(@NotNull final DefaultConfigFactory defaultConfigFactory, @Nullable final Class<C> configType,
+                                           @Nullable C config) {
+
         factories.put( configType, defaultConfigFactory );
         instances.put( configType, config );
     }
