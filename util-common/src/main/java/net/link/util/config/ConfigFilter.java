@@ -30,8 +30,8 @@ public class ConfigFilter implements Filter {
 
     static final Logger logger = Logger.get( ConfigFilter.class );
 
-    protected ConfigHolder<?> configHolder;
-    protected ServletContext  servletContext;
+    protected ConfigHolder   configHolder;
+    protected ServletContext servletContext;
 
     /**
      * Create a config filter that requires the config holder to be specified in the servlet context via the {@code configHolder} init
@@ -44,7 +44,7 @@ public class ConfigFilter implements Filter {
     /**
      * @param configHolder The configuration holder that holds the config that requests coming through this filter should use.
      */
-    protected ConfigFilter(ConfigHolder<?> configHolder) {
+    protected ConfigFilter(ConfigHolder configHolder) {
 
         this.configHolder = configHolder;
     }
@@ -65,14 +65,26 @@ public class ConfigFilter implements Filter {
 
         try {
             setLocalConfigHolder( getConfigHolder() );
-            factory( DefaultConfigFactory.class ).setServletContext( servletContext );
-            factory( DefaultConfigFactory.class ).setServletRequest( request );
+
+            for (DefaultConfigFactory factory : factories()) {
+                factory.setServletContext( servletContext );
+                factory.setServletRequest( request );
+            }
+
+            //            factory( DefaultConfigFactory.class ).setServletContext( servletContext );
+            //            factory( DefaultConfigFactory.class ).setServletRequest( request );
 
             chain.doFilter( request, response );
         }
         finally {
-            factory( DefaultConfigFactory.class ).unsetServletRequest();
-            factory( DefaultConfigFactory.class ).unsetServletContext();
+
+            for (DefaultConfigFactory factory : factories()) {
+                factory.unsetServletRequest();
+                factory.unsetServletContext();
+            }
+
+            //            factory( DefaultConfigFactory.class ).unsetServletRequest();
+            //            factory( DefaultConfigFactory.class ).unsetServletContext();
 
             unsetLocalConfigHolder();
             logger.dbg( "[<<<] %s: %s", getConfigHolder().getClass().getSimpleName(), servletContext.getServletContextName() );
@@ -85,7 +97,7 @@ public class ConfigFilter implements Filter {
         servletContext = null;
     }
 
-    public ConfigHolder<?> getConfigHolder() {
+    public ConfigHolder getConfigHolder() {
 
         if (configHolder == null)
             configHolder = loadConfigHolder( servletContext );
@@ -94,7 +106,7 @@ public class ConfigFilter implements Filter {
     }
 
     @NotNull
-    protected static ConfigHolder<?> loadConfigHolder(ServletContext servletContext) {
+    protected static ConfigHolder loadConfigHolder(ServletContext servletContext) {
 
         // Try to find a custom holder.
         String configHolder = servletContext.getInitParameter( "configHolder" );
@@ -118,6 +130,6 @@ public class ConfigFilter implements Filter {
             configInstance = newInstance( configClass );
 
         // Create the holder.
-        return new ConfigHolder<RootConfig>( configFactory, configClass, configInstance );
+        return new ConfigHolder( configFactory, configClass, configInstance );
     }
 }

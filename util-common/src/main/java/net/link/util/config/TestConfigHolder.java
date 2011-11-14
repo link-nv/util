@@ -11,7 +11,7 @@ import net.link.util.common.DummyServletRequest;
 import org.jetbrains.annotations.Nullable;
 
 
-public class TestConfigHolder<C extends RootConfig> extends ConfigHolder<C> {
+public class TestConfigHolder<C extends RootConfig> extends ConfigHolder {
 
     private static RootConfig testConfig;
 
@@ -22,46 +22,46 @@ public class TestConfigHolder<C extends RootConfig> extends ConfigHolder<C> {
      *
      * @return The currently active config, cast to TestConfigHolder.
      */
-    @SuppressWarnings( { "StaticVariableUsedBeforeInitialization" })
+    @SuppressWarnings({ "StaticVariableUsedBeforeInitialization" })
     public static <C extends RootConfig> C testConfig(Class<C> type) {
 
         return type.cast( testConfig );
     }
 
-    public TestConfigHolder(C testConfig, @Nullable final ServletContext servletContext) {
+    public TestConfigHolder(C testConfig, Class<C> testConfigType, @Nullable final ServletContext servletContext) {
 
         //noinspection unchecked
         super( new DefaultConfigFactory() {
 
-                    @Nullable
-                    @Override
-                    @SuppressWarnings( { "RefusedBequest" })
-                    protected ServletContext getServletContext() {
+            @Nullable
+            @Override
+            @SuppressWarnings({ "RefusedBequest" })
+            protected ServletContext getServletContext() {
 
-                        return servletContext;
+                return servletContext;
+            }
+
+            @Override
+            @SuppressWarnings({ "RefusedBequest" })
+            protected ServletRequest getServletRequest() {
+
+                return new DummyServletRequest() {
+                    @Override
+                    @SuppressWarnings({ "RefusedBequest" })
+                    public Locale getLocale() {
+
+                        return new Locale( "en" );
                     }
 
                     @Override
-                    @SuppressWarnings( { "RefusedBequest" })
-                    protected ServletRequest getServletRequest() {
+                    @SuppressWarnings({ "RefusedBequest" })
+                    public String getContextPath() {
 
-                        return new DummyServletRequest() {
-                            @Override
-                            @SuppressWarnings( { "RefusedBequest" })
-                            public Locale getLocale() {
-
-                                return new Locale( "en" );
-                            }
-
-                            @Override
-                            @SuppressWarnings( { "RefusedBequest" })
-                            public String getContextPath() {
-
-                                return "/";
-                            }
-                        };
+                        return "/";
                     }
-                }, (Class<C>)testConfig.getClass(), testConfig );
+                };
+            }
+        }, testConfigType, testConfig );
 
         TestConfigHolder.testConfig = testConfig;
     }
