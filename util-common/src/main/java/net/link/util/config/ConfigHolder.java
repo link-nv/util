@@ -193,6 +193,11 @@ public class ConfigHolder {
         instances.put( configType, config );
     }
 
+    public boolean hasConfig(Class<? extends RootConfig> configType) {
+
+        return null != factories.get( configType ) || null != instances.get( configType );
+    }
+
     /**
      * Provides the config held by this holder.
      *
