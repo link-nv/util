@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <!-- PROJECT METADATA -->
@@ -243,6 +244,7 @@
         <cglib.version>2.1_3</cglib.version>
 
         <hibernate-entitymanager.version>3.6.0.Final</hibernate-entitymanager.version>
+        <hibernate-core.version>3.6.2.Final</hibernate-core.version>
         <hibernate-jpa2-api.version>1.0.0.Final</hibernate-jpa2-api.version>
 
         <jetty.version>6.1.7</jetty.version>
@@ -849,6 +851,11 @@
                         <artifactId>commons-logging</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-core</artifactId>
+                <version>${hibernate-core.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-collections</groupId>
