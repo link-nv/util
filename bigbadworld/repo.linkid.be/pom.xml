@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.lin-k.util</groupId>
+        <artifactId>bigbadworld</artifactId>
+        <version>GIT-SNAPSHOT</version>
+    </parent>
+
+    <!-- PROJECT METADATA -->
+    <name>repo.linkid.be</name>
+    <inceptionYear>2010</inceptionYear>
+    <groupId>net.lin-k.util.bigbadworld</groupId>
+    <artifactId>repo.linkid.be</artifactId>
+    <packaging>pom</packaging>
+    <organization>
+        <name>Lin.k N.V.</name>
+        <url>http://www.lin-k.net</url>
+    </organization>
+
+    <distributionManagement>
+        <repository>
+            <id>repo.linkid.be</id>
+            <name>Lin.k public repository</name>
+            <url>scpexe://repo.linkid.be/home/maven/repository/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>repo.linkid.be.snap</id>
+            <name>Lin.k public repository</name>
+            <url>scpexe://repo.linkid.be/home/maven/repository/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <deployDependencies>true</deployDependencies>
+                    <filterPom>true</filterPom>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>net.lin-k.util</groupId>
+            <artifactId>util-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.lin-k.util</groupId>
+            <artifactId>util-config-manual</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.lin-k.util</groupId>
+            <artifactId>util-j2ee</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.lin-k.util</groupId>
+            <artifactId>util-j2ee-jboss4</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.lin-k.util</groupId>
+            <artifactId>util-j2ee-jboss6</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.lin-k.util</groupId>
+            <artifactId>util-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.lin-k.util</groupId>
+            <artifactId>util-protocol</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.lin-k.util</groupId>
+            <artifactId>util-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.lin-k.util</groupId>
+            <artifactId>util-wicket</artifactId>
+        </dependency>
+    </dependencies>
+</project>
