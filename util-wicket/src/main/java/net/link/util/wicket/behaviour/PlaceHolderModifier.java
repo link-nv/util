@@ -19,7 +19,7 @@ public class PlaceHolderModifier extends AttributeModifier {
     private static final ResourceReference PLACEHOLDER_JS = new JavascriptResourceReference(PlaceHolderModifier.class, "placeholder.js");
 
     public PlaceHolderModifier(IModel<String> model){
-        super("placeholder", model );
+        super("placeholder",true, model );
     }
 
     /**
