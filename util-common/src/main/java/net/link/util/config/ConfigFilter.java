@@ -60,11 +60,11 @@ public class ConfigFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        logger.dbg( "[>>>] %s: %s @ %s", getConfigHolder().getClass().getSimpleName(), servletContext.getServletContextName(),
+        logger.dbg( "[>>>] %s: %s @ %s", getConfigHolder( request ).getClass().getSimpleName(), servletContext.getServletContextName(),
                 request instanceof HttpServletRequest? ((HttpServletRequest) request).getRequestURL(): null );
 
         try {
-            setLocalConfigHolder( getConfigHolder() );
+            setLocalConfigHolder( getConfigHolder( request ) );
 
             for (DefaultConfigFactory factory : factories()) {
                 factory.setServletContext( servletContext );
@@ -87,7 +87,7 @@ public class ConfigFilter implements Filter {
             //            factory( DefaultConfigFactory.class ).unsetServletContext();
 
             unsetLocalConfigHolder();
-            logger.dbg( "[<<<] %s: %s", getConfigHolder().getClass().getSimpleName(), servletContext.getServletContextName() );
+            logger.dbg( "[<<<] %s: %s", getConfigHolder( request ).getClass().getSimpleName(), servletContext.getServletContextName() );
         }
     }
 
@@ -97,7 +97,7 @@ public class ConfigFilter implements Filter {
         servletContext = null;
     }
 
-    public ConfigHolder getConfigHolder() {
+    public ConfigHolder getConfigHolder(ServletRequest request) {
 
         if (configHolder == null)
             configHolder = loadConfigHolder( servletContext );
