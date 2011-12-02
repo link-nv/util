@@ -51,18 +51,9 @@ public class PlaceHolderModifier extends AttributeModifier {
     @Override
     public void renderHead(final IHeaderResponse response) {
         super.renderHead( response );
-        renderHtml5Script(response);
+        response.renderJavascriptReference( PLACEHOLDER_JS, "placeholder-script" );
     }
 
-    private void renderHtml5Script(IHeaderResponse response)
-	{
-		response.renderJavascriptReference( PLACEHOLDER_JS );
-		final String id = getComponent().getMarkupId();
-
-
-		String initJS = String.format("$('#%s').placeholderEnhanced()", id);
-		response.renderOnDomReadyJavascript( initJS );
-	}
 
     public Component getComponent() {
         return component;
