@@ -1,14 +1,16 @@
 package net.link.util.config;
 
-import static com.google.common.base.Preconditions.*;
-import static com.lyndir.lhunath.opal.system.util.TypeUtils.*;
-import static net.link.util.config.ConfigHolder.*;
-
 import com.lyndir.lhunath.opal.system.logging.Logger;
-import java.io.IOException;
+import org.jetbrains.annotations.NotNull;
+
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
-import org.jetbrains.annotations.NotNull;
+import java.io.IOException;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.lyndir.lhunath.opal.system.util.TypeUtils.loadClass;
+import static com.lyndir.lhunath.opal.system.util.TypeUtils.newInstance;
+import static net.link.util.config.ConfigHolder.*;
 
 
 /**
