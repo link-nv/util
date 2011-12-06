@@ -30,7 +30,7 @@ public abstract class ConfigContextListener implements ServletContextListener {
 
     static final Logger logger = Logger.get( ConfigContextListener.class );
 
-    private ConfigHolder<?> configHolder;
+    private ConfigHolder configHolder;
 
     /**
      * @param configHolder The configuration holder that holds the config that requests coming through this filter should use.  May be
@@ -38,7 +38,7 @@ public abstract class ConfigContextListener implements ServletContextListener {
      *                     {@code configHolder} init parameter, or requires the root config class to be specified via the {@code
      *                     configClass} init parameter.
      */
-    protected ConfigContextListener(ConfigHolder<?> configHolder) {
+    protected ConfigContextListener(ConfigHolder configHolder) {
 
         this.configHolder = configHolder;
     }
@@ -46,12 +46,15 @@ public abstract class ConfigContextListener implements ServletContextListener {
     @Override
     public final void contextInitialized(final ServletContextEvent sce) {
 
-        ConfigHolder<?> configHolder = getConfigHolder( sce );
+        ConfigHolder configHolder = getConfigHolder( sce );
         logger.dbg( "[>>>] %s: %s [init]", configHolder.getClass().getSimpleName(), sce.getServletContext().getServletContextName() );
 
         try {
             setLocalConfigHolder( configHolder );
-            factory( DefaultConfigFactory.class ).setServletContext( sce.getServletContext() );
+            for (DefaultConfigFactory factory : factories()) {
+                factory.setServletContext( sce.getServletContext() );
+            }
+            //            factory( DefaultConfigFactory.class ).setServletContext( sce.getServletContext() );
 
             doContextInitialized( sce );
         }
@@ -64,12 +67,15 @@ public abstract class ConfigContextListener implements ServletContextListener {
     @Override
     public final void contextDestroyed(final ServletContextEvent sce) {
 
-        ConfigHolder<?> configHolder = getConfigHolder( sce );
+        ConfigHolder configHolder = getConfigHolder( sce );
         logger.dbg( "[>>>] %s: %s [destroy]", configHolder.getClass().getSimpleName(), sce.getServletContext().getServletContextName() );
 
         try {
             setLocalConfigHolder( configHolder );
-            factory( DefaultConfigFactory.class ).setServletContext( sce.getServletContext() );
+            for (DefaultConfigFactory factory : factories()) {
+                factory.setServletContext( sce.getServletContext() );
+            }
+            //            factory( DefaultConfigFactory.class ).setServletContext( sce.getServletContext() );
 
             doContextDestroyed( sce );
         }
@@ -80,7 +86,7 @@ public abstract class ConfigContextListener implements ServletContextListener {
     }
 
     @NotNull
-    protected ConfigHolder<?> getConfigHolder(final ServletContextEvent sce) {
+    protected ConfigHolder getConfigHolder(final ServletContextEvent sce) {
 
         if (configHolder == null)
             configHolder = ConfigFilter.loadConfigHolder( sce.getServletContext() );

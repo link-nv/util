@@ -1,14 +1,16 @@
 package net.link.util.config;
 
-import static com.google.common.base.Preconditions.*;
-import static com.lyndir.lhunath.opal.system.util.TypeUtils.*;
-import static net.link.util.config.ConfigHolder.*;
-
 import com.lyndir.lhunath.opal.system.logging.Logger;
-import java.io.IOException;
+import org.jetbrains.annotations.NotNull;
+
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
-import org.jetbrains.annotations.NotNull;
+import java.io.IOException;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.lyndir.lhunath.opal.system.util.TypeUtils.loadClass;
+import static com.lyndir.lhunath.opal.system.util.TypeUtils.newInstance;
+import static net.link.util.config.ConfigHolder.*;
 
 
 /**
@@ -30,8 +32,8 @@ public class ConfigFilter implements Filter {
 
     static final Logger logger = Logger.get( ConfigFilter.class );
 
-    protected ConfigHolder<?> configHolder;
-    protected ServletContext  servletContext;
+    protected ConfigHolder   configHolder;
+    protected ServletContext servletContext;
 
     /**
      * Create a config filter that requires the config holder to be specified in the servlet context via the {@code configHolder} init
@@ -44,7 +46,7 @@ public class ConfigFilter implements Filter {
     /**
      * @param configHolder The configuration holder that holds the config that requests coming through this filter should use.
      */
-    protected ConfigFilter(ConfigHolder<?> configHolder) {
+    protected ConfigFilter(ConfigHolder configHolder) {
 
         this.configHolder = configHolder;
     }
@@ -60,22 +62,34 @@ public class ConfigFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        logger.dbg( "[>>>] %s: %s @ %s", getConfigHolder().getClass().getSimpleName(), servletContext.getServletContextName(),
+        logger.dbg( "[>>>] %s: %s @ %s", getConfigHolder( request ).getClass().getSimpleName(), servletContext.getServletContextName(),
                 request instanceof HttpServletRequest? ((HttpServletRequest) request).getRequestURL(): null );
 
         try {
-            setLocalConfigHolder( getConfigHolder() );
-            factory( DefaultConfigFactory.class ).setServletContext( servletContext );
-            factory( DefaultConfigFactory.class ).setServletRequest( request );
+            setLocalConfigHolder( getConfigHolder( request ) );
+
+            for (DefaultConfigFactory factory : factories()) {
+                factory.setServletContext( servletContext );
+                factory.setServletRequest( request );
+            }
+
+            //            factory( DefaultConfigFactory.class ).setServletContext( servletContext );
+            //            factory( DefaultConfigFactory.class ).setServletRequest( request );
 
             chain.doFilter( request, response );
         }
         finally {
-            factory( DefaultConfigFactory.class ).unsetServletRequest();
-            factory( DefaultConfigFactory.class ).unsetServletContext();
+
+            for (DefaultConfigFactory factory : factories()) {
+                factory.unsetServletRequest();
+                factory.unsetServletContext();
+            }
+
+            //            factory( DefaultConfigFactory.class ).unsetServletRequest();
+            //            factory( DefaultConfigFactory.class ).unsetServletContext();
 
             unsetLocalConfigHolder();
-            logger.dbg( "[<<<] %s: %s", getConfigHolder().getClass().getSimpleName(), servletContext.getServletContextName() );
+            logger.dbg( "[<<<] %s: %s", getConfigHolder( request ).getClass().getSimpleName(), servletContext.getServletContextName() );
         }
     }
 
@@ -85,7 +99,7 @@ public class ConfigFilter implements Filter {
         servletContext = null;
     }
 
-    public ConfigHolder<?> getConfigHolder() {
+    public ConfigHolder getConfigHolder(ServletRequest request) {
 
         if (configHolder == null)
             configHolder = loadConfigHolder( servletContext );
@@ -94,7 +108,7 @@ public class ConfigFilter implements Filter {
     }
 
     @NotNull
-    protected static ConfigHolder<?> loadConfigHolder(ServletContext servletContext) {
+    protected static ConfigHolder loadConfigHolder(ServletContext servletContext) {
 
         // Try to find a custom holder.
         String configHolder = servletContext.getInitParameter( "configHolder" );
@@ -118,6 +132,6 @@ public class ConfigFilter implements Filter {
             configInstance = newInstance( configClass );
 
         // Create the holder.
-        return new ConfigHolder<RootConfig>( configFactory, configClass, configInstance );
+        return new ConfigHolder( configFactory, configClass, configInstance );
     }
 }

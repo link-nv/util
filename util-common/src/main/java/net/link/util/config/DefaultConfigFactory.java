@@ -388,7 +388,7 @@ public class DefaultConfigFactory {
      * @return The generated value.
      */
     @Nullable
-    @SuppressWarnings( { "UnusedParameters" })
+    @SuppressWarnings({ "UnusedParameters" })
     protected String generateValueExtension(@NotNull final Method method) {
 
         return null;
@@ -589,7 +589,7 @@ public class DefaultConfigFactory {
      * @return The value, converted to an instance of the given type.
      */
     @Nullable
-    @SuppressWarnings( { "UnusedParameters" })
+    @SuppressWarnings({ "UnusedParameters" })
     protected <T> T toTypeExtension(@NotNull final String value, @NotNull final Class<T> type) {
 
         return null;

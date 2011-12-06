@@ -245,7 +245,7 @@
         <release.version>1.25</release.version>
         <servlet-api.version>2.4</servlet-api.version>
 
-        <wicket.version>1.4.17</wicket.version>
+        <wicket.version>1.4.18</wicket.version>
         <wicket-datetime.version>1.4.6</wicket-datetime.version>
         <wicket-javaee.version>1.1-safe-online</wicket-javaee.version>
 
@@ -265,6 +265,7 @@
         <cglib.version>2.1_3</cglib.version>
 
         <hibernate-entitymanager.version>3.6.0.Final</hibernate-entitymanager.version>
+        <hibernate-core.version>3.6.2.Final</hibernate-core.version>
         <hibernate-jpa2-api.version>1.0.0.Final</hibernate-jpa2-api.version>
 
         <jetty.version>6.1.7</jetty.version>
@@ -812,6 +813,11 @@
                         <artifactId>commons-logging</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-core</artifactId>
+                <version>${hibernate-core.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-collections</groupId>
