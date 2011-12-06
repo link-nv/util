@@ -53,6 +53,9 @@
         <dependency>
             <groupId>net.lin-k.util</groupId>
             <artifactId>util-config-manual</artifactId>
+            <type>zip</type>
+            <classifier>pdf-zip</classifier>
+            <version>${version}</version>
         </dependency>
         <dependency>
             <groupId>net.lin-k.util</groupId>

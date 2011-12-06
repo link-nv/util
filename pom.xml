@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <!-- PROJECT METADATA -->
@@ -331,13 +332,8 @@
         <extensions>
             <extension>
                 <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh</artifactId>
-                <version>1.0-beta-6</version>
-            </extension>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
                 <artifactId>wagon-ssh-external</artifactId>
-                <version>1.0-beta-6</version>
+                <version>1.0</version>
             </extension>
         </extensions>
         <plugins>
@@ -433,26 +429,26 @@
                     <artifactId>maven-jdocbook-plugin</artifactId>
                     <version>${maven-jdocbook-plugin.version}</version>
                     <dependencies>
-					    <dependency>
-						    <groupId>org.jboss</groupId>
-						    <artifactId>jbossorg-docbook-xslt</artifactId>
-						    <version>1.1.0</version>
-					    </dependency>
-					    <dependency>
-						    <groupId>org.jboss</groupId>
-						    <artifactId>jbossorg-jdocbook-style</artifactId>
-						    <version>1.1.0</version>
-						    <type>jdocbook-style</type>
-					    </dependency>
-				    </dependencies>
+                        <dependency>
+                            <groupId>org.jboss</groupId>
+                            <artifactId>jbossorg-docbook-xslt</artifactId>
+                            <version>1.1.0</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.jboss</groupId>
+                            <artifactId>jbossorg-jdocbook-style</artifactId>
+                            <version>1.1.0</version>
+                            <type>jdocbook-style</type>
+                        </dependency>
+                    </dependencies>
                     <configuration>
-					    <formats>
-						    <format>
-							    <formatName>pdf</formatName>
-							    <stylesheetResource>classpath:/xslt/org/jboss/pdf.xsl</stylesheetResource>
+                        <formats>
+                            <format>
+                                <formatName>pdf</formatName>
+                                <stylesheetResource>classpath:/xslt/org/jboss/pdf.xsl</stylesheetResource>
                                 <finalName>${project.artifactId}.pdf</finalName>
-						    </format>
-					    </formats>
+                            </format>
+                        </formats>
                         <sourceDocumentName>${project.artifactId}.xml</sourceDocumentName>
                         <imageResource>
                             <directory>${basedir}/src/main/images</directory>
@@ -667,14 +663,14 @@
                 <artifactId>jboss-j2se</artifactId>
                 <version>${jboss-mx.version}</version>
                 <exclusions>
-                  <exclusion>
-                    <groupId>org.jboss.logging</groupId>
-                    <artifactId>jboss-logging-spi</artifactId>
-                  </exclusion>
-                  <exclusion>
-                    <groupId>org.jboss.logging</groupId>
-                    <artifactId>jboss-logging-log4j</artifactId>
-                  </exclusion>
+                    <exclusion>
+                        <groupId>org.jboss.logging</groupId>
+                        <artifactId>jboss-logging-spi</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.jboss.logging</groupId>
+                        <artifactId>jboss-logging-log4j</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
