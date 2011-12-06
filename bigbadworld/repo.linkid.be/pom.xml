@@ -29,7 +29,7 @@
         <snapshotRepository>
             <id>repo.linkid.be.snap</id>
             <name>Lin.k public repository</name>
-            <url>scpexe://repo.linkid.be/home/maven/repository/snapshots</url>
+            <url>scpexe://repo.linkid.be/home/maven/repository/releases</url>
         </snapshotRepository>
     </distributionManagement>
 
