@@ -1,38 +1,37 @@
 /* jQuery Placeholder Enhanced
 * ----------------------------------------------------------
 * Author: Denis Ciccale (dciccale@gmail.com)
-* Password support by Gabriel Birke (gabriel.birke@gmail.com) & optimized by Denis Ciccale
+* Password support by Gabriel Birke (gabriel.birke@gmail.com) & optimized by Denis Ciccale 
 *
 * Dual licensed under the MIT and GPL licenses:
 * http://www.opensource.org/licenses/mit-license.php
 * http://www.gnu.org/licenses/gpl.html
-*/
-;
+*/ 
 (function ($) {
-
+		
 	$.fn.placeholderEnhanced = function() {
-
+	
 		// don't act on absent elements
 		if(!this.length) return;
-
+		
 		var // placeholder css class (if you change the class name, be sure to change the c below to "placeholder")
 			c = "placeholder",
 			// if browser supports placeholder attribute, use native events to show/hide placeholder
 			hasNativeSupport = c in document.createElement("input");
-
-
+			
+			
 			// extra check for Opera: Opera 11 supports placeholder only for input, and you cannot style it yet, even with a class you can't.
 			// http://my.opera.com/ODIN/blog/2010/12/17/new-html5-features-in-opera-11
 			// http://dev.opera.com/forums/topic/841252?t=1296553904&page=1#comment8072202
 			// this is fixed for version 11.50
 			if($.browser.opera && $.browser.version < '11.50') hasNativeSupport = false;
-
+			
 		// ensure not sending placeholder value when placeholder is not supported
 		if (!hasNativeSupport) {
 			$('form').submit(function() {
 				// form
 				var $this = $(this);
-
+				
 				// empty input value if is the same as the placeholder attribute
 				$this.find('input[placeholder], textarea[placeholder]').each(function () {
 					var e = $(this);
@@ -98,15 +97,15 @@
 				var inputCssClass = (e[0].className) ? ' ' + e[0].className : '',
 				// get size attr also
 						size = (e[0].size) ? 'size=' + e[0].size : '';
-
+			
 				// create input with tabindex="-1" to skip tabbing
 				var fakePassw = $('<input type="text" class="' + c + inputCssClass + '" value="' + d + '"' + size + ' tabindex="-1" />');
-
+				
 				// trigger password focus when focus is on text input
 				fakePassw.bind('focus.placeholder', function() {
 					e.trigger('focus.placeholder');
 				});
-
+				
 				// insert the text input
 				e.before(fakePassw)
 				// focus event to show the real password input
@@ -115,19 +114,19 @@
 					hideInput(fakePassw);
 				});
 			}
-
+			
 			// bind blur event and trigger on load
 			e.bind('blur.placeholder', placeholderOnBlur)
-			.trigger('blur.placeholder');
-
+			.ready(placeholderOnBlur);
+		
 		});
 	};
-
+	
 	// auto-initialize the plugin
 	$(function () {
 		$('input[placeholder], textarea[placeholder]').placeholderEnhanced();
     });
-
+	
 	// if placeholder is not supported, the jQuery val function returns the placeholder
 	// redefine the val function to fix this
 	var hasNativeSupport = "placeholder" in document.createElement("input");
