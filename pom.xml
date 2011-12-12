@@ -125,89 +125,6 @@
         </pluginRepository>
     </pluginRepositories>
 
-    <profiles>
-        <!-- Profile for exporting to linkid's public repository -->
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>com.stackoverflow</groupId>
-                        <artifactId>maven-export-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>output</id>
-                                <goals>
-                                    <goal>output-project</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>development</id>
-
-            <repositories>
-                <repository>
-                    <id>internal</id>
-                    <name>Archiva Managed Internal Repository</name>
-                    <url>http://buildserver:7070/archiva/repository/internal/</url>
-                    <releases>
-                        <enabled>true</enabled>
-                        <updatePolicy>never</updatePolicy>
-                    </releases>
-                    <snapshots>
-                        <enabled>false</enabled>
-                        <updatePolicy>never</updatePolicy>
-                    </snapshots>
-                </repository>
-                <repository>
-                    <id>snapshots</id>
-                    <name>Archiva Managed Snapshot Repository</name>
-                    <url>http://buildserver:7070/archiva/repository/snapshots/</url>
-                    <releases>
-                        <enabled>false</enabled>
-                        <updatePolicy>never</updatePolicy>
-                    </releases>
-                    <snapshots>
-                        <enabled>true</enabled>
-                        <updatePolicy>never</updatePolicy>
-                    </snapshots>
-                </repository>
-            </repositories>
-
-        </profile>
-
-    </profiles>
-
     <!-- MODULES -->
     <modules>
         <module>util-jpa</module>
@@ -385,7 +302,31 @@
                 </configuration>
                 <inherited>true</inherited>
             </plugin>
-
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
 
         <!-- DEFAULT PLUGIN CONFIGURATION -->
