@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <!-- PROJECT METADATA -->
@@ -78,113 +79,51 @@
     <!-- DISTRIBUTION AND DEPLOYMENT -->
     <distributionManagement>
         <repository>
-            <id>repo.linkid.be</id>
-            <url>scpexe://repo.linkid.be/home/maven/repository/releases</url>
+            <id>buildserver-release-repository</id>
+            <url>scpexe://buildserver/home/devel/maven2/repositories/release
+            </url>
+            <uniqueVersion>false</uniqueVersion>
         </repository>
         <snapshotRepository>
-            <id>repo.linkid.be</id>
-            <url>scpexe://repo.linkid.be/home/maven/repository/snapshots</url>
+            <id>buildserver-snapshot-repository</id>
+            <url>scpexe://buildserver/home/devel/maven2/repositories/release
+            </url>
             <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
     </distributionManagement>
-    <reporting>
-        <outputDirectory>target/site</outputDirectory>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>${maven-javadoc-plugin.version}</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-report-plugin</artifactId>
-                <version>${maven-surefire-report-plugin}</version>
-            </plugin>
-        </plugins>
-    </reporting>
+    <!-- REMOTE ARTIFACT REPOSITORIES -->
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>Lin.k internal repo</name>
+            <url>http://buildserver/maven2</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
 
-    <profiles>
-        <!-- Profile for exporting to linkid's public repository -->
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>com.stackoverflow</groupId>
-                        <artifactId>maven-export-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>output</id>
-                                <goals>
-                                    <goal>output-project</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>development</id>
-
-            <repositories>
-                <repository>
-                    <id>internal</id>
-                    <name>Archiva Managed Internal Repository</name>
-                    <url>http://buildserver:7070/archiva/repository/internal/</url>
-                    <releases>
-                        <enabled>true</enabled>
-                        <updatePolicy>never</updatePolicy>
-                    </releases>
-                    <snapshots>
-                        <enabled>false</enabled>
-                        <updatePolicy>never</updatePolicy>
-                    </snapshots>
-                </repository>
-                <repository>
-                    <id>snapshots</id>
-                    <name>Archiva Managed Snapshot Repository</name>
-                    <url>http://buildserver:7070/archiva/repository/snapshots/</url>
-                    <releases>
-                        <enabled>false</enabled>
-                        <updatePolicy>never</updatePolicy>
-                    </releases>
-                    <snapshots>
-                        <enabled>true</enabled>
-                        <updatePolicy>never</updatePolicy>
-                    </snapshots>
-                </repository>
-            </repositories>
-
-        </profile>
-
-    </profiles>
+    <!-- MAVEN PLUGIN REPOSITORIES -->
+    <pluginRepositories>
+        <pluginRepository>
+            <id>central</id>
+            <name>Lin.k internal repo</name>
+            <url>http://buildserver/maven2</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
     <!-- MODULES -->
     <modules>
@@ -197,6 +136,7 @@
         <module>util-common</module>
         <module>util-config-manual</module>
         <module>util-protocol</module>
+        <module>bigbadworld</module>
     </modules>
 
     <!-- DEFAULT PROPERTIES -->
@@ -213,7 +153,7 @@
         <maven-javadoc-plugin.version>2.5</maven-javadoc-plugin.version>
         <maven-source-plugin.version>2.1.2</maven-source-plugin.version>
         <maven-resources-plugin.version>2.5</maven-resources-plugin.version>
-        <maven-export-plugin.version>1.4</maven-export-plugin.version>
+        <maven-deploy-plugin.version>2.7-4l</maven-deploy-plugin.version>
         <maven-jdocbook-plugin.version>2.1.1</maven-jdocbook-plugin.version>
         <maven-assembly-plugin.version>2.2-beta-5</maven-assembly-plugin.version>
         <maven-surefire-report-plugin>2.5</maven-surefire-report-plugin>
@@ -309,13 +249,8 @@
         <extensions>
             <extension>
                 <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh</artifactId>
-                <version>1.0-beta-6</version>
-            </extension>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
                 <artifactId>wagon-ssh-external</artifactId>
-                <version>1.0-beta-6</version>
+                <version>1.0</version>
             </extension>
         </extensions>
         <plugins>
@@ -367,7 +302,31 @@
                 </configuration>
                 <inherited>true</inherited>
             </plugin>
-
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
 
         <!-- DEFAULT PLUGIN CONFIGURATION -->
@@ -411,26 +370,26 @@
                     <artifactId>maven-jdocbook-plugin</artifactId>
                     <version>${maven-jdocbook-plugin.version}</version>
                     <dependencies>
-					    <dependency>
-						    <groupId>org.jboss</groupId>
-						    <artifactId>jbossorg-docbook-xslt</artifactId>
-						    <version>1.1.0</version>
-					    </dependency>
-					    <dependency>
-						    <groupId>org.jboss</groupId>
-						    <artifactId>jbossorg-jdocbook-style</artifactId>
-						    <version>1.1.0</version>
-						    <type>jdocbook-style</type>
-					    </dependency>
-				    </dependencies>
+                        <dependency>
+                            <groupId>org.jboss</groupId>
+                            <artifactId>jbossorg-docbook-xslt</artifactId>
+                            <version>1.1.0</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.jboss</groupId>
+                            <artifactId>jbossorg-jdocbook-style</artifactId>
+                            <version>1.1.0</version>
+                            <type>jdocbook-style</type>
+                        </dependency>
+                    </dependencies>
                     <configuration>
-					    <formats>
-						    <format>
-							    <formatName>pdf</formatName>
-							    <stylesheetResource>classpath:/xslt/org/jboss/pdf.xsl</stylesheetResource>
+                        <formats>
+                            <format>
+                                <formatName>pdf</formatName>
+                                <stylesheetResource>classpath:/xslt/org/jboss/pdf.xsl</stylesheetResource>
                                 <finalName>${project.artifactId}.pdf</finalName>
-						    </format>
-					    </formats>
+                            </format>
+                        </formats>
                         <sourceDocumentName>${project.artifactId}.xml</sourceDocumentName>
                         <imageResource>
                             <directory>${basedir}/src/main/images</directory>
@@ -507,77 +466,13 @@
                     <version>${maven-resources-plugin.version}</version>
                 </plugin>
                 <plugin>
-                    <groupId>com.stackoverflow</groupId>
-                    <artifactId>maven-export-plugin</artifactId>
-                    <version>${maven-export-plugin.version}</version>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>${maven-deploy-plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
     </build>
-
-    <!-- REMOTE ARTIFACT REPOSITORIES -->
-    <repositories>
-
-        <repository>
-            <id>internal</id>
-            <name>Archiva Managed Internal Repository</name>
-            <url>http://buildserver:7070/archiva/repository/internal/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>snapshots</id>
-            <name>Archiva Managed Snapshot Repository</name>
-            <url>http://buildserver:7070/archiva/repository/snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-                <updatePolicy>always</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </repository>
-
-    </repositories>
-
-    <!-- MAVEN PLUGIN REPOSITORIES -->
-    <pluginRepositories>
-
-        <pluginRepository>
-            <id>internal</id>
-            <name>Archiva Managed Internal Repository</name>
-            <url>http://buildserver:7070/archiva/repository/internal/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </pluginRepository>
-        <pluginRepository>
-            <id>snapshots</id>
-            <name>Archiva Managed Snapshot Repository</name>
-            <url>http://buildserver:7070/archiva/repository/snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-                <updatePolicy>always</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </pluginRepository>
-
-    </pluginRepositories>
 
     <!-- DEPENDENCIES: DEFAULT SCOPE AND VERSION -->
     <dependencyManagement>
@@ -587,6 +482,11 @@
             <dependency>
                 <groupId>net.lin-k.util</groupId>
                 <artifactId>util-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.lin-k.util</groupId>
+                <artifactId>util-config-manual</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -704,14 +604,14 @@
                 <artifactId>jboss-j2se</artifactId>
                 <version>${jboss-mx.version}</version>
                 <exclusions>
-                  <exclusion>
-                    <groupId>org.jboss.logging</groupId>
-                    <artifactId>jboss-logging-spi</artifactId>
-                  </exclusion>
-                  <exclusion>
-                    <groupId>org.jboss.logging</groupId>
-                    <artifactId>jboss-logging-log4j</artifactId>
-                  </exclusion>
+                    <exclusion>
+                        <groupId>org.jboss.logging</groupId>
+                        <artifactId>jboss-logging-spi</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.jboss.logging</groupId>
+                        <artifactId>jboss-logging-log4j</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -1065,6 +965,6 @@
     </dependencies>
 
     <prerequisites>
-        <maven>2.2.0</maven>
+        <maven>3.0.3</maven>
     </prerequisites>
 </project>
