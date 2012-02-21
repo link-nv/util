@@ -7,7 +7,15 @@
 
 package net.link.util.test;
 
+import static org.easymock.EasyMock.*;
+
 import com.google.common.collect.ImmutableList;
+import java.security.KeyPair;
+import java.util.UUID;
+import javax.xml.ws.Binding;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.handler.Handler;
+import javax.xml.ws.spi.Provider;
 import net.link.util.common.CertificateChain;
 import net.link.util.test.pkix.PkiTestUtils;
 import net.link.util.test.session.DummyLoginModule;
@@ -16,14 +24,6 @@ import net.link.util.test.web.ws.WebServiceTestManager;
 import net.link.util.ws.security.WSSecurityConfiguration;
 import net.link.util.ws.security.WSSecurityHandler;
 import org.joda.time.Duration;
-
-import javax.xml.ws.Binding;
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.handler.Handler;
-import java.security.KeyPair;
-import java.util.UUID;
-
-import static org.easymock.EasyMock.expect;
 
 
 /**
@@ -50,6 +50,9 @@ public abstract class AbstractWSTest<T> extends AbstractUnitTests<T> {
     @Override
     protected void setUp()
             throws Exception {
+
+        // set jaxws-rt as JAX-WS provider
+        System.setProperty( Provider.JAXWSPROVIDER_PROPERTY, "com.sun.xml.ws.spi.ProviderImpl" );
 
         // Generic Data
         testApplicationId = 1234567890;

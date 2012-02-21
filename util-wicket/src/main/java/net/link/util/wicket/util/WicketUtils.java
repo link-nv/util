@@ -6,6 +6,7 @@
  */
 package net.link.util.wicket.util;
 
+import com.lyndir.lhunath.opal.system.logging.Logger;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.*;
@@ -18,12 +19,11 @@ import net.link.util.wicket.component.WicketPage;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.LocaleUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.wicket.*;
 import org.apache.wicket.injection.ComponentInjector;
 import org.apache.wicket.injection.ConfigurableInjector;
 import org.apache.wicket.protocol.http.*;
+import org.jetbrains.annotations.Nullable;
 import org.wicketstuff.javaee.injection.AnnotJavaEEInjector;
 
 
@@ -34,14 +34,16 @@ import org.wicketstuff.javaee.injection.AnnotJavaEEInjector;
  */
 public abstract class WicketUtils {
 
-    static final Log LOG = LogFactory.getLog( WicketUtils.class );
+    static final Logger logger = Logger.get( WicketUtils.class );
     static ConfigurableInjector eeInjector;
 
     // %[argument_index$][flags][width][.precision][t]conversion
     private static final String  formatSpecifier = "%(\\d+\\$)?([-#+ 0,(\\<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z%])";
-    private static       Pattern fsPattern       = Pattern.compile( formatSpecifier );
+    private static final Pattern fsPattern       = Pattern.compile( formatSpecifier );
 
     /**
+     * @param locale locale
+     *
      * @return A formatter according to the given locale in short form.
      */
     public static DateFormat getDateFormat(Locale locale) {
@@ -50,6 +52,9 @@ public abstract class WicketUtils {
     }
 
     /**
+     * @param date   date to format
+     * @param locale locale to use
+     *
      * @return A string that is the formatted representation of the given date according to the given locale in short form.
      */
     public static String format(Locale locale, Date date) {
@@ -58,6 +63,8 @@ public abstract class WicketUtils {
     }
 
     /**
+     * @param locale locale to get currency from
+     *
      * @return A formatter according to the given locale's currency.
      */
     public static NumberFormat getCurrencyFormat(Locale locale) {
@@ -225,13 +232,14 @@ public abstract class WicketUtils {
      *
      * @param componentPage The page to add the focusing behaviour to.
      */
+    @Nullable
     public static FocusOnReady focus(Component component, Page componentPage) {
 
         if (component == null)
             return null;
 
         if (componentPage == null) {
-            LOG.warn( "Tried to focus " + component.getId() + " but don't know the page it's on." );
+            logger.wrn( "Tried to focus %s but don't know the page it's on.", component.getId() );
             return null;
         }
 
