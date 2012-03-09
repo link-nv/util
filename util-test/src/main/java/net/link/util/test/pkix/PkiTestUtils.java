@@ -18,16 +18,27 @@ import java.security.interfaces.DSAKeyPairGenerator;
 import java.security.spec.RSAKeyGenParameterSpec;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
+import org.bouncycastle.operator.*;
+import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
+import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 
 
 public class PkiTestUtils {
 
-    public static final String DEFAULT_ALIAS = "default";
+    public static final    String DEFAULT_ALIAS         = "default";
+    protected static final int    RSA_KEYSIZE           = 1024;
+    protected static final int    DSA_MODLEN            = 512;
+    protected static final int    SERIALNUMBER_NUM_BITS = 128;
 
     private PkiTestUtils() {
 
@@ -35,6 +46,7 @@ public class PkiTestUtils {
     }
 
     static {
+        //noinspection NonFinalStaticVariableUsedInClassInitialization
         if (null == Security.getProvider( BouncyCastleProvider.PROVIDER_NAME ))
             Security.addProvider( new BouncyCastleProvider() );
     }
@@ -42,8 +54,7 @@ public class PkiTestUtils {
     public static KeyPair generateKeyPair()
             throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
 
-        KeyPair keyPair = generateKeyPair( "RSA" );
-        return keyPair;
+        return generateKeyPair( "RSA" );
     }
 
     public static KeyPair generateKeyPair(String algorithm)
@@ -52,108 +63,112 @@ public class PkiTestUtils {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance( algorithm );
         SecureRandom random = new SecureRandom();
         if ("RSA".equals( keyPairGenerator.getAlgorithm() ))
-            keyPairGenerator.initialize( new RSAKeyGenParameterSpec( 1024, RSAKeyGenParameterSpec.F4 ), random );
+            keyPairGenerator.initialize( new RSAKeyGenParameterSpec( RSA_KEYSIZE, RSAKeyGenParameterSpec.F4 ), random );
         else if (keyPairGenerator instanceof DSAKeyPairGenerator) {
             DSAKeyPairGenerator dsaKeyPairGenerator = (DSAKeyPairGenerator) keyPairGenerator;
-            dsaKeyPairGenerator.initialize( 512, false, random );
+            dsaKeyPairGenerator.initialize( DSA_MODLEN, false, random );
         }
-        KeyPair keyPair = keyPairGenerator.generateKeyPair();
-        return keyPair;
+        return keyPairGenerator.generateKeyPair();
     }
 
     public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String dn, DateTime notBefore, DateTime notAfter,
-                                                                String signatureAlgorithm, boolean includeAuthorityKeyIdentifier,
+                                                                @Nullable String signatureAlgorithm, boolean includeAuthorityKeyIdentifier,
                                                                 boolean caCert, boolean timeStampingPurpose)
-            throws InvalidKeyException, IllegalStateException, NoSuchAlgorithmException, SignatureException, IOException,
-                   CertificateException {
+            throws IllegalStateException, IOException, CertificateException, OperatorCreationException {
 
-        X509Certificate certificate = generateCertificate( keyPair.getPublic(), dn, keyPair.getPrivate(), null, notBefore, notAfter,
-                signatureAlgorithm, includeAuthorityKeyIdentifier, caCert, timeStampingPurpose, null );
-        return certificate;
+        return generateCertificate( keyPair.getPublic(), dn, keyPair.getPrivate(), null, notBefore, notAfter, signatureAlgorithm,
+                includeAuthorityKeyIdentifier, caCert, timeStampingPurpose, null );
     }
 
     public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String dn)
-            throws InvalidKeyException, IllegalStateException, NoSuchAlgorithmException, SignatureException, IOException,
-                   CertificateException {
+            throws IllegalStateException, IOException, CertificateException, OperatorCreationException {
 
         DateTime now = new DateTime();
         DateTime future = now.plusYears( 10 );
-        X509Certificate certificate = generateSelfSignedCertificate( keyPair, dn, now, future, null, true, true, false );
-        return certificate;
+        return generateSelfSignedCertificate( keyPair, dn, now, future, null, true, true, false );
     }
 
     public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn, PrivateKey issuerPrivateKey,
-                                                      X509Certificate issuerCert, DateTime notBefore, DateTime notAfter,
-                                                      String signatureAlgorithm, boolean includeAuthorityKeyIdentifier, boolean caCert,
-                                                      boolean timeStampingPurpose, URI ocspUri)
-            throws IOException, SignatureException, InvalidKeyException, NoSuchAlgorithmException, CertificateException {
+                                                      @Nullable X509Certificate issuerCert, DateTime notBefore, DateTime notAfter,
+                                                      @Nullable String signatureAlgorithm, boolean includeAuthorityKeyIdentifier,
+                                                      boolean caCert, boolean timeStampingPurpose, @Nullable URI ocspUri)
+            throws IOException, CertificateException, OperatorCreationException {
 
         String finalSignatureAlgorithm = signatureAlgorithm;
         if (null == signatureAlgorithm)
             finalSignatureAlgorithm = "SHA512WithRSAEncryption";
-        X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
-        certificateGenerator.reset();
-        certificateGenerator.setPublicKey( subjectPublicKey );
-        certificateGenerator.setSignatureAlgorithm( finalSignatureAlgorithm );
-        certificateGenerator.setNotBefore( notBefore.toDate() );
-        certificateGenerator.setNotAfter( notAfter.toDate() );
+
         X509Principal issuerDN;
         if (null != issuerCert)
             issuerDN = new X509Principal( issuerCert.getSubjectX500Principal().toString() );
         else
             issuerDN = new X509Principal( subjectDn );
-        certificateGenerator.setIssuerDN( issuerDN );
-        certificateGenerator.setSubjectDN( new X509Principal( subjectDn ) );
-        certificateGenerator.setSerialNumber( new BigInteger( 128, new SecureRandom() ) );
 
-        certificateGenerator.addExtension( X509Extensions.SubjectKeyIdentifier, false, createSubjectKeyId( subjectPublicKey ) );
+        // new bc 2.0 API
+        X509Principal subject = new X509Principal( subjectDn );
+        SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance( subjectPublicKey.getEncoded() );
+        BigInteger serialNumber = new BigInteger( SERIALNUMBER_NUM_BITS, new SecureRandom() );
+
+        X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder( X500Name.getInstance( issuerDN.getDERObject() ),
+                serialNumber, notBefore.toDate(), notAfter.toDate(), X500Name.getInstance( subject.getDERObject() ), publicKeyInfo );
+
+        // prepare signer
+        AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find( finalSignatureAlgorithm );
+        AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find( sigAlgId );
+        AsymmetricKeyParameter privateKey = PrivateKeyFactory.createKey( issuerPrivateKey.getEncoded() );
+        ContentSigner signer = new BcRSAContentSignerBuilder( sigAlgId, digAlgId ).build( privateKey );
+
+        // add extensions
+        certificateBuilder.addExtension( X509Extension.subjectKeyIdentifier, false, createSubjectKeyId( subjectPublicKey ) );
         PublicKey issuerPublicKey;
         if (null != issuerCert)
             issuerPublicKey = issuerCert.getPublicKey();
         else
             issuerPublicKey = subjectPublicKey;
-        if (true == includeAuthorityKeyIdentifier)
-            certificateGenerator.addExtension( X509Extensions.AuthorityKeyIdentifier, false, createAuthorityKeyId( issuerPublicKey ) );
+        if (includeAuthorityKeyIdentifier)
+            certificateBuilder.addExtension( X509Extension.authorityKeyIdentifier, false, createAuthorityKeyId( issuerPublicKey ) );
 
-        certificateGenerator.addExtension( X509Extensions.BasicConstraints, false, new BasicConstraints( caCert ) );
+        certificateBuilder.addExtension( X509Extension.basicConstraints, false, new BasicConstraints( caCert ) );
 
         if (timeStampingPurpose)
-            certificateGenerator.addExtension( X509Extensions.ExtendedKeyUsage, true,
+            certificateBuilder.addExtension( X509Extension.extendedKeyUsage, true,
                     new ExtendedKeyUsage( new DERSequence( KeyPurposeId.id_kp_timeStamping ) ) );
 
         if (null != ocspUri) {
             GeneralName ocspName = new GeneralName( GeneralName.uniformResourceIdentifier, ocspUri.toString() );
             AuthorityInformationAccess authorityInformationAccess = new AuthorityInformationAccess( X509ObjectIdentifiers.ocspAccessMethod,
                     ocspName );
-            certificateGenerator.addExtension( X509Extensions.AuthorityInfoAccess.getId(), false, authorityInformationAccess );
+            certificateBuilder.addExtension( X509Extension.authorityInfoAccess, false, authorityInformationAccess );
         }
 
-        X509Certificate certificate = certificateGenerator.generate( issuerPrivateKey );
+        // build
+        X509CertificateHolder certificateHolder = certificateBuilder.build( signer );
+        X509CertificateStructure eeX509CertificateStructure = certificateHolder.toASN1Structure();
 
         /*
          * Make sure the default certificate provider is active.
          */
         CertificateFactory certificateFactory = CertificateFactory.getInstance( "X.509" );
-        certificate = (X509Certificate) certificateFactory.generateCertificate( new ByteArrayInputStream( certificate.getEncoded() ) );
 
-        return certificate;
+        return (X509Certificate) certificateFactory.generateCertificate(
+                new ByteArrayInputStream( eeX509CertificateStructure.getEncoded() ) );
     }
 
     public static X509Certificate generateTestSelfSignedCert(URI ocspUri)
-            throws Exception {
+            throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, IOException, OperatorCreationException,
+                   CertificateException {
 
         KeyPair keyPair = generateKeyPair();
         DateTime now = new DateTime();
         DateTime notBefore = now.minusDays( 1 );
         DateTime notAfter = now.plusDays( 1 );
-        X509Certificate certificate = generateCertificate( keyPair.getPublic(), "CN=Test", keyPair.getPrivate(), null, notBefore, notAfter,
-                null, true, true, false, ocspUri );
-        return certificate;
+        return generateCertificate( keyPair.getPublic(), "CN=Test", keyPair.getPrivate(), null, notBefore, notAfter, null, true, true,
+                false, ocspUri );
     }
 
     public static KeyStore.PrivateKeyEntry generateKeyEntry(String dn)
-            throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, SignatureException, IOException, InvalidKeyException,
-                   CertificateException {
+            throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, IOException, CertificateException,
+                   OperatorCreationException {
 
         KeyPair keyPair = generateKeyPair();
         return new KeyStore.PrivateKeyEntry( keyPair.getPrivate(), new Certificate[] { generateSelfSignedCertificate( keyPair, dn ) } );
@@ -163,17 +178,16 @@ public class PkiTestUtils {
             throws CertificateException {
 
         CertificateFactory certificateFactory = CertificateFactory.getInstance( "X.509" );
-        X509Certificate certificate = (X509Certificate) certificateFactory.generateCertificate( inputStream );
-        return certificate;
+        return (X509Certificate) certificateFactory.generateCertificate( inputStream );
     }
 
+    @SuppressWarnings("IOResourceOpenedButNotSafelyClosed")
     public static X509Certificate loadCertificateFromResource(String resourceName)
             throws CertificateException {
 
         InputStream inputStream = PkiTestUtils.class.getResourceAsStream( resourceName );
         try {
-            X509Certificate certificate = loadCertificate( inputStream );
-            return certificate;
+            return loadCertificate( inputStream );
         }
         finally {
             IOUtils.closeQuietly( inputStream );
@@ -229,14 +243,18 @@ public class PkiTestUtils {
         KeyStore keyStore = KeyStore.getInstance( keyStoreType );
         keyStore.load( null, keyStorePassword.toCharArray() );
         keyStore.setKeyEntry( DEFAULT_ALIAS, privateKey, keyEntryPassword.toCharArray(), new Certificate[] { certificate } );
-        FileOutputStream keyStoreOut;
-        keyStoreOut = new FileOutputStream( pkcs12keyStore );
-        keyStore.store( keyStoreOut, keyStorePassword.toCharArray() );
-        keyStoreOut.close();
+        FileOutputStream keyStoreOut = new FileOutputStream( pkcs12keyStore );
+        try {
+            keyStore.store( keyStoreOut, keyStorePassword.toCharArray() );
+        }
+        finally {
+            keyStoreOut.close();
+        }
 
         return keyStore;
     }
 
+    @SuppressWarnings("IOResourceOpenedButNotSafelyClosed")
     private static SubjectKeyIdentifier createSubjectKeyId(PublicKey publicKey)
             throws IOException {
 
@@ -245,6 +263,7 @@ public class PkiTestUtils {
         return new SubjectKeyIdentifier( info );
     }
 
+    @SuppressWarnings("IOResourceOpenedButNotSafelyClosed")
     private static AuthorityKeyIdentifier createAuthorityKeyId(PublicKey publicKey)
             throws IOException {
 

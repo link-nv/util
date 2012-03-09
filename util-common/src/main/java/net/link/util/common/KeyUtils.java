@@ -9,6 +9,7 @@ package net.link.util.common;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
+import com.lyndir.lhunath.opal.system.logging.exception.InternalInconsistencyException;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.URI;
@@ -21,11 +22,19 @@ import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Enumeration;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
+import org.bouncycastle.operator.*;
+import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
+import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 
 
@@ -36,7 +45,12 @@ import org.joda.time.DateTime;
  */
 public abstract class KeyUtils {
 
+    protected static final int RSA_KEYSIZE           = 1024;
+    protected static final int DSA_MODLEN            = 512;
+    protected static final int SERIALNUMBER_NUM_BITS = 128;
+
     static {
+        //noinspection NonFinalStaticVariableUsedInClassInitialization
         if (null == Security.getProvider( BouncyCastleProvider.PROVIDER_NAME ))
             Security.addProvider( new BouncyCastleProvider() );
     }
@@ -88,7 +102,7 @@ public abstract class KeyUtils {
             aliases = keyStore.aliases();
         }
         catch (KeyStoreException e) {
-            throw new RuntimeException( "could not get aliases", e );
+            throw new InternalInconsistencyException( "could not get aliases", e );
         }
         String alias = null;
         while (aliases.hasMoreElements()) {
@@ -98,20 +112,26 @@ public abstract class KeyUtils {
                     break;
             }
             catch (KeyStoreException e) {
-                throw new RuntimeException( e );
+                throw new InternalInconsistencyException( e );
             }
 
             alias = null;
         }
         if (alias == null)
-            throw new RuntimeException( "no private key found in keystore" );
+            throw new InternalInconsistencyException( "no private key found in keystore" );
 
         /* Get the private key entry. */
         try {
             return (PrivateKeyEntry) keyStore.getEntry( alias, new KeyStore.PasswordProtection( keyEntryPassword ) );
         }
-        catch (Exception e) {
-            throw new RuntimeException( "error retrieving key", e );
+        catch (UnrecoverableEntryException e) {
+            throw new InternalInconsistencyException( "error retrieving key", e );
+        }
+        catch (NoSuchAlgorithmException e) {
+            throw new InternalInconsistencyException( "error retrieving key", e );
+        }
+        catch (KeyStoreException e) {
+            throw new InternalInconsistencyException( "error retrieving key", e );
         }
     }
 
@@ -125,25 +145,31 @@ public abstract class KeyUtils {
             aliases = keyStore.aliases();
         }
         catch (KeyStoreException e) {
-            throw new RuntimeException( "could not get aliases", e );
+            throw new InternalInconsistencyException( "could not get aliases", e );
         }
         if (!aliases.hasMoreElements())
-            throw new RuntimeException( "keystore is empty" );
+            throw new InternalInconsistencyException( "keystore is empty" );
 
         try {
             if (!keyStore.isKeyEntry( alias ))
-                throw new RuntimeException( "not key entry: " + alias );
+                throw new InternalInconsistencyException( String.format( "not key entry: %s", alias ) );
         }
         catch (KeyStoreException e) {
-            throw new RuntimeException( "key store error", e );
+            throw new InternalInconsistencyException( "key store error", e );
         }
 
         /* Get the private key entry. */
         try {
             return (PrivateKeyEntry) keyStore.getEntry( alias, new KeyStore.PasswordProtection( keyEntryPassword ) );
         }
-        catch (Exception e) {
-            throw new RuntimeException( "error retrieving key", e );
+        catch (UnrecoverableEntryException e) {
+            throw new InternalInconsistencyException( "error retrieving key", e );
+        }
+        catch (NoSuchAlgorithmException e) {
+            throw new InternalInconsistencyException( "error retrieving key", e );
+        }
+        catch (KeyStoreException e) {
+            throw new InternalInconsistencyException( "error retrieving key", e );
         }
     }
 
@@ -155,7 +181,7 @@ public abstract class KeyUtils {
             return keyStore;
         }
         catch (KeyStoreException e) {
-            throw new RuntimeException( "could not set new entry on keystore for alias: " + alias, e );
+            throw new InternalInconsistencyException( String.format( "could not set new entry on keystore for alias: %s", alias ), e );
         }
     }
 
@@ -172,7 +198,7 @@ public abstract class KeyUtils {
             aliases = keyStore.aliases();
         }
         catch (KeyStoreException e) {
-            throw new RuntimeException( "could not enumerate aliases", e );
+            throw new InternalInconsistencyException( "could not enumerate aliases", e );
         }
 
         ImmutableMap.Builder<String, X509Certificate> certificates = ImmutableMap.builder();
@@ -186,7 +212,7 @@ public abstract class KeyUtils {
                     certificates.put( alias, (X509Certificate) keyStore.getCertificate( alias ) );
             }
             catch (KeyStoreException e) {
-                throw new RuntimeException( "error retrieving certificate, alias=" + alias, e );
+                throw new InternalInconsistencyException( String.format( "error retrieving certificate, alias=%s", alias ), e );
             }
         }
 
@@ -202,16 +228,16 @@ public abstract class KeyUtils {
             return keyStore;
         }
         catch (IOException e) {
-            throw new RuntimeException( e );
+            throw new InternalInconsistencyException( e );
         }
         catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException( e );
+            throw new InternalInconsistencyException( e );
         }
         catch (CertificateException e) {
-            throw new RuntimeException( e );
+            throw new InternalInconsistencyException( e );
         }
         catch (KeyStoreException e) {
-            throw new RuntimeException( e );
+            throw new InternalInconsistencyException( e );
         }
     }
 
@@ -226,7 +252,7 @@ public abstract class KeyUtils {
             return generateKeyPair( keyAlgorithm.getJCAName() );
         }
         catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException( "RSA not supported", e );
+            throw new InternalInconsistencyException( "RSA not supported", e );
         }
     }
 
@@ -238,14 +264,7 @@ public abstract class KeyUtils {
     public static PrivateKeyEntry generatePrivateKeyEntry(KeyAlgorithm keyAlgorithm, String dn) {
 
         KeyPair keyPair = generateKeyPair( keyAlgorithm );
-        X509Certificate certificate;
-        try {
-            certificate = generateSelfSignedCertificate( keyPair, dn );
-        }
-        catch (InvalidKeyException e) {
-            throw new RuntimeException( "Can't generate certificate from generated key", e );
-        }
-
+        X509Certificate certificate = generateSelfSignedCertificate( keyPair, dn );
         return new PrivateKeyEntry( keyPair.getPrivate(), new Certificate[] { certificate } );
     }
 
@@ -256,37 +275,29 @@ public abstract class KeyUtils {
         SecureRandom random = new SecureRandom();
         if ("RSA".equals( keyPairGenerator.getAlgorithm() ))
             try {
-                keyPairGenerator.initialize( new RSAKeyGenParameterSpec( 1024, RSAKeyGenParameterSpec.F4 ), random );
+                keyPairGenerator.initialize( new RSAKeyGenParameterSpec( RSA_KEYSIZE, RSAKeyGenParameterSpec.F4 ), random );
             }
             catch (InvalidAlgorithmParameterException e) {
-                throw new RuntimeException( "KeyGenParams incompatible with key generator.", e );
+                throw new InternalInconsistencyException( "KeyGenParams incompatible with key generator.", e );
             }
         else if (keyPairGenerator instanceof DSAKeyPairGenerator) {
             DSAKeyPairGenerator dsaKeyPairGenerator = (DSAKeyPairGenerator) keyPairGenerator;
-            dsaKeyPairGenerator.initialize( 512, false, random );
+            dsaKeyPairGenerator.initialize( DSA_MODLEN, false, random );
         }
 
         return keyPairGenerator.generateKeyPair();
     }
 
-    public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String dn)
-            throws InvalidKeyException {
+    public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String dn) {
 
         DateTime now = new DateTime();
         DateTime future = now.plusYears( 10 );
-        X509Certificate certificate;
-        try {
-            certificate = generateSelfSignedCertificate( keyPair, dn, now, future, null, true, false );
-        }
-        catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException( "Default signature algorithm not supported", e );
-        }
-        return certificate;
+        return generateSelfSignedCertificate( keyPair, dn, now, future, null, true, false );
     }
 
     public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String dn, DateTime notBefore, DateTime notAfter,
-                                                                String signatureAlgorithm, boolean caCert, boolean timeStampingPurpose)
-            throws InvalidKeyException, NoSuchAlgorithmException {
+                                                                @Nullable String signatureAlgorithm, boolean caCert,
+                                                                boolean timeStampingPurpose) {
 
         return generateCertificate( keyPair.getPublic(), dn, keyPair.getPrivate(), null, notBefore, notAfter, signatureAlgorithm, caCert,
                 timeStampingPurpose, null );
@@ -302,77 +313,84 @@ public abstract class KeyUtils {
                     issuerCert, notBefore, notAfter, inSignatureAlgorithm, caCert, timeStampingPurpose, ocspUri );
         }
         catch (NoSuchProviderException e) {
-            throw new RuntimeException( e );
+            throw new InternalInconsistencyException( e );
         }
     }
 
     public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn, PrivateKey issuerPrivateKey,
-                                                      X509Certificate issuerCert, DateTime notBefore, DateTime notAfter,
-                                                      String inSignatureAlgorithm, boolean caCert, boolean timeStampingPurpose, URI ocspUri)
-            throws InvalidKeyException, NoSuchAlgorithmException {
+                                                      @Nullable X509Certificate issuerCert, DateTime notBefore, DateTime notAfter,
+                                                      String inSignatureAlgorithm, boolean caCert, boolean timeStampingPurpose,
+                                                      @Nullable URI ocspUri) {
 
-        String signatureAlgorithm = inSignatureAlgorithm;
-        if (null == signatureAlgorithm)
-            signatureAlgorithm = String.format( "SHA1With%s", issuerPrivateKey.getAlgorithm() );
-        X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
-        certificateGenerator.reset();
-        certificateGenerator.setPublicKey( subjectPublicKey );
-        certificateGenerator.setSignatureAlgorithm( signatureAlgorithm );
-        certificateGenerator.setNotBefore( notBefore.toDate() );
-        certificateGenerator.setNotAfter( notAfter.toDate() );
-        X509Principal issuerDN;
-        if (null != issuerCert)
-            issuerDN = new X509Principal( issuerCert.getSubjectX500Principal().toString() );
-        else
-            issuerDN = new X509Principal( subjectDn );
-        certificateGenerator.setIssuerDN( issuerDN );
-        certificateGenerator.setSubjectDN( new X509Principal( subjectDn ) );
-        certificateGenerator.setSerialNumber( new BigInteger( 128, new SecureRandom() ) );
-
-        certificateGenerator.addExtension( X509Extensions.SubjectKeyIdentifier, false, createSubjectKeyId( subjectPublicKey ) );
-        PublicKey issuerPublicKey;
-        if (null != issuerCert)
-            issuerPublicKey = issuerCert.getPublicKey();
-        else
-            issuerPublicKey = subjectPublicKey;
-        certificateGenerator.addExtension( X509Extensions.AuthorityKeyIdentifier, false, createAuthorityKeyId( issuerPublicKey ) );
-
-        certificateGenerator.addExtension( X509Extensions.BasicConstraints, false, new BasicConstraints( caCert ) );
-
-        if (timeStampingPurpose)
-            certificateGenerator.addExtension( X509Extensions.ExtendedKeyUsage, true,
-                    new ExtendedKeyUsage( new DERSequence( KeyPurposeId.id_kp_timeStamping ) ) );
-
-        if (null != ocspUri) {
-            GeneralName ocspName = new GeneralName( GeneralName.uniformResourceIdentifier, ocspUri.toString() );
-            AuthorityInformationAccess authorityInformationAccess = new AuthorityInformationAccess( X509ObjectIdentifiers.ocspAccessMethod,
-                    ocspName );
-            certificateGenerator.addExtension( X509Extensions.AuthorityInfoAccess.getId(), false, authorityInformationAccess );
-        }
-
-        X509Certificate certificate;
         try {
-            certificate = certificateGenerator.generate( issuerPrivateKey );
-        }
-        catch (CertificateEncodingException e) {
-            throw new RuntimeException( e );
-        }
-        catch (SignatureException e) {
-            throw new RuntimeException( e );
-        }
+            String signatureAlgorithm = inSignatureAlgorithm;
+            if (null == signatureAlgorithm)
+                signatureAlgorithm = String.format( "SHA1With%s", issuerPrivateKey.getAlgorithm() );
 
-        /*
-         * Make sure the default certificate provider is active.
-         */
-        try {
+            X509Principal issuerDN;
+            if (null != issuerCert)
+                issuerDN = new X509Principal( issuerCert.getSubjectX500Principal().toString() );
+            else
+                issuerDN = new X509Principal( subjectDn );
+
+            // new bc 2.0 API
+            X509Principal subject = new X509Principal( subjectDn );
+            SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance( subjectPublicKey.getEncoded() );
+            BigInteger serialNumber = new BigInteger( SERIALNUMBER_NUM_BITS, new SecureRandom() );
+
+            X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder( X500Name.getInstance( issuerDN.getDERObject() ),
+                    serialNumber, notBefore.toDate(), notAfter.toDate(), X500Name.getInstance( subject.getDERObject() ), publicKeyInfo );
+
+            // prepare signer
+            AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find( signatureAlgorithm );
+            AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find( sigAlgId );
+            AsymmetricKeyParameter privateKey = PrivateKeyFactory.createKey( issuerPrivateKey.getEncoded() );
+            ContentSigner signer = new BcRSAContentSignerBuilder( sigAlgId, digAlgId ).build( privateKey );
+
+            certificateBuilder.addExtension( X509Extension.subjectKeyIdentifier, false, createSubjectKeyId( subjectPublicKey ) );
+            PublicKey issuerPublicKey;
+            if (null != issuerCert)
+                issuerPublicKey = issuerCert.getPublicKey();
+            else
+                issuerPublicKey = subjectPublicKey;
+            certificateBuilder.addExtension( X509Extension.authorityKeyIdentifier, false, createAuthorityKeyId( issuerPublicKey ) );
+
+            certificateBuilder.addExtension( X509Extension.basicConstraints, false, new BasicConstraints( caCert ) );
+
+            if (timeStampingPurpose)
+                certificateBuilder.addExtension( X509Extension.extendedKeyUsage, true,
+                        new ExtendedKeyUsage( new DERSequence( KeyPurposeId.id_kp_timeStamping ) ) );
+
+            if (null != ocspUri) {
+                GeneralName ocspName = new GeneralName( GeneralName.uniformResourceIdentifier, ocspUri.toString() );
+                AuthorityInformationAccess authorityInformationAccess = new AuthorityInformationAccess(
+                        X509ObjectIdentifiers.ocspAccessMethod, ocspName );
+                certificateBuilder.addExtension( X509Extension.authorityInfoAccess, false, authorityInformationAccess );
+            }
+
+            // build
+            X509CertificateHolder certificateHolder = certificateBuilder.build( signer );
+            X509CertificateStructure eeX509CertificateStructure = certificateHolder.toASN1Structure();
+
+            /*
+            * Make sure the default certificate provider is active.
+            */
             return (X509Certificate) CertificateFactory.getInstance( "X.509" )
-                                                       .generateCertificate( new ByteArrayInputStream( certificate.getEncoded() ) );
+                                                       .generateCertificate(
+                                                               new ByteArrayInputStream( eeX509CertificateStructure.getEncoded() ) );
         }
         catch (CertificateException e) {
-            throw new RuntimeException( "X.509 is not supported.", e );
+            throw new InternalInconsistencyException( "X.509 is not supported.", e );
+        }
+        catch (OperatorCreationException e) {
+            throw new InternalInconsistencyException( e );
+        }
+        catch (IOException e) {
+            throw new InternalInconsistencyException( e );
         }
     }
 
+    @SuppressWarnings("IOResourceOpenedButNotSafelyClosed")
     private static SubjectKeyIdentifier createSubjectKeyId(PublicKey publicKey) {
 
         try {
@@ -382,10 +400,11 @@ public abstract class KeyUtils {
             return new SubjectKeyIdentifier( info );
         }
         catch (IOException e) {
-            throw new RuntimeException( "Can't read from a ByteArrayInputStream?", e );
+            throw new InternalInconsistencyException( "Can't read from a ByteArrayInputStream?", e );
         }
     }
 
+    @SuppressWarnings("IOResourceOpenedButNotSafelyClosed")
     private static AuthorityKeyIdentifier createAuthorityKeyId(PublicKey publicKey) {
 
         try {
@@ -395,7 +414,7 @@ public abstract class KeyUtils {
             return new AuthorityKeyIdentifier( info );
         }
         catch (IOException e) {
-            throw new RuntimeException( "Can't read from a ByteArrayInputStream?", e );
+            throw new InternalInconsistencyException( "Can't read from a ByteArrayInputStream?", e );
         }
     }
 
@@ -415,20 +434,26 @@ public abstract class KeyUtils {
             KeyStore keyStore = newKeyStore( privateKey, certificate, keyStorePassword, keyEntryPassword );
 
             FileOutputStream keyStoreOut = new FileOutputStream( pkcs12keyStore );
-            keyStore.store( keyStoreOut, keyStorePassword );
-            keyStoreOut.close();
+            try {
+
+                keyStore.store( keyStoreOut, keyStorePassword );
+            }
+            finally {
+                keyStoreOut.close();
+            }
         }
         catch (IOException e) {
-            throw new RuntimeException( "Key Store can't be created or stored.", e );
+            throw new InternalInconsistencyException( "Key Store can't be created or stored.", e );
         }
         catch (CertificateException e) {
-            throw new RuntimeException( "Certificate couldn't be stored.", e );
+            throw new InternalInconsistencyException( "Certificate couldn't be stored.", e );
         }
         catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException( "KeyStores integrity algorithm not supported.", e );
+            throw new InternalInconsistencyException( "KeyStores integrity algorithm not supported.", e );
         }
         catch (KeyStoreException e) {
-            throw new RuntimeException( "PKCS12 KeyStores not supported or store does not support the key or certificate.", e );
+            throw new InternalInconsistencyException( "PKCS12 KeyStores not supported or store does not support the key or certificate.",
+                    e );
         }
     }
 
@@ -442,7 +467,8 @@ public abstract class KeyUtils {
             return keyStore;
         }
         catch (KeyStoreException e) {
-            throw new RuntimeException( "PKCS12 KeyStores not supported or store does not support the key or certificate.", e );
+            throw new InternalInconsistencyException( "PKCS12 KeyStores not supported or store does not support the key or certificate.",
+                    e );
         }
     }
 
@@ -455,16 +481,17 @@ public abstract class KeyUtils {
             return keyStore;
         }
         catch (IOException e) {
-            throw new RuntimeException( "Key Store can't be created or stored.", e );
+            throw new InternalInconsistencyException( "Key Store can't be created or stored.", e );
         }
         catch (CertificateException e) {
-            throw new RuntimeException( "Certificate couldn't be stored.", e );
+            throw new InternalInconsistencyException( "Certificate couldn't be stored.", e );
         }
         catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException( "KeyStores integrity algorithm not supported.", e );
+            throw new InternalInconsistencyException( "KeyStores integrity algorithm not supported.", e );
         }
         catch (KeyStoreException e) {
-            throw new RuntimeException( "PKCS12 KeyStores not supported or store does not support the key or certificate.", e );
+            throw new InternalInconsistencyException( "PKCS12 KeyStores not supported or store does not support the key or certificate.",
+                    e );
         }
     }
 
@@ -475,10 +502,10 @@ public abstract class KeyUtils {
             FileUtils.writeByteArrayToFile( certificateFile, certificate.getEncoded() );
         }
         catch (CertificateEncodingException e) {
-            throw new RuntimeException( "error encoding certificate ", e );
+            throw new InternalInconsistencyException( "error encoding certificate ", e );
         }
         catch (IOException e) {
-            throw new RuntimeException( "error writing out certificate ", e );
+            throw new InternalInconsistencyException( "error writing out certificate ", e );
         }
     }
 }

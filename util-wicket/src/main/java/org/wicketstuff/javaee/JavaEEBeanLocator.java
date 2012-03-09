@@ -27,10 +27,10 @@ import org.apache.wicket.proxy.IProxyTargetLocator;
  * annotate a instance variable with
  *
  * @author Filippo Diotalevi
- * @EJB, e.g.<br/>
+ * \@EJB, e.g.<br/>
  * <p/>
  * private
- * @EJB(name="ejb/myejb") org.acme.MyEjb myejb
+ * \@EJB(name="ejb/myejb") org.acme.MyEjb myejb
  * <p/>
  * If the 'name' attribute is specified, the {@link JavaEEBeanLocator} will search in the JNDI registry for an EJB
  * named 'java:comp/env/&lt;name&gt;' (in the example: 'java:comp/env/ejb/myejb')

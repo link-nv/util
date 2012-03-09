@@ -1,7 +1,7 @@
 package net.link.util.jpa.hibernate.dialect;
 
 import java.sql.Types;
-import org.hibernate.dialect.OracleDialect;
+import org.hibernate.dialect.Oracle8iDialect;
 
 
 /**
@@ -9,7 +9,7 @@ import org.hibernate.dialect.OracleDialect;
  *
  * @author wvdhaute
  */
-public class Oracle11Dialect extends OracleDialect {
+public class Oracle11Dialect extends Oracle8iDialect {
 
     public Oracle11Dialect() {
 

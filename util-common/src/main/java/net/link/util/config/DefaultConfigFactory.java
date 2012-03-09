@@ -42,7 +42,7 @@ public class DefaultConfigFactory {
 
     static final Logger logger = Logger.get( DefaultConfigFactory.class );
 
-    private static final String  DEFAULT_CONFIG_RESOURCE = "config";
+    public static final  String  DEFAULT_CONFIG_RESOURCE = "config";
     private static final Pattern LEADING_WHITESPACE      = Pattern.compile( "^\\s+" );
     private static final Pattern TRAILING_WHITESPACE     = Pattern.compile( "\\s+$" );
     private static final Pattern COMMA_DELIMITOR         = Pattern.compile( "\\s*,\\s*" );
