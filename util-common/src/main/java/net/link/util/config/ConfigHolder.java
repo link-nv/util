@@ -151,7 +151,7 @@ public class ConfigHolder {
 
     /**
      * Create a config holder that reads default configuration from the default resource "{@value
-     * DefaultConfigFactory#DEFAULT_CONFIG_RESOURCE}}".
+     * net.link.util.config.DefaultConfigFactory#DEFAULT_CONFIG_RESOURCE}}".
      *
      * @param configType The type of configuration that this holder provides.
      */

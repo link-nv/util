@@ -9,9 +9,7 @@
     </parent>
 
     <name>Util Test</name>
-    <description>
-        EJB3 Test Utilities.
-    </description>
+    <description>EJB3 Test Utilities.</description>
 
     <groupId>net.lin-k.util</groupId>
     <artifactId>util-test</artifactId>
@@ -50,10 +48,6 @@
             <groupId>org.jboss.spec.javax.security.jacc</groupId>
             <artifactId>jboss-jacc-api_1.4_spec</artifactId>
         </dependency>
-        <!--dependency>
-            <groupId>org.jboss.ejb3</groupId>
-            <artifactId>jboss-ejb3-ext-api</artifactId>
-        </dependency-->
         <dependency>
             <groupId>org.jboss.mx</groupId>
             <artifactId>jboss-j2se</artifactId>
@@ -63,39 +57,9 @@
             <artifactId>jbosssx-client</artifactId>
         </dependency>
         <dependency>
-            <groupId>hsqldb</groupId>
+            <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
         </dependency>
-
-        <!-- JBoss 4 : to-be-removed ... -->
-        <!--<dependency>-->
-            <!--<groupId>org.jboss</groupId>-->
-            <!--<artifactId>hsqldb</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>jboss</groupId>-->
-            <!--<artifactId>jbosssx-client</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>jboss</groupId>-->
-            <!--<artifactId>jboss-j2ee</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>jboss</groupId>-->
-            <!--<artifactId>jboss-annotations-ejb3</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>jboss</groupId>-->
-            <!--<artifactId>jboss-ejb3x</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.jboss</groupId>-->
-            <!--<artifactId>jboss-jaxrpc</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.jboss</groupId>-->
-            <!--<artifactId>ejb3-persistence</artifactId>-->
-        <!--</dependency>-->
 
         <!-- Specific Dependencies: External -->
         <dependency>
@@ -130,10 +94,6 @@
             <groupId>com.sun.net.httpserver</groupId>
             <artifactId>http</artifactId>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>javax.ejb</groupId>-->
-            <!--<artifactId>ejb-api</artifactId>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>cglib</groupId>
             <artifactId>cglib</artifactId>

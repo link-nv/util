@@ -16,7 +16,7 @@ import net.link.util.servlet.AbstractInjectionServlet;
 
 /**
  * <h2>{@link AbstractEJBInjectionServlet}<br>
- * <sub>An {@link AbstractInjectionServlet} that also performs {@link EJB} injections.</sub></h2>
+ * <sub>An {@link AbstractInjectionServlet} that also performs EJB injections.</sub></h2>
  *
  * <p>
  * <i>Jan 1, 2010</i>

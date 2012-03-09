@@ -7,6 +7,7 @@
 
 package net.link.util.test.j2ee;
 
+import com.lyndir.lhunath.opal.system.logging.exception.InternalInconsistencyException;
 import java.io.Serializable;
 import java.lang.reflect.*;
 import java.security.Identity;
@@ -22,8 +23,7 @@ import javax.jms.Queue;
 import javax.persistence.*;
 import javax.security.auth.Subject;
 import javax.security.jacc.*;
-import javax.transaction.*;
-import javax.transaction.RollbackException;
+import javax.transaction.UserTransaction;
 import javax.xml.rpc.handler.MessageContext;
 import net.link.util.j2ee.EJBUtils;
 import net.sf.cglib.proxy.*;
@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.ejb3.annotation.*;
 import org.jboss.security.*;
+import org.jetbrains.annotations.Nullable;
 
 
 /**
@@ -229,16 +230,16 @@ public final class EJBTestUtils {
             instance = beanType.getConstructor().newInstance();
         }
         catch (InstantiationException e) {
-            throw new RuntimeException( "While instantiating: " + beanType , e);
+            throw new InternalInconsistencyException( "While instantiating: " + beanType, e );
         }
         catch (IllegalAccessException e) {
-            throw new RuntimeException( "While instantiating: " + beanType, e );
+            throw new InternalInconsistencyException( "While instantiating: " + beanType, e );
         }
         catch (NoSuchMethodException e) {
-            throw new RuntimeException( "While instantiating: " + beanType, e );
+            throw new InternalInconsistencyException( "While instantiating: " + beanType, e );
         }
         catch (InvocationTargetException e) {
-            throw new RuntimeException( "While instantiating: " + beanType, e );
+            throw new InternalInconsistencyException( "While instantiating: " + beanType, e );
         }
         TestContainerMethodInterceptor testContainerMethodInterceptor = new TestContainerMethodInterceptor( instance, container,
                 entityManager, sessionContext );
@@ -253,11 +254,11 @@ public final class EJBTestUtils {
                 return object;
             }
             catch (Exception e) {
-                throw new RuntimeException( "init error: " + beanType, e );
+                throw new InternalInconsistencyException( "init error: " + beanType, e );
             }
         }
         catch (Exception e) {
-            throw new RuntimeException( "CG Enhancer error: " + beanType, e );
+            throw new InternalInconsistencyException( "CG Enhancer error: " + beanType, e );
         }
     }
 
@@ -278,8 +279,7 @@ public final class EJBTestUtils {
 
         private final SessionContext sessionContext;
 
-        public TestContainerMethodInterceptor(Object object, Class<?>[] container, EntityManager entityManager,
-                                              SessionContext sessionContext) {
+        TestContainerMethodInterceptor(Object object, Class<?>[] container, EntityManager entityManager, SessionContext sessionContext) {
 
             this.object = object;
             this.container = container;
@@ -287,13 +287,14 @@ public final class EJBTestUtils {
             this.sessionContext = sessionContext;
         }
 
+        @Override
         public Object intercept(@SuppressWarnings("unused") Object obj, Method method, Object[] args,
                                 @SuppressWarnings("unused") MethodProxy proxy)
                 throws Throwable {
 
-            checkSessionBean();
+            validateSessionBean();
             Class<?> clazz = object.getClass();
-            checkSecurity( clazz, method );
+            validateSecurity( clazz, method );
             injectDependencies( clazz );
             injectEntityManager( clazz );
             injectResources( clazz );
@@ -331,7 +332,7 @@ public final class EJBTestUtils {
             }
         }
 
-        private void checkSecurity(Class<?> clazz, Method method) {
+        private void validateSecurity(Class<?> clazz, Method method) {
 
             SecurityDomain securityDomainAnnotation = clazz.getAnnotation( SecurityDomain.class );
             if (null == securityDomainAnnotation)
@@ -349,7 +350,7 @@ public final class EJBTestUtils {
             // LOG.debug("number of roles: " + roles.length);
             for (String role : roles)
                 // LOG.debug("checking role: " + role);
-                if (true == sessionContext.isCallerInRole( role ))
+                if (sessionContext.isCallerInRole( role ))
                     return;
             StringBuffer message = new StringBuffer();
             message.append( "user is not allowed to invoke the method. [allowed roles: " );
@@ -359,7 +360,7 @@ public final class EJBTestUtils {
             throw new EJBException( message.toString() );
         }
 
-        private void checkSessionBean() {
+        private void validateSessionBean() {
 
             Class<?> clazz = object.getClass();
             Stateless statelessAnnotation = clazz.getAnnotation( Stateless.class );
@@ -370,7 +371,7 @@ public final class EJBTestUtils {
 
         private void injectResources(Class<?> clazz) {
 
-            if (false == clazz.equals( Object.class ))
+            if (!clazz.equals( Object.class ))
                 injectResources( clazz.getSuperclass() );
             Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
@@ -378,60 +379,62 @@ public final class EJBTestUtils {
                 if (null == resourceAnnotation)
                     continue;
                 Class<?> fieldType = field.getType();
-                if (true == SessionContext.class.isAssignableFrom( fieldType )) {
+                if (SessionContext.class.isAssignableFrom( fieldType )) {
                     setField( field, sessionContext );
                     continue;
                 }
-                if (true == TimerService.class.isAssignableFrom( fieldType )) {
+                if (TimerService.class.isAssignableFrom( fieldType )) {
                     TimerService testTimerService = new TestTimerService();
                     setField( field, testTimerService );
                     continue;
                 }
-                if (true == String.class.isAssignableFrom( fieldType ))
+                if (String.class.isAssignableFrom( fieldType ))
                     /*
                      * In this case we're probably dealing with an env-entry injection, which we can most of the time safely skip.
                      */
                     continue;
-                if (true == ConnectionFactory.class.isAssignableFrom( fieldType ))
+                if (ConnectionFactory.class.isAssignableFrom( fieldType ))
                     // JMS ConnectionFactory, we can probably safely skip.
                     continue;
-                if (true == Queue.class.isAssignableFrom( fieldType ))
+                if (Queue.class.isAssignableFrom( fieldType ))
                     // JMS ConnectionFactory, we can probably safely skip.
                     continue;
-                if (true == boolean.class.isAssignableFrom( fieldType ))
+                if (boolean.class.isAssignableFrom( fieldType ))
                     continue;
-                if (true == UserTransaction.class.isAssignableFrom( fieldType )) {
+                if (UserTransaction.class.isAssignableFrom( fieldType )) {
                     setField( field, new UserTransaction() {
 
-                        public void setTransactionTimeout(int arg0)
-                                throws SystemException {
+                        @Override
+                        public void setTransactionTimeout(int arg0) {
 
                         }
 
+                        @Override
                         public void setRollbackOnly()
-                                throws IllegalStateException, SystemException {
+                                throws IllegalStateException {
 
                         }
 
+                        @Override
                         public void rollback()
-                                throws IllegalStateException, SecurityException, SystemException {
+                                throws IllegalStateException, SecurityException {
 
                         }
 
-                        public int getStatus()
-                                throws SystemException {
+                        @Override
+                        public int getStatus() {
 
                             return 0;
                         }
 
+                        @Override
                         public void commit()
-                                throws RollbackException, HeuristicMixedException, HeuristicRollbackException, SecurityException,
-                                       IllegalStateException, SystemException {
+                                throws SecurityException, IllegalStateException {
 
                         }
 
-                        public void begin()
-                                throws NotSupportedException, SystemException {
+                        @Override
+                        public void begin() {
 
                         }
                     } );
@@ -445,7 +448,7 @@ public final class EJBTestUtils {
         @SuppressWarnings("unchecked")
         private void injectDependencies(Class<?> clazz) {
 
-            if (false == clazz.equals( Object.class ))
+            if (!clazz.equals( Object.class ))
                 injectDependencies( clazz.getSuperclass() );
             Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
@@ -462,14 +465,14 @@ public final class EJBTestUtils {
                     bean = EJBUtils.getEJB( fieldType );
                 }
                 catch (EJBException e) {
-                    if (false == fieldType.isInterface())
-                        throw new EJBException( "field is not an interface type" );
+                    if (!fieldType.isInterface())
+                        throw new EJBException( "field is not an interface type", e );
                     Local localAnnotation = fieldType.getAnnotation( Local.class );
                     if (null == localAnnotation)
-                        throw new EJBException( "interface has no @Local annotation: " + fieldType.getName() );
+                        throw new EJBException( "interface has no @Local annotation: " + fieldType.getName(), e );
                     Remote remoteAnnotation = fieldType.getAnnotation( Remote.class );
                     if (null != remoteAnnotation)
-                        throw new EJBException( "interface cannot have both @Local and @Remote annotation" );
+                        throw new EJBException( "interface cannot have both @Local and @Remote annotation", e );
 
                     Class<?> beanType = getBeanType( fieldType, ejbAnnotation );
                     bean = EJBTestUtils.newInstance( beanType, container, entityManager, sessionContext );
@@ -496,7 +499,7 @@ public final class EJBTestUtils {
 
         private void injectEntityManager(Class<?> clazz) {
 
-            if (false == clazz.equals( Object.class ))
+            if (!clazz.equals( Object.class ))
                 injectEntityManager( clazz.getSuperclass() );
             Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
@@ -504,7 +507,7 @@ public final class EJBTestUtils {
                 if (null == persistenceContextAnnotation)
                     continue;
                 Class<?> fieldType = field.getType();
-                if (false == EntityManager.class.isAssignableFrom( fieldType ))
+                if (!EntityManager.class.isAssignableFrom( fieldType ))
                     throw new EJBException( "field type not correct" );
                 setField( field, entityManager );
             }
@@ -513,7 +516,7 @@ public final class EJBTestUtils {
         private Class<?> getBeanType(Class<?> interfaceType, EJB ejbAnnotation) {
 
             for (Class<?> containerClass : container) {
-                if (false == interfaceType.isAssignableFrom( containerClass ))
+                if (!interfaceType.isAssignableFrom( containerClass ))
                     continue;
                 LocalBinding localBinding = containerClass.getAnnotation( LocalBinding.class );
                 if (null != localBinding)
@@ -547,17 +550,20 @@ public final class EJBTestUtils {
             }
         }
 
+        @Override
         @SuppressWarnings("unused")
         public Object getContext(String key, Object data) {
 
             return subject;
         }
 
+        @Override
         public String[] getKeys() {
 
             return new String[] { "javax.security.auth.Subject.container" };
         }
 
+        @Override
         public boolean supports(String key) {
 
             return "javax.security.auth.Subject.container".equals( key );
@@ -590,36 +596,47 @@ public final class EJBTestUtils {
             }
         }
 
+        @Nullable
+        @Override
         public EJBLocalObject getEJBLocalObject()
                 throws IllegalStateException {
 
             return null;
         }
 
+        @Nullable
+        @Override
         public EJBObject getEJBObject()
                 throws IllegalStateException {
 
             return null;
         }
 
+        @Nullable
+        @Override
         public Class<?> getInvokedBusinessInterface()
                 throws IllegalStateException {
 
             return null;
         }
 
+        @Nullable
+        @Override
         public MessageContext getMessageContext()
                 throws IllegalStateException {
 
             return null;
         }
 
+        @Nullable
+        @Override
         @SuppressWarnings("deprecation")
         public Identity getCallerIdentity() {
 
             return null;
         }
 
+        @Override
         public Principal getCallerPrincipal() {
 
             if (null == principal)
@@ -627,65 +644,83 @@ public final class EJBTestUtils {
             return principal;
         }
 
+        @Nullable
+        @Override
         public EJBHome getEJBHome() {
 
             return null;
         }
 
+        @Nullable
+        @Override
         public EJBLocalHome getEJBLocalHome() {
 
             return null;
         }
 
+        @Nullable
+        @Override
         public Properties getEnvironment() {
 
             return null;
         }
 
+        @Override
         public boolean getRollbackOnly()
                 throws IllegalStateException {
 
             return false;
         }
 
+        @Nullable
+        @Override
         public TimerService getTimerService()
                 throws IllegalStateException {
 
             return null;
         }
 
+        @Nullable
+        @Override
         public UserTransaction getUserTransaction()
                 throws IllegalStateException {
 
             return null;
         }
 
+        @Override
         @SuppressWarnings("deprecation")
         public boolean isCallerInRole(@SuppressWarnings("unused") Identity arg0) {
 
             return false;
         }
 
+        @Override
         public boolean isCallerInRole(String expectedRole) {
 
             if (null == roles)
                 return false;
             for (String role : roles)
-                if (true == role.equals( expectedRole ))
+                if (role.equals( expectedRole ))
                     return true;
             return false;
         }
 
+        @Nullable
+        @Override
         public Object lookup(@SuppressWarnings("unused") String arg0) {
 
             return null;
         }
 
+        @Override
         public void setRollbackOnly()
                 throws IllegalStateException {
 
         }
 
+        @Nullable
+        @Override
         public <T> T getBusinessObject(@SuppressWarnings("unused") Class<T> arg0)
                 throws IllegalStateException {
 
@@ -696,31 +731,39 @@ public final class EJBTestUtils {
 
     static class TestTimer implements Timer {
 
+        @Override
         public void cancel()
-                throws IllegalStateException, NoSuchObjectLocalException, EJBException {
+                throws IllegalStateException, EJBException {
 
         }
 
+        @Nullable
+        @Override
         public TimerHandle getHandle()
-                throws IllegalStateException, NoSuchObjectLocalException, EJBException {
+                throws IllegalStateException, EJBException {
 
             return null;
         }
 
+        @Nullable
+        @Override
         public Serializable getInfo()
-                throws IllegalStateException, NoSuchObjectLocalException, EJBException {
+                throws IllegalStateException, EJBException {
 
             return null;
         }
 
+        @Nullable
+        @Override
         public Date getNextTimeout()
-                throws IllegalStateException, NoSuchObjectLocalException, EJBException {
+                throws IllegalStateException, EJBException {
 
             return null;
         }
 
+        @Override
         public long getTimeRemaining()
-                throws IllegalStateException, NoSuchObjectLocalException, EJBException {
+                throws IllegalStateException, EJBException {
 
             return 0;
         }
@@ -731,6 +774,8 @@ public final class EJBTestUtils {
 
         private static final Log serviceLOG = LogFactory.getLog( TestTimerService.class );
 
+        @Nullable
+        @Override
         @SuppressWarnings("unused")
         public Timer createTimer(long arg0, Serializable arg1)
                 throws IllegalArgumentException, IllegalStateException, EJBException {
@@ -738,15 +783,17 @@ public final class EJBTestUtils {
             return null;
         }
 
+        @Override
         @SuppressWarnings("unused")
         public Timer createTimer(Date arg0, Serializable arg1)
                 throws IllegalArgumentException, IllegalStateException, EJBException {
 
             serviceLOG.debug( "createTimer" );
-            Timer testTimer = new TestTimer();
-            return testTimer;
+            return new TestTimer();
         }
 
+        @Nullable
+        @Override
         @SuppressWarnings("unused")
         public Timer createTimer(long arg0, long arg1, Serializable arg2)
                 throws IllegalArgumentException, IllegalStateException, EJBException {
@@ -754,6 +801,8 @@ public final class EJBTestUtils {
             return null;
         }
 
+        @Nullable
+        @Override
         @SuppressWarnings("unused")
         public Timer createTimer(Date arg0, long arg1, Serializable arg2)
                 throws IllegalArgumentException, IllegalStateException, EJBException {
@@ -761,6 +810,8 @@ public final class EJBTestUtils {
             return null;
         }
 
+        @Nullable
+        @Override
         public Collection<?> getTimers()
                 throws IllegalStateException, EJBException {
 
