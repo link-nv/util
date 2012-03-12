@@ -25,15 +25,14 @@ import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
-import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.crypto.util.PrivateKeyFactory;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.operator.*;
-import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 
@@ -342,11 +341,7 @@ public abstract class KeyUtils {
                     serialNumber, notBefore.toDate(), notAfter.toDate(), X500Name.getInstance( subject.getDERObject() ), publicKeyInfo );
 
             // prepare signer
-            AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find( signatureAlgorithm );
-            AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find( sigAlgId );
-            AsymmetricKeyParameter privateKey = PrivateKeyFactory.createKey( issuerPrivateKey.getEncoded() );
-            ContentSigner signer = new BcRSAContentSignerBuilder( sigAlgId, digAlgId ).build( privateKey );
-
+            ContentSigner signer = new JcaContentSignerBuilder( signatureAlgorithm ).build( issuerPrivateKey );
             certificateBuilder.addExtension( X509Extension.subjectKeyIdentifier, false, createSubjectKeyId( subjectPublicKey ) );
             PublicKey issuerPublicKey;
             if (null != issuerCert)
@@ -369,23 +364,12 @@ public abstract class KeyUtils {
             }
 
             // build
-            X509CertificateHolder certificateHolder = certificateBuilder.build( signer );
-            X509CertificateStructure eeX509CertificateStructure = certificateHolder.toASN1Structure();
-
-            /*
-            * Make sure the default certificate provider is active.
-            */
-            return (X509Certificate) CertificateFactory.getInstance( "X.509" )
-                                                       .generateCertificate(
-                                                               new ByteArrayInputStream( eeX509CertificateStructure.getEncoded() ) );
+            return new JcaX509CertificateConverter().setProvider( "BC" ).getCertificate( certificateBuilder.build( signer ) );
         }
         catch (CertificateException e) {
             throw new InternalInconsistencyException( "X.509 is not supported.", e );
         }
         catch (OperatorCreationException e) {
-            throw new InternalInconsistencyException( e );
-        }
-        catch (IOException e) {
             throw new InternalInconsistencyException( e );
         }
     }

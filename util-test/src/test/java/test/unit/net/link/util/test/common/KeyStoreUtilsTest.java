@@ -146,5 +146,8 @@ public class KeyStoreUtilsTest {
         assertEquals( 2, certificateChain.getOrderedCertificateChain().size() );
         assertEquals( certificate, certificateChain.getIdentityCertificate() );
         assertEquals( rootCertificate, certificateChain.getRootCertificate() );
+
+        // Operate
+        certificate.verify( rootCertificate.getPublicKey() );
     }
 }

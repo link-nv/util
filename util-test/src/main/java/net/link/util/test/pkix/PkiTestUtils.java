@@ -21,14 +21,13 @@ import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
-import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.crypto.util.PrivateKeyFactory;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.operator.*;
-import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 
@@ -113,10 +112,7 @@ public class PkiTestUtils {
                 serialNumber, notBefore.toDate(), notAfter.toDate(), X500Name.getInstance( subject.getDERObject() ), publicKeyInfo );
 
         // prepare signer
-        AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find( finalSignatureAlgorithm );
-        AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find( sigAlgId );
-        AsymmetricKeyParameter privateKey = PrivateKeyFactory.createKey( issuerPrivateKey.getEncoded() );
-        ContentSigner signer = new BcRSAContentSignerBuilder( sigAlgId, digAlgId ).build( privateKey );
+        ContentSigner signer = new JcaContentSignerBuilder( finalSignatureAlgorithm ).build( issuerPrivateKey );
 
         // add extensions
         certificateBuilder.addExtension( X509Extension.subjectKeyIdentifier, false, createSubjectKeyId( subjectPublicKey ) );
@@ -135,23 +131,14 @@ public class PkiTestUtils {
                     new ExtendedKeyUsage( new DERSequence( KeyPurposeId.id_kp_timeStamping ) ) );
 
         if (null != ocspUri) {
-            GeneralName ocspName = new GeneralName( GeneralName.uniformResourceIdentifier, ocspUri.toString() );
+            GeneralName ocspName = new GeneralName( GeneralName.uniformResourceIdentifier, new DERIA5String( ocspUri.toString() ) );
             AuthorityInformationAccess authorityInformationAccess = new AuthorityInformationAccess( X509ObjectIdentifiers.ocspAccessMethod,
                     ocspName );
             certificateBuilder.addExtension( X509Extension.authorityInfoAccess, false, authorityInformationAccess );
         }
 
         // build
-        X509CertificateHolder certificateHolder = certificateBuilder.build( signer );
-        X509CertificateStructure eeX509CertificateStructure = certificateHolder.toASN1Structure();
-
-        /*
-         * Make sure the default certificate provider is active.
-         */
-        CertificateFactory certificateFactory = CertificateFactory.getInstance( "X.509" );
-
-        return (X509Certificate) certificateFactory.generateCertificate(
-                new ByteArrayInputStream( eeX509CertificateStructure.getEncoded() ) );
+        return new JcaX509CertificateConverter().setProvider( "BC" ).getCertificate( certificateBuilder.build( signer ) );
     }
 
     public static X509Certificate generateTestSelfSignedCert(URI ocspUri)

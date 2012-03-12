@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <!-- PROJECT METADATA -->
@@ -53,10 +52,10 @@
         <tag>HEAD</tag>
         <url>http://buildserver/cgi-bin/gitweb.cgi?p=util.git</url>
         <connection>
-            scm:git:ssh://buildserver/home/devel/scm/git/util.git
+            scm:git:ssh://buildserver/Users/devel/scm/git/util.git
         </connection>
         <developerConnection>
-            scm:git:ssh://buildserver/home/devel/scm/git/util.git
+            scm:git:ssh://buildserver/Users/devel/scm/git/util.git
         </developerConnection>
     </scm>
     <issueManagement>
@@ -80,13 +79,13 @@
     <distributionManagement>
         <repository>
             <id>buildserver-release-repository</id>
-            <url>scpexe://buildserver/home/devel/maven2/repositories/release
+            <url>scpexe://buildserver/Users/devel/maven2/repositories/release
             </url>
             <uniqueVersion>false</uniqueVersion>
         </repository>
         <snapshotRepository>
             <id>buildserver-snapshot-repository</id>
-            <url>scpexe://buildserver/home/devel/maven2/repositories/release
+            <url>scpexe://buildserver/Users/devel/maven2/repositories/release
             </url>
             <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
