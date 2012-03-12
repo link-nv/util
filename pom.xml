@@ -52,10 +52,10 @@
         <tag>HEAD</tag>
         <url>http://buildserver/cgi-bin/gitweb.cgi?p=util.git</url>
         <connection>
-            scm:git:ssh://buildserver/home/devel/scm/git/util.git
+            scm:git:ssh://buildserver/Users/devel/scm/git/util.git
         </connection>
         <developerConnection>
-            scm:git:ssh://buildserver/home/devel/scm/git/util.git
+            scm:git:ssh://buildserver/Users/devel/scm/git/util.git
         </developerConnection>
     </scm>
     <issueManagement>
@@ -79,13 +79,13 @@
     <distributionManagement>
         <repository>
             <id>buildserver-release-repository</id>
-            <url>scpexe://buildserver/home/devel/maven2/repositories/release
+            <url>scpexe://buildserver/Users/devel/maven2/repositories/release
             </url>
             <uniqueVersion>false</uniqueVersion>
         </repository>
         <snapshotRepository>
             <id>buildserver-snapshot-repository</id>
-            <url>scpexe://buildserver/home/devel/maven2/repositories/release
+            <url>scpexe://buildserver/Users/devel/maven2/repositories/release
             </url>
             <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
