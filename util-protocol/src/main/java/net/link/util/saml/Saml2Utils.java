@@ -180,6 +180,7 @@ public abstract class Saml2Utils extends SamlUtils {
 
                 SecurityPolicy securityPolicy = new BasicSecurityPolicy();
                 securityPolicy.getPolicyRules().add( new SAML2HTTPRedirectDeflateSignatureRule( engine ) );
+                securityPolicy.getPolicyRules().add( new HTTPRedirectForceSignedRule() );
 
                 return securityPolicy;
             }
