@@ -24,7 +24,6 @@ import org.joda.time.ReadableDateTime;
 import org.opensaml.common.SAMLObject;
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.binding.decoding.HTTPRedirectDeflateDecoder;
-import org.opensaml.saml2.binding.security.SAML2HTTPRedirectDeflateSignatureRule;
 import org.opensaml.saml2.core.*;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.ws.message.MessageContext;
@@ -179,8 +178,7 @@ public abstract class Saml2Utils extends SamlUtils {
                     throws SecurityException {
 
                 SecurityPolicy securityPolicy = new BasicSecurityPolicy();
-                securityPolicy.getPolicyRules().add( new SAML2HTTPRedirectDeflateSignatureRule( engine ) );
-                securityPolicy.getPolicyRules().add( new HTTPRedirectForceSignedRule() );
+                securityPolicy.getPolicyRules().add( new HTTPRedirectForceSignedRule( engine ) );
 
                 return securityPolicy;
             }
