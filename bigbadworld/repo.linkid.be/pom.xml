@@ -21,14 +21,12 @@
 
     <distributionManagement>
         <repository>
-            <id>repo.linkid.be</id>
-            <name>Lin.k public repository</name>
-            <url>scpexe://repo.linkid.be/home/maven/repository/releases</url>
+            <id>embedded</id>
+            <url>file:${basedir}/maven-repository</url>
         </repository>
         <snapshotRepository>
-            <id>repo.linkid.be.snap</id>
-            <name>Lin.k public repository</name>
-            <url>scpexe://repo.linkid.be/home/maven/repository/releases</url>
+            <id>embedded.snapshot</id>
+            <url>file:${basedir}/maven-repository</url>
         </snapshotRepository>
     </distributionManagement>
 
