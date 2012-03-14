@@ -16,10 +16,27 @@ public class PlaceHolderModifier extends AttributeModifier {
 
     Component component = null;
 
+    boolean addFallbackJS;
+
     private static final ResourceReference PLACEHOLDER_JS = new JavascriptResourceReference(PlaceHolderModifier.class, "placeholder.js");
 
-    public PlaceHolderModifier(IModel<String> model){
+    /**
+     * Adds the HTML5 placeholder tag, with an optional JS for browsers that don't support the tag
+     *
+     * @param model The text to display
+     * @param addFallbackJS If true, ddd JS to the page for browsers that don't support the placeholder tag
+     */
+    public PlaceHolderModifier(IModel<String> model, boolean addFallbackJS){
         super("placeholder",true, model );
+        this.addFallbackJS = addFallbackJS;
+    }
+
+    /**
+     * Add a placeholder, and include JS on the page for browsers that don't support the placeholder tag
+     * @param model
+     */
+    public PlaceHolderModifier(IModel<String> model){
+        this(model, true);
     }
 
     /**
@@ -51,7 +68,8 @@ public class PlaceHolderModifier extends AttributeModifier {
     @Override
     public void renderHead(final IHeaderResponse response) {
         super.renderHead( response );
-        response.renderJavascriptReference( PLACEHOLDER_JS, "placeholder-script" );
+        if (addFallbackJS)
+            response.renderJavascriptReference( PLACEHOLDER_JS, "placeholder-script" );
     }
 
 
