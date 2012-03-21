@@ -147,7 +147,7 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
             wsSecTimeStamp.prependToHeader( wsSecHeader );
             wsEncryptionParts.add( new WSEncryptionPart( wsSecTimeStamp.getId() ) );
 
-            @SuppressWarnings( { "unchecked" })
+            @SuppressWarnings({ "unchecked" })
             Set<String> toBeSignedIDs = (Set<String>) soapMessageContext.get( TO_BE_SIGNED_IDS_SET );
             if (null != toBeSignedIDs)
                 for (String toBeSignedID : toBeSignedIDs)
@@ -159,7 +159,7 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
             wsSecSignature.computeSignature();
         }
         catch (WSSecurityException e) {
-            logger.err( "While handling outbound WS request", e );
+            logger.err( e, "While handling outbound WS request" );
             return false;
         }
 
@@ -190,7 +190,7 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
         Timestamp timestamp = null;
         Set<String> signedElements = null;
         for (WSSecurityEngineResult result : wsSecurityEngineResults) {
-            @SuppressWarnings( { "unchecked" })
+            @SuppressWarnings({ "unchecked" })
             Set<String> resultSignedElements = (Set<String>) result.get( WSSecurityEngineResult.TAG_SIGNED_ELEMENT_IDS );
             if (null != resultSignedElements)
                 signedElements = resultSignedElements;
@@ -261,7 +261,7 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
     /**
      * @return the X509 certificate chain that was set previously by a WS-Security handler.
      */
-    @SuppressWarnings( { "unchecked" })
+    @SuppressWarnings({ "unchecked" })
     public static CertificateChain findCertificateChain(MessageContext context) {
 
         return (CertificateChain) context.get( CERTIFICATE_CHAIN_PROPERTY );

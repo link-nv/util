@@ -2,14 +2,15 @@ package net.link.util.ws;
 
 import static com.google.common.base.Preconditions.*;
 
+import com.lyndir.lhunath.opal.system.logging.exception.InternalInconsistencyException;
 import com.sun.xml.ws.developer.JAXWSProperties;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
+import javax.net.ssl.*;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.spi.Provider;
+import net.link.util.common.ApplicationMode;
 import net.link.util.pkix.X509CertificateTrustManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,12 +62,26 @@ public class AbstractWSClient<P> {
 
             // Setup TrustManager for validation
             getBindingProvider().getRequestContext().put( JAXWSProperties.SSL_SOCKET_FACTORY, sslContext.getSocketFactory() );
+
+            // skip hostname validation for SSL in debug/demo mode ...
+            if (ApplicationMode.get() != ApplicationMode.DEPLOYMENT) {
+                getBindingProvider().getRequestContext().put( JAXWSProperties.HOSTNAME_VERIFIER, new SkipHostnameVerifier() );
+            }
         }
         catch (KeyManagementException e) {
-            throw new RuntimeException( e );
+            throw new InternalInconsistencyException( e );
         }
         catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException( e );
+            throw new InternalInconsistencyException( e );
+        }
+    }
+
+    static class SkipHostnameVerifier implements HostnameVerifier {
+
+        @Override
+        public boolean verify(final String s, final SSLSession sslSession) {
+
+            return true;
         }
     }
 }
