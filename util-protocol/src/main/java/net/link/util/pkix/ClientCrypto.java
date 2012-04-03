@@ -8,15 +8,16 @@
 package net.link.util.pkix;
 
 import com.google.common.collect.Iterables;
-import java.io.InputStream;
 import java.math.BigInteger;
-import java.security.KeyStore;
 import java.security.PrivateKey;
-import java.security.cert.*;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import net.link.util.common.CertificateChain;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ws.security.components.crypto.Crypto;
+import org.apache.ws.security.WSSecurityException;
+import org.apache.ws.security.components.crypto.CryptoBase;
+import org.jetbrains.annotations.Nullable;
 
 
 /**
@@ -24,7 +25,8 @@ import org.apache.ws.security.components.crypto.Crypto;
  *
  * @author fcorneli
  */
-public class ClientCrypto implements Crypto {
+@SuppressWarnings("RefusedBequest")
+public class ClientCrypto extends CryptoBase {
 
     private static final Log LOG = LogFactory.getLog( ClientCrypto.class );
 
@@ -38,62 +40,20 @@ public class ClientCrypto implements Crypto {
         this.privateKey = privateKey;
     }
 
-    public String getAliasForX509Cert(Certificate cert) {
+    @Nullable
+    @Override
+    protected String getCryptoProvider() {
 
-        throw new UnsupportedOperationException();
+        return null;
     }
 
-    public String getAliasForX509Cert(String issuer) {
-
-        throw new UnsupportedOperationException();
-    }
-
-    public String getAliasForX509Cert(byte[] subjectKeyIdentifier) {
-
-        throw new UnsupportedOperationException();
-    }
-
-    public String getAliasForX509Cert(String issuer, BigInteger serialNumber) {
-
-        throw new UnsupportedOperationException();
-    }
-
-    public String getAliasForX509CertThumb(byte[] thumb) {
-
-        throw new UnsupportedOperationException();
-    }
-
-    public String[] getAliasesForDN(String subjectDN) {
-
-        throw new UnsupportedOperationException();
-    }
-
-    public byte[] getCertificateData(boolean reverse, X509Certificate[] certificates) {
-
-        throw new UnsupportedOperationException();
-    }
-
-    public CertificateFactory getCertificateFactory() {
-
-        throw new UnsupportedOperationException();
-    }
-
-    public X509Certificate[] getCertificates(String alias) {
-
-        LOG.debug( "getCertificates for alias: " + alias );
-        return Iterables.toArray( certificateChain.getOrderedCertificateChain(), X509Certificate.class );
-    }
-
+    @Override
     public String getDefaultX509Alias() {
 
         throw new UnsupportedOperationException();
     }
 
-    public KeyStore getKeyStore() {
-
-        throw new UnsupportedOperationException();
-    }
-
+    @Override
     public PrivateKey getPrivateKey(String alias, String password)
             throws Exception {
 
@@ -101,23 +61,59 @@ public class ClientCrypto implements Crypto {
         return privateKey;
     }
 
-    public byte[] getSKIBytesFromCert(X509Certificate cert) {
+    @Override
+    public String getAliasForX509Cert(final String issuer)
+            throws WSSecurityException {
 
         throw new UnsupportedOperationException();
     }
 
-    public X509Certificate[] getX509Certificates(byte[] data, boolean reverse) {
+    @Override
+    public String getAliasForX509Cert(final String issuer, final BigInteger serialNumber)
+            throws WSSecurityException {
 
         throw new UnsupportedOperationException();
     }
 
-    public X509Certificate loadCertificate(InputStream inputStream) {
+    @Override
+    public String getAliasForX509Cert(final byte[] skiBytes)
+            throws WSSecurityException {
 
         throw new UnsupportedOperationException();
     }
 
-    public boolean validateCertPath(X509Certificate[] certificates) {
+    @Override
+    public String getAliasForX509Cert(final Certificate cert)
+            throws WSSecurityException {
 
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getAliasForX509CertThumb(final byte[] thumb)
+            throws WSSecurityException {
+
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String[] getAliasesForDN(final String subjectDN)
+            throws WSSecurityException {
+
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean validateCertPath(final X509Certificate[] certs)
+            throws WSSecurityException {
+
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public X509Certificate[] getCertificates(String alias) {
+
+        LOG.debug( "getCertificates for alias: " + alias );
+        return Iterables.toArray( certificateChain.getOrderedCertificateChain(), X509Certificate.class );
     }
 }

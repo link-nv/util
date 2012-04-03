@@ -9,6 +9,7 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import javax.net.ssl.*;
 import net.link.util.common.ApplicationMode;
+import net.link.util.common.CertificateChain;
 
 
 /**
@@ -58,7 +59,7 @@ public class X509CertificateTrustManager implements X509TrustManager {
     public void checkClientTrusted(X509Certificate[] chain, String authType)
             throws CertificateException {
 
-        if (!checkTrustedCertificate( chain, authType ))
+        if (!checkTrustedCertificate( new CertificateChain( chain ), authType ))
             defaultTrustManager.checkClientTrusted( chain, authType );
     }
 
@@ -66,7 +67,7 @@ public class X509CertificateTrustManager implements X509TrustManager {
     public void checkServerTrusted(X509Certificate[] chain, String authType)
             throws CertificateException {
 
-        if (!checkTrustedCertificate( chain, authType ))
+        if (!checkTrustedCertificate( new CertificateChain( chain ), authType ))
             defaultTrustManager.checkServerTrusted( chain, authType );
     }
 
@@ -78,22 +79,22 @@ public class X509CertificateTrustManager implements X509TrustManager {
      *
      * @throws CertificateException if the chain was checked and was not trusted.
      */
-    private boolean checkTrustedCertificate(final X509Certificate[] chain, final String authType)
+    private boolean checkTrustedCertificate(final CertificateChain chain, final String authType)
             throws CertificateException {
 
-        if (chain.length < 1)
+        if (chain.isEmpty())
             return false;
 
         logger.inf( "checking if chain: %s (authType: %s) is trusted (by: %s).", Arrays.asList( chain ), authType, trustedCertificate );
 
         // Check validity of end certificate.
-        X509Certificate endCertificate = chain[0];
-        endCertificate.checkValidity();
+        X509Certificate identityCertificate = chain.getIdentityCertificate();
+        identityCertificate.checkValidity();
 
         // If an SSL certificate is given, check the chain against it.
         if (trustedCertificate != null)
             try {
-                endCertificate.verify( trustedCertificate.getPublicKey() );
+                identityCertificate.verify( trustedCertificate.getPublicKey() );
                 return true;
             }
             catch (GeneralSecurityException e) {
