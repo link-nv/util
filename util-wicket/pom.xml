@@ -20,6 +20,10 @@
             <groupId>net.lin-k.util</groupId>
             <artifactId>util-j2ee</artifactId>
         </dependency>
+        <dependency>
+            <groupId>net.lin-k.util</groupId>
+            <artifactId>util-common</artifactId>
+        </dependency>
 
         <!-- Specific Dependencies: External -->
         <dependency>
