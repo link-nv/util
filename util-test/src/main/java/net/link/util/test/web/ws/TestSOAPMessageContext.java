@@ -32,97 +32,115 @@ public class TestSOAPMessageContext implements SOAPMessageContext {
         properties.put( MessageContext.MESSAGE_OUTBOUND_PROPERTY, outbound );
     }
 
+    @Override
     @SuppressWarnings("unused")
     public Object[] getHeaders(QName name, JAXBContext context, boolean required) {
 
         return null;
     }
 
+    @Override
     public SOAPMessage getMessage() {
 
         return message;
     }
 
+    @Override
     public Set<String> getRoles() {
 
         return null;
     }
 
+    @Override
     public void setMessage(SOAPMessage message) {
 
         this.message = message;
     }
 
+    @Override
     @SuppressWarnings("unused")
     public Scope getScope(String scope) {
 
         return null;
     }
 
+    @Override
     @SuppressWarnings("unused")
     public void setScope(String scopeName, Scope scope) {
 
         // empty
     }
 
+    @Override
     public void clear() {
 
     }
 
+    @Override
     @SuppressWarnings("unused")
     public boolean containsKey(Object key) {
 
         return false;
     }
 
+    @Override
     @SuppressWarnings("unused")
     public boolean containsValue(Object value) {
 
         return false;
     }
 
-    public Set<java.util.Map.Entry<String, Object>> entrySet() {
+    @Override
+    public Set<Map.Entry<String, Object>> entrySet() {
 
         return null;
     }
 
+    @Override
     public Object get(Object key) {
 
         return properties.get( key );
     }
 
+    @Override
     public boolean isEmpty() {
 
         return false;
     }
 
+    @Override
     public Set<String> keySet() {
 
         return null;
     }
 
+    @Override
     public Object put(String key, Object value) {
 
         LOG.debug( "put: " + key );
         return properties.put( key, value );
     }
 
+    @Override
     @SuppressWarnings("unused")
     public void putAll(Map<? extends String, ? extends Object> t) {
 
     }
 
+    @Override
     @SuppressWarnings("unused")
     public Object remove(Object key) {
 
         return null;
     }
 
+    @Override
     public int size() {
 
         return 0;
     }
 
+    @Override
     public Collection<Object> values() {
 
         return null;

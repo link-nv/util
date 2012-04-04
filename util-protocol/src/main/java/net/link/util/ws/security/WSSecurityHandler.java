@@ -8,11 +8,13 @@
 package net.link.util.ws.security;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.lyndir.lhunath.opal.system.logging.Logger;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import javax.annotation.PostConstruct;
 import javax.naming.*;
+import javax.xml.crypto.dsig.Reference;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPPart;
@@ -135,7 +137,7 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
             wsSecSignature.setUseSingleCertificate( !certificateChain.hasRootCertificate() );
             wsSecSignature.prepare( document, new ClientCrypto( certificateChain, configuration.getPrivateKey() ), wsSecHeader );
 
-            Vector<WSEncryptionPart> wsEncryptionParts = new Vector<WSEncryptionPart>();
+            List<WSEncryptionPart> wsEncryptionParts = Lists.newLinkedList();
 
             SOAPConstants soapConstants = WSSecurityUtil.getSOAPConstants( document.getDocumentElement() );
             wsEncryptionParts.add(
@@ -147,16 +149,16 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
             wsSecTimeStamp.prependToHeader( wsSecHeader );
             wsEncryptionParts.add( new WSEncryptionPart( wsSecTimeStamp.getId() ) );
 
-            @SuppressWarnings({ "unchecked" })
+            @SuppressWarnings("unchecked")
             Set<String> toBeSignedIDs = (Set<String>) soapMessageContext.get( TO_BE_SIGNED_IDS_SET );
             if (null != toBeSignedIDs)
                 for (String toBeSignedID : toBeSignedIDs)
                     wsEncryptionParts.add( new WSEncryptionPart( toBeSignedID ) );
 
-            wsSecSignature.addReferencesToSign( wsEncryptionParts, wsSecHeader );
-            wsSecSignature.prependToHeader( wsSecHeader );
+            List<Reference> references = wsSecSignature.addReferencesToSign( wsEncryptionParts, wsSecHeader );
+            //            wsSecSignature.prependToHeader( wsSecHeader );
             wsSecSignature.prependBSTElementToHeader( wsSecHeader );
-            wsSecSignature.computeSignature();
+            wsSecSignature.computeSignature( references );
         }
         catch (WSSecurityException e) {
             logger.err( e, "While handling outbound WS request" );
@@ -170,10 +172,10 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
     private boolean handleInboundDocument(SOAPPart document, SOAPMessageContext soapMessageContext) {
 
         logger.dbg( "In: WS-Security header validation" );
-        Vector<WSSecurityEngineResult> wsSecurityEngineResults;
+        List<WSSecurityEngineResult> wsSecurityEngineResults;
         try {
             //noinspection unchecked
-            wsSecurityEngineResults = WSSecurityEngine.getInstance().processSecurityHeader( document, null, null, new ServerCrypto() );
+            wsSecurityEngineResults = new WSSecurityEngine().processSecurityHeader( document, null, null, new ServerCrypto() );
         }
         catch (WSSecurityException e) {
             throw SOAPUtils.createSOAPFaultException( "The signature or decryption was invalid", "FailedCheck", e );
@@ -188,10 +190,12 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
         }
 
         Timestamp timestamp = null;
-        Set<String> signedElements = null;
+        List<WSDataRef> signedElements = null;
         for (WSSecurityEngineResult result : wsSecurityEngineResults) {
-            @SuppressWarnings({ "unchecked" })
-            Set<String> resultSignedElements = (Set<String>) result.get( WSSecurityEngineResult.TAG_SIGNED_ELEMENT_IDS );
+
+            @SuppressWarnings("unchecked")
+            List<WSDataRef> resultSignedElements = (List<WSDataRef>) result.get( WSSecurityEngineResult.TAG_DATA_REF_URIS );
+            //            Set<String> resultSignedElements = (Set<String>) result.get( WSSecurityEngineResult.TAG_SIGNED_ELEMENT_IDS );
             if (null != resultSignedElements)
                 signedElements = resultSignedElements;
 
@@ -209,7 +213,7 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
 
         if (null == signedElements)
             throw SOAPUtils.createSOAPFaultException( "No signed elements found.", "FailedCheck" );
-        logger.dbg( "signed elements: " + signedElements );
+        logger.dbg( "# signed elements: %d", signedElements.size() );
         soapMessageContext.put( SIGNED_ELEMENTS_CONTEXT_KEY, signedElements );
 
         // Check whether the SOAP Body has been signed.
@@ -242,7 +246,7 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
         String timestampId = timestamp.getID();
         if (!isElementSigned( soapMessageContext, timestampId ))
             throw SOAPUtils.createSOAPFaultException( "Timestamp not signed", "FailedCheck" );
-        Duration age = new Duration( timestamp.getCreated().getTimeInMillis(), System.currentTimeMillis() );
+        Duration age = new Duration( timestamp.getCreated().getTime(), System.currentTimeMillis() );
         Duration maximumAge = configuration.getMaximumAge();
         if (age.isLongerThan( maximumAge )) {
             logger.dbg( "Maximum age exceeded by %s (since %s)", maximumAge.minus( age ), timestamp.getCreated().getTime() );
@@ -261,7 +265,7 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
     /**
      * @return the X509 certificate chain that was set previously by a WS-Security handler.
      */
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings("unchecked")
     public static CertificateChain findCertificateChain(MessageContext context) {
 
         return (CertificateChain) context.get( CERTIFICATE_CHAIN_PROPERTY );
@@ -296,11 +300,29 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
      */
     public static boolean isElementSigned(SOAPMessageContext context, String id) {
 
+        logger.dbg( "isElementSigned: %s", id );
         @SuppressWarnings("unchecked")
-        Set<String> signedElements = (Set<String>) context.get( SIGNED_ELEMENTS_CONTEXT_KEY );
+        List<WSDataRef> signedElements = (List<WSDataRef>) context.get( SIGNED_ELEMENTS_CONTEXT_KEY );
+        return isElementSigned( signedElements, id );
+    }
+
+    public static boolean isElementSigned(final List<WSDataRef> signedElements, final String id) {
+
         if (null == signedElements)
             return false;
 
-        return signedElements.contains( id );
+        for (WSDataRef signedElement : signedElements) {
+
+            String wsuId = signedElement.getWsuId();
+            if (wsuId.charAt( 0 ) == '#') {
+                wsuId = wsuId.substring( 1 );
+            }
+            logger.dbg( "signed element: %s", wsuId );
+
+            if (wsuId.equals( id ))
+                return true;
+        }
+
+        return false;
     }
 }

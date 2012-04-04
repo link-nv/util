@@ -8,16 +8,15 @@
 package net.link.util.pkix;
 
 import com.google.common.collect.Iterables;
-import java.math.BigInteger;
+import com.lyndir.lhunath.opal.system.logging.Logger;
 import java.security.PrivateKey;
-import java.security.cert.Certificate;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import javax.security.auth.callback.CallbackHandler;
 import net.link.util.common.CertificateChain;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.components.crypto.CryptoBase;
-import org.jetbrains.annotations.Nullable;
+import org.apache.ws.security.components.crypto.CryptoType;
 
 
 /**
@@ -28,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("RefusedBequest")
 public class ClientCrypto extends CryptoBase {
 
-    private static final Log LOG = LogFactory.getLog( ClientCrypto.class );
+    private static final Logger logger = Logger.get( ClientCrypto.class );
 
     private final CertificateChain certificateChain;
 
@@ -40,80 +39,55 @@ public class ClientCrypto extends CryptoBase {
         this.privateKey = privateKey;
     }
 
-    @Nullable
     @Override
-    protected String getCryptoProvider() {
+    public X509Certificate[] getX509Certificates(final CryptoType cryptoType)
+            throws WSSecurityException {
 
-        return null;
+        logger.dbg( "getCertificates for cryptotype: %s", cryptoType );
+        return Iterables.toArray( certificateChain.getOrderedCertificateChain(), X509Certificate.class );
     }
 
     @Override
-    public String getDefaultX509Alias() {
+    public String getX509Identifier(final X509Certificate cert)
+            throws WSSecurityException {
 
-        throw new UnsupportedOperationException();
+        return cert.getSerialNumber().toString();
     }
 
     @Override
-    public PrivateKey getPrivateKey(String alias, String password)
-            throws Exception {
+    public PrivateKey getPrivateKey(final X509Certificate certificate, final CallbackHandler callbackHandler)
+            throws WSSecurityException {
 
-        LOG.debug( "getPrivateKey for alias: " + alias );
+        logger.dbg( "getPrivateKey for certificate: %s", certificate );
         return privateKey;
     }
 
     @Override
-    public String getAliasForX509Cert(final String issuer)
+    public PrivateKey getPrivateKey(String alias, String password) {
+
+        logger.dbg( "getPrivateKey for alias: %s", alias );
+        return privateKey;
+    }
+
+    @Deprecated
+    @Override
+    public boolean verifyTrust(final X509Certificate[] certs)
             throws WSSecurityException {
 
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public String getAliasForX509Cert(final String issuer, final BigInteger serialNumber)
+    public boolean verifyTrust(final X509Certificate[] certs, final boolean enableRevocation)
             throws WSSecurityException {
 
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public String getAliasForX509Cert(final byte[] skiBytes)
+    public boolean verifyTrust(final PublicKey publicKey)
             throws WSSecurityException {
 
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getAliasForX509Cert(final Certificate cert)
-            throws WSSecurityException {
-
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getAliasForX509CertThumb(final byte[] thumb)
-            throws WSSecurityException {
-
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String[] getAliasesForDN(final String subjectDN)
-            throws WSSecurityException {
-
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean validateCertPath(final X509Certificate[] certs)
-            throws WSSecurityException {
-
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public X509Certificate[] getCertificates(String alias) {
-
-        LOG.debug( "getCertificates for alias: " + alias );
-        return Iterables.toArray( certificateChain.getOrderedCertificateChain(), X509Certificate.class );
     }
 }
