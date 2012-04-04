@@ -4,23 +4,38 @@ import java.io.IOException;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.link.util.common.URLUtils;
 import net.link.util.servlet.HttpServletRequestEndpointWrapper;
 import net.link.util.servlet.HttpServletResponseEndpointWrapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.wicket.protocol.http.WicketFilter;
+import org.jetbrains.annotations.Nullable;
 
 
 /**
- * <h2>{@link ProxiedWicketFilter}<br> <sub>[in short] (TODO).</sub></h2>
+ * <b>REQUEST AND RESPONSE WRAPPING</b>:
  * <p/>
- * <p> <i>02 01, 2011</i> </p>
+ * <p> When we're behind a proxy or load balancer, the servlet request's request URI is the request made by the proxy to the container,
+ * not the request made by the user agent to the proxy.  This causes validation problems when the request is expected to come in on a
+ * certain URL (eg. OpenSAML expects its tickets to go to the assertion consumer URL) and when the container resolves relative redirection
+ * URLs based on the request URL (causing the container to make the relative redirection absolute against the internal URL, and then
+ * giving that absolute URL to the user agent, who cannot reach it).  </p>
+ * <code><pre>
+ *     [User Agent]-->[ https://myapp.com/app/foo ]-->[Proxy]-->[ http://127.0.0.1/myapp/app/foo ]-->[MyApp Container]
+ *     [MyApp: redirect to bar]-->[Container: redirect to http://127.0.0.1/myapp/app/bar ]-->[Proxy]-->[User Agent]
+ *     [User Agent]-->[ http://127.0.0.1/myapp/app/bar ]-->[ Problem! ]
+ * </pre></code>
+ * <p> To solve this problem, we wrap the servlet request and response such that the request URI in the HttpServletRequest is the
+ * request URI of the client's request (the request to the proxy/load balancer), and such that sendRedirects with relative URIs are
+ * translated to absolute URIs using the client's request URI base.</p>
  *
  * @author lhunath
  */
 public abstract class ProxiedWicketFilter extends WicketFilter {
 
-    static final Log LOG = LogFactory.getLog( ProxiedWicketFilter.class );
+    private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
+    static final         Log    LOG               = LogFactory.getLog( ProxiedWicketFilter.class );
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -31,7 +46,7 @@ public abstract class ProxiedWicketFilter extends WicketFilter {
 
         LOG.debug( "servlet " + getClass() + " beginning service" );
         String endpoint = getWrapperEndpoint( httpServletRequest );
-        if (endpoint == null) {
+        if (endpoint != null) {
             HttpServletRequestEndpointWrapper wrappedRequest = new HttpServletRequestEndpointWrapper( httpServletRequest, endpoint );
             HttpServletResponseEndpointWrapper wrappedResponse = new HttpServletResponseEndpointWrapper( httpServletResponse, endpoint );
 
@@ -44,24 +59,30 @@ public abstract class ProxiedWicketFilter extends WicketFilter {
     }
 
     /**
-     * <b>REQUEST AND RESPONSE WRAPPING</b>:
-     * <p/>
-     * <p> When we're behind a proxy or load balancer, the servlet request URI that the container gives us points to this machine rather
-     * than the server that the request was actually sent to. This causes validation issues in OpenSAML and problems when redirecting to
-     * relative URIs. </p>
-     * <p/>
-     * <p> <code>[User] >--[ https://linkid.be/app/foo ]--> [Proxy] >--[ http://provider.com/linkid/app/foo ]--> [linkID]</code> <br>
-     * <code>[linkID: redirect to bar] >--[ redirect: http://provider.com/linkid/app/bar ]--> [Proxy] >--[ redirect:
-     * http://provider.com/linkid/app/bar]--> [User]</code> <br> <code>[User] >--[ http://provider.com/linkid/app/bar ]-->
-     * [Problem!]</code>
-     * </p>
-     * <p/>
-     * <p> To solve this problem, we wrap the servlet request and response such that the request URI in the HttpServletRequest is the
-     * request URI of the client's request (the request to the proxy/load balancer), and such that sendRedirects with relative URIs are
-     * translated to absolute URIs using the client's request URI base. </p>
+     * The default implementation searches for the {@value ProxiedWicketFilter#X_FORWARDED_PROTO} header in the request.  This header can be
+     * set by a proxy or load balancer to indicate that forwarding took place and what the original protocol was.  If the header is found,
+     * the request will be wrapped using an endpoint based on {@link #getHTTPBase()} or {@link #getHTTPSBase()}, depending on what the
+     * original request's protocol was.  The request's context path is appended to this base URL to form the final endpoint.  If the header
+     * is not found, the default implementation of this method returns {@code null}, meaning no wrapping will take place.
      *
      * @return The endpoint URL that the wrapper should use to replace the servlet request's requestURI and to calculate the absolute URL
-     *         for the servlet response's relative sendRedirects.
+     *         for the servlet response's relative sendRedirects.  Basically: Deployment URL + context path as seen by the user agent.
      */
-    protected abstract String getWrapperEndpoint(HttpServletRequest request);
+    @Nullable
+    protected String getWrapperEndpoint(HttpServletRequest request) {
+
+        String forwardedProtocol = request.getHeader( X_FORWARDED_PROTO );
+        if (forwardedProtocol != null) {
+            if ("http".equalsIgnoreCase( forwardedProtocol ))
+                return URLUtils.concat( getHTTPBase(), request.getContextPath() );
+            if ("https".equalsIgnoreCase( forwardedProtocol ))
+                return URLUtils.concat( getHTTPSBase(), request.getContextPath() );
+        }
+
+        return null;
+    }
+
+    protected abstract String getHTTPBase();
+
+    protected abstract String getHTTPSBase();
 }
