@@ -9,10 +9,10 @@
     </parent>
 
     <!-- PROJECT METADATA -->
-    <name>repo.linkid.be</name>
+    <name>GitHub Repo</name>
     <inceptionYear>2010</inceptionYear>
     <groupId>net.lin-k.util.bigbadworld</groupId>
-    <artifactId>repo.linkid.be</artifactId>
+    <artifactId>github</artifactId>
     <packaging>pom</packaging>
     <organization>
         <name>Lin.k N.V.</name>

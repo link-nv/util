@@ -20,6 +20,6 @@
     </organization>
 
     <modules>
-        <module>repo.linkid.be</module>
+        <module>github</module>
     </modules>
 </project>
