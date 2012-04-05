@@ -156,7 +156,6 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
                     wsEncryptionParts.add( new WSEncryptionPart( toBeSignedID ) );
 
             List<Reference> references = wsSecSignature.addReferencesToSign( wsEncryptionParts, wsSecHeader );
-            //            wsSecSignature.prependToHeader( wsSecHeader );
             wsSecSignature.prependBSTElementToHeader( wsSecHeader );
             wsSecSignature.computeSignature( references );
         }
