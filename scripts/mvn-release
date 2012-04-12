@@ -43,6 +43,8 @@ checkExit() {
         esac
     }
 
+    rm -rf **/target/checkout
+
     return $r
 }
 trap checkExit EXIT

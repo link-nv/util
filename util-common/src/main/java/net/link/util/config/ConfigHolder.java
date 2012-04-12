@@ -2,7 +2,7 @@ package net.link.util.config;
 
 import static com.google.common.base.Preconditions.*;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Map;
@@ -61,7 +61,7 @@ public class ConfigHolder {
     private static Class<ConfigHolder> globalConfigHolderType;
     private static ConfigHolder        globalConfigHolder;
 
-    private final Map<Class<? extends RootConfig>, RootConfig>           instances = Maps.newHashMap();
+    private final ClassToInstanceMap<RootConfig> instances = MutableClassToInstanceMap.create();
     private final Map<Class<? extends RootConfig>, DefaultConfigFactory> factories = Maps.newHashMap();
 
     //    private final Class<C>             configType;
@@ -128,14 +128,14 @@ public class ConfigHolder {
         checkState( !holderActivated.get(), "Tried to activate config holder: %s, but one is already active: %s", instance, holder.get() );
         checkNotNull( instance, "Tried to activate a config holder but none was given." );
 
-        ConfigHolder.holderActivated.set( true );
-        ConfigHolder.holder.set( instance );
+        holderActivated.set( true );
+        holder.set( instance );
     }
 
     public static synchronized void unsetLocalConfigHolder() {
 
-        ConfigHolder.holder.remove();
-        ConfigHolder.holderActivated.remove();
+        holder.remove();
+        holderActivated.remove();
     }
 
     public static <C extends RootConfig> C config(Class<C> rootConfig) {
@@ -143,10 +143,9 @@ public class ConfigHolder {
         return rootConfig.cast( get().getConfig( rootConfig ) );
     }
 
-    public static Collection<DefaultConfigFactory> factories() {
+    public static DefaultConfigFactory factory(Class<? extends RootConfig> rootConfig) {
 
-        return get().getFactories();
-        //        return factory.cast( get().getFactory() );
+        return get().getFactory( rootConfig );
     }
 
     /**
@@ -157,17 +156,7 @@ public class ConfigHolder {
      */
     public ConfigHolder(@NotNull final Class<? extends RootConfig> configType) {
 
-        this( new DefaultConfigFactory(), configType, null );
-    }
-
-    /**
-     * Create a config holder that holds the given configuration implementation.
-     *
-     * @param customConfig The configuration instance.
-     */
-    public ConfigHolder(@NotNull RootConfig customConfig) {
-
-        this( new DefaultConfigFactory(), null, customConfig );
+        this( configType, new DefaultConfigFactory(), null );
     }
 
     /**
@@ -180,17 +169,17 @@ public class ConfigHolder {
      *
      * @see DefaultConfigFactory The default configuration
      */
-    protected <C extends RootConfig> ConfigHolder(@NotNull final DefaultConfigFactory defaultConfigFactory,
-                                                  @Nullable final Class<C> configType, @Nullable C config) {
+    protected <C extends RootConfig> ConfigHolder(@NotNull final Class<C> configType, @Nullable final DefaultConfigFactory defaultConfigFactory,
+                                                  @Nullable C config) {
 
-        add( defaultConfigFactory, configType, config );
+        add( configType, defaultConfigFactory, config );
     }
 
-    public <C extends RootConfig> void add(@NotNull final DefaultConfigFactory defaultConfigFactory, @Nullable final Class<C> configType,
+    public <C extends RootConfig> void add(@NotNull final Class<C> configType, @Nullable final DefaultConfigFactory defaultConfigFactory,
                                            @Nullable C config) {
 
         factories.put( configType, defaultConfigFactory );
-        instances.put( configType, config );
+        instances.putInstance( configType, config );
     }
 
     public boolean hasConfig(Class<? extends RootConfig> configType) {
@@ -207,14 +196,15 @@ public class ConfigHolder {
      */
     protected <C extends RootConfig> C getConfig(Class<C> configType) {
 
-        C config = (C) instances.get( configType );
+        C config = instances.getInstance( configType );
         DefaultConfigFactory defaultConfigFactory = factories.get( configType );
 
         // look at superclasses in maps
         if (null == config) {
             for (Class<? extends RootConfig> mapConfigType : instances.keySet()) {
                 if (configType.isAssignableFrom( mapConfigType )) {
-                    config = (C) instances.get( mapConfigType );
+                    //noinspection unchecked
+                    config = instances.getInstance( (Class<? extends C>) mapConfigType );
                 }
             }
         }
@@ -248,7 +238,6 @@ public class ConfigHolder {
     protected Iterable<Class<? extends RootConfig>> getRootTypes() {
 
         return instances.keySet();
-        //        return ImmutableSet.<Class<?>>of( getConfigType() );
     }
 
     /**
@@ -260,7 +249,7 @@ public class ConfigHolder {
      */
     protected <C extends RootConfig> C getUnwrappedCustomConfig(Class<C> configType) {
 
-        return (C) instances.get( configType );
+        return instances.getInstance( configType );
     }
 
     /**
@@ -269,5 +258,13 @@ public class ConfigHolder {
     protected Collection<DefaultConfigFactory> getFactories() {
 
         return factories.values();
+    }
+
+    /**
+     * @return The factory that this config holder uses to create default implementations of the given config class.
+     */
+    protected DefaultConfigFactory getFactory(Class<? extends RootConfig> configType) {
+
+        return factories.get(configType);
     }
 }

@@ -256,15 +256,14 @@ if [[ -e $distribution ]] && (( ! nodeploy && ! nodistribution )); then
             src=("${distribution##*/}"-*/*/); src=("${src[@]%/}")
 
             emit "Shutting down remote distribution"
-            ssh -qt ${deployToPort:+-p "$deployToPort"} "$deployToHost" "$(printf 's=%q/scripts/stop; [[ -e $s ]] || exit 0; "$s"' "${deployToPath:-~}/${src%%/*}")"
+            ssh -qt ${deployToPort:+-p "$deployToPort"} "$deployToHost" "$(printf 'bash -lc %q' "$(printf 's=%q/scripts/stop; [[ -e $s ]] || exit 0; "$s"' "${deployToPath:-~}/${src%%/*}")")"
 
             emit "Uploading distribution to $deployTo:${deployToPath:-~}/${src%%/*}"
-            ssh -qt ${deployToPort:+-p "$deployToPort"} "$deployToHost" "$(printf 's=%q/scripts/stop; [[ -e $s ]] || exit 0; "$s" -w' "${deployToPath:-~}/${src%%/*}")"
+            ssh -qt ${deployToPort:+-p "$deployToPort"} "$deployToHost" "$(printf 'bash -lc %q' "$(printf 's=%q/scripts/stop; [[ -e $s ]] || exit 0; "$s" -w' "${deployToPath:-~}/${src%%/*}")")"
             rsync -avP --delete-after -e "ssh ${deployToPort:+-p $deployToPort}" "${src[@]}" "$deployToHost":"${deployToPath:-~}/${src%%/*}/"
 
             emit "(Re)Starting remote distribution"
-            ssh -qt ${deployToPort:+-p "$deployToPort"} "$deployToHost" "$(printf 'dist=%q
-                                         "$dist/scripts/start" -f' "${deployToPath:-~}/${src%%/*}")"
+            ssh -qt ${deployToPort:+-p "$deployToPort"} "$deployToHost" "$(printf 'bash -lc %q' "$(printf 'dist=%q; "$dist/scripts/start" -f' "${deployToPath:-~}/${src%%/*}")")"
             ;;
         *.ear|*.war)
             emit "Uploading package to $deployTo:${deployToPath:-~}/$package"

@@ -28,10 +28,10 @@ public class TestConfigHolder<C extends RootConfig> extends ConfigHolder {
         return type.cast( testConfig );
     }
 
-    public TestConfigHolder(C testConfig, Class<C> testConfigType, @Nullable final ServletContext servletContext) {
+    public TestConfigHolder(Class<C> testConfigType, C testConfig, @Nullable final ServletContext servletContext) {
 
         //noinspection unchecked
-        super( new DefaultConfigFactory() {
+        super( testConfigType, new DefaultConfigFactory() {
 
             @Nullable
             @Override
@@ -61,7 +61,7 @@ public class TestConfigHolder<C extends RootConfig> extends ConfigHolder {
                     }
                 };
             }
-        }, testConfigType, testConfig );
+        }, testConfig );
 
         TestConfigHolder.testConfig = testConfig;
     }
