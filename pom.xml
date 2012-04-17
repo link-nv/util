@@ -481,6 +481,50 @@
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>${maven-deploy-plugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>1.0-beta-1</version>
+                    <executions>
+                        <execution>
+                            <id>enforce-banned-dependencies</id>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <bannedDependencies>
+                                        <excludes>
+                                            <!-- We use bcprov-jdk16 instead -->
+                                            <exclude>org.bouncycastle:bcprov-jdk15</exclude>
+                                            <!-- We use org.apache.* instead -->
+                                            <exclude>xml-apis:xml-apis</exclude>
+                                            <exclude>xml-apis:xmlParserAPIs</exclude>
+                                            <exclude>xerces:xmlParserAPIs</exclude>
+                                            <exclude>xerces:xercesImpl</exclude>
+                                            <exclude>apache-xerces:xercesImpl</exclude>
+                                            <exclude>apache-xerces:xml-apis</exclude>
+                                            <exclude>xalan:xalan</exclude>
+                                            <exclude>xml-security:xmlsec</exclude>
+                                            <exclude>wss4j:wss4j</exclude>
+                                            <exclude>xom:xom</exclude>
+                                            <exclude>velocity:velocity</exclude>
+                                            <!-- We use bridges to SLF4J instead -->
+                                            <!-- Libraries depending on logging implementations is evil anyway -->
+                                            <exclude>commons-logging:commons-logging</exclude>
+                                            <exclude>log4j:log4j</exclude>
+                                            <!-- We use persistence API 2.0 -->
+                                            <exclude>javax.persistence:persistence-api:1.0</exclude>
+                                            <exclude>net.lin-k.util:util-j2ee-jboss4</exclude>
+                                            <exclude>javax.ejb:ejb-api</exclude>
+                                        </excludes>
+                                    </bannedDependencies>
+                                </rules>
+                                <fail>true</fail>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
