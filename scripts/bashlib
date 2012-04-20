@@ -1264,28 +1264,30 @@ inArray() {
 #  ______________________________________________________________________
 # |__ xpathNodes ________________________________________________________|
 #
-#       xpathNodes query [filename]
+#       xpathNodes query [files...]
 #
 # Outputs every xpath node that matches the query on a separate line.
 # Leading and trailing whitespace is always stripped.
 #
-#   filename    The path to the file that contains the document to run the query on.
+#   file        The path to the file that contains the document to run the query on.
 #   query       The XPath query to run on the document.
 #
 xpathNodes() {
-    local query=$1 filename=$2
-    [[ $filename ]] || filename=<(cat)
+    local query=$1; shift
+    [[ $1 ]] || set -- <(cat)
 
-    {
-        if xpath -e / <(echo '<a></a>') >/dev/null 2>&1; then
-            xpath -e "$query" "$filename" 2>&1
-        else
-            xpath "$filename" "$query" 2>&1
-        fi
-    } | {
-        read
-        sed -ne $'s/-- NODE --/\\\n/g' -e 's/^[[:space:]]*\(.*[^[:space:]]\)[[:space:]]*$/\1/p'
-    }
+    for file; do
+        {
+            if xpath -e / <(echo '<a></a>') >/dev/null 2>&1; then
+                xpath -e "$query" "$file" 2>&1
+            else
+                xpath "$file" "$query" 2>&1
+            fi
+        } | {
+            read
+            sed -ne $'s/-- NODE --/\\\n/g' -e 's/^[[:space:]]*\(.*[^[:space:]]\)[[:space:]]*$/\1/p'
+        }
+    done
 
     return "${PIPESTATUS[0]}"
 }
