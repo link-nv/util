@@ -15,7 +15,6 @@ import java.util.UUID;
 import javax.xml.ws.Binding;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.Handler;
-import javax.xml.ws.spi.Provider;
 import net.link.util.common.CertificateChain;
 import net.link.util.test.pkix.PkiTestUtils;
 import net.link.util.test.session.DummyLoginModule;
@@ -50,9 +49,6 @@ public abstract class AbstractWSTest<T> extends AbstractUnitTests<T> {
     @Override
     protected void setUp()
             throws Exception {
-
-        // set jaxws-rt as JAX-WS provider
-        System.setProperty( Provider.JAXWSPROVIDER_PROPERTY, "com.sun.xml.ws.spi.ProviderImpl" );
 
         // Generic Data
         testApplicationId = 1234567890;
