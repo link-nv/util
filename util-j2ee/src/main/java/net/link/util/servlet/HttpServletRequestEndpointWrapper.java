@@ -8,7 +8,6 @@
 package net.link.util.servlet;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import org.apache.commons.logging.Log;
@@ -24,55 +23,23 @@ public class HttpServletRequestEndpointWrapper extends HttpServletRequestWrapper
 
     private static final Log LOG = LogFactory.getLog( HttpServletRequestEndpointWrapper.class );
 
-    private URI requestBaseUri;
+    private final URI baseURI;
 
 
-    public HttpServletRequestEndpointWrapper(HttpServletRequest request, String responseBase) {
+    public HttpServletRequestEndpointWrapper(HttpServletRequest request, String baseURL) {
 
         super( request );
 
-        try {
-            URI responseBaseUri = new URI( responseBase );
-
-            requestBaseUri = new URI( responseBaseUri.getScheme(), responseBaseUri.getAuthority(), responseBaseUri.getPath(), null, null );
-        }
-
-        catch (URISyntaxException e) {
-            throw new IllegalArgumentException( e );
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getRequestURI() {
-
-        String originalRequest = super.getRequestURI();
-
-        int index = originalRequest.indexOf( getContextPath() );
-        URI locationUri;
-        if (index != -1 && !originalRequest.equals( "/" ))
-            locationUri = URI.create( originalRequest.substring( index + getContextPath().length() + 1 ) );
-        else
-            locationUri = URI.create( originalRequest );
-
-        // String[] requestURIElements = originalRequest.split( "/" );
-        // URI locationUri;
-        // if (0 == requestURIElements.length)
-        // locationUri = URI.create( originalRequest );
-        // else
-        // locationUri = URI.create( requestURIElements[requestURIElements.length - 1] );
-
-        String rebasedRequestURI = requestBaseUri.resolve( locationUri ).toASCIIString();
-        LOG.debug( "wrapper " + this + ": Rebased request URI '" + originalRequest + "' to: " + rebasedRequestURI );
-
-        return rebasedRequestURI;
+        baseURI = URI.create( baseURL );
     }
 
     @Override
     public StringBuffer getRequestURL() {
 
-        return new StringBuffer( getRequestURI() );
+        String requestURI = getRequestURI();
+        String requestURL = baseURI.resolve( requestURI ).toASCIIString();
+        LOG.debug( "Resolving request URI: " + requestURI + " with base: " + baseURI + " -> " + requestURL  );
+
+        return new StringBuffer( requestURL );
     }
 }

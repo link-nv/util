@@ -156,6 +156,38 @@ unhex() {
 
 
 #  ______________________________________________________________________
+# |__ max _______________________________________________________________|
+#
+#       max numbers...
+#
+# Outputs the highest of the given numbers.
+#
+max() {
+  local max=$1 n
+  for n
+  do (( n > max )) && max=$n; done
+  printf %d "$max"
+} # _____________________________________________________________________
+
+
+
+#  ______________________________________________________________________
+# |__ min _______________________________________________________________|
+#
+#       min numbers...
+#
+# Outputs the lowest of the given numbers.
+#
+min() {
+  local min=$1 n
+  for n
+  do (( n < min )) && min=$n; done
+  printf %d "$min"
+} # _____________________________________________________________________
+
+
+
+#  ______________________________________________________________________
 # |__ Exists ____________________________________________________________|
 #
 #       exists application
@@ -178,6 +210,27 @@ exists() {
 #
 eol() {
     : #[[ $1 && $1 != *[\!\?.,:\;\|] ]] && printf .. ||:
+} # _____________________________________________________________________
+
+
+
+#  ______________________________________________________________________
+# |__ Hr _______________________________________________________________|
+#
+#       hr pattern [length]
+#
+# Outputs a horizontal ruler of the given length in characters or the terminal column length otherwise.
+# The ruler is a repetition of the given pattern string.
+#
+hr() {
+    local pattern=$1 length=${2:-$COLUMNS} ruler=
+    (( length )) || length=$(tput cols)
+
+    while (( ${#ruler} < length )); do
+        ruler+=${pattern:0:length-${#ruler}}
+    done
+
+    printf %s "$ruler"
 } # _____________________________________________________________________
 
 
@@ -287,29 +340,32 @@ latest() (
 #  ______________________________________________________________________
 # |__ Logging ___________________________________________________________|
 #
-#       log [level] [format] [arguments...]
+#       log [format] [arguments...]
 #
 # Log an event at a certain importance level.  The event is expressed as a printf(1) format argument.
 # The current exit code remains unaffected by the execution of this function.
 #
 log() {
-    local exitcode=$? level=$1 supported=0 end=$'\n' type=msg conMsg= logMsg= format= colorFormat= date= info= args=() colorArgs=()
+    local exitcode=$? level=${level:-inf} supported=0 end=$'\n' type=msg conMsg= logMsg= format= colorFormat= date= info= arg= args=() colorArgs=() ruler=
 
     # Handle options.
-    [[ $1 = -p ]] && {
-        shift
-        level=$1
-        end='.. '
-        type=startProgress
-    }
-    [[ $1 = -P ]] && {
-        shift
-        level=$1
-        type=doneProgress
-    }
-    shift
-    format=$1
-    args=( "${@:2}" )
+    unset OPTIND
+    while getopts :puPr arg; do
+        case $arg in
+            p)
+                end='.. '
+                type=startProgress ;;
+            u)
+                end='.. '
+                type=updateProgress ;;
+            P)
+                type=doneProgress ;;
+            r)
+                ruler='____' ;;
+        esac
+    done
+    shift "$((OPTIND-1))"
+    format=$1 args=( "${@:2}" )
 
     # Level-specific settings.
     case $level in
@@ -337,7 +393,18 @@ log() {
             if (( _logColor )); then
                 colorFormat=$(sed -e "s/$(requote "$reset")/$reset$color/g" -e "s/%[^a-z]*[a-z]/$reset$bold$color&$reset$color/g" <<< "$format")
                 colorArgs=("${args[@]//$reset/$reset$bold$color}")
-                printf -v conMsg "[%s %-3s] $color$colorFormat$reset$end" "$date" "$level" "${colorArgs[@]}"
+                printf -v conMsg "[%s %-3s] $color$colorFormat$reset$end$save" "$date" "$level" "${colorArgs[@]}"
+            else
+                conMsg=$logMsg
+            fi
+        ;;
+
+        updateProgress)
+            printf -v logMsg printf " [$format]" "${args[@]}"
+            if (( _logColor )); then
+                colorFormat=$(sed -e "s/$(requote "$reset")/$reset$color/g" -e "s/%[^a-z]*[a-z]/$reset$bold$color&$reset$color/g" <<< "$format")
+                colorArgs=("${args[@]//$reset/$reset$bold$color}")
+                printf -v conMsg "$load$eel$blue$bold[$reset$color$colorFormat$reset$blue$bold]$reset$end" "${colorArgs[@]}"
             else
                 conMsg=$logMsg
             fi
@@ -345,10 +412,11 @@ log() {
 
         doneProgress)
             case $exitcode in
-                0)  info=${format:+$(printf " ($format)" "${args[@]}")}
-                    printf -v logMsg "done%s.\n" "$info"
+                0)  printf -v logMsg "done${format:+ ($format)}.\n" "${args[@]}"
                     if (( _logColor )); then
-                        printf -v conMsg "${green}${bold}done${reset}%s.\n" "$info"
+                        colorFormat=$(sed -e "s/$(requote "$reset")/$reset$color/g" -e "s/%[^a-z]*[a-z]/$reset$bold$color&$reset$color/g" <<< "$format")
+                        colorArgs=("${args[@]//$reset/$reset$bold$color}")
+                        printf -v conMsg "$load$eel$green${bold}done${colorFormat:+ ($reset$color$colorFormat$reset$green$bold)}$reset.\n" "${colorArgs[@]}"
                     else
                         conMsg=$logMsg
                     fi
@@ -357,7 +425,7 @@ log() {
                 *)  info=${format:+$(printf ": $format" "${args[@]}")}
                     printf -v logMsg "error(%d%s).\n" "$exitcode" "$info"
                     if (( _logColor )); then
-                        printf -v conMsg "${red}error${reset}(${bold}${red}%d${reset}%s).\n" "$exitcode" "$info"
+                        printf -v conMsg "${eel}${red}error${reset}(${bold}${red}%d${reset}%s).\n" "$exitcode" "$info"
                     else
                         conMsg=$logMsg
                     fi
@@ -366,31 +434,49 @@ log() {
         ;;
     esac
 
+    # Create the log file.
+    if [[ $_logFile && ! -e $_logFile ]]; then
+        [[ $_logFile = */* ]] || $_logFile=./$logFile
+        mkdir -p "${_logFile%/*}" && touch "$_logFile"
+    fi
+
+    # Output the ruler.
+    if [[ $ruler ]]; then
+        printf >&2 '%s\n' "$(hr "$ruler")"
+        [[ -w $_logFile ]] \
+            && printf >> "$_logFile" '%s' "$ruler"
+    fi
+
     # Output the log message.
     printf >&2 '%s' "$conMsg"
-    [[ $_logFile && ! -e $_logFile ]] && touch "$_logFile"
     [[ -w $_logFile ]] \
-        && printf '%s' "$logMsg" >> "$_logFile"
+        && printf >> "$_logFile" '%s' "$logMsg"
 
     return $exitcode
 }
-dbg() { log DBG "$@"; }
-inf() { log INF "$@"; }
-wrn() { log WRN "$@"; }
-err() { log ERR "$@"; }
-ftl() { log FTL "$@"; }
+dbg() { level=DBG log "$@"; }
+inf() { level=INF log "$@"; }
+wrn() { level=WRN log "$@"; }
+err() { level=ERR log "$@"; }
+ftl() { level=FTL log "$@"; }
 plog() { log -p "$@"; }
-golp() { log -P "$@" "$golp"; }
-pdbg() { plog DBG "$@"; }
-pinf() { plog INF "$@"; }
-pwrn() { plog WRN "$@"; }
-perr() { plog ERR "$@"; }
-pftl() { plog FTL "$@"; }
-gbdp() { golp=$gbdp golp DBG "$@"; }
-fnip() { golp=$fnip golp INF "$@"; }
-nrwp() { golp=$nrwp golp WRN "$@"; }
-rrep() { golp=$rrep golp ERR "$@"; }
-ltfp() { golp=$ltfp golp FTL "$@"; }
+ulog() { log -u "$@"; }
+golp() { log -P "$@"; }
+pdbg() { level=DBG plog "$@"; }
+pinf() { level=INF plog "$@"; }
+pwrn() { level=WRN plog "$@"; }
+perr() { level=ERR plog "$@"; }
+pftl() { level=FTL plog "$@"; }
+udbg() { level=DBG ulog "$@"; }
+uinf() { level=INF ulog "$@"; }
+uwrn() { level=WRN ulog "$@"; }
+uerr() { level=ERR ulog "$@"; }
+uftl() { level=FTL ulog "$@"; }
+gbdp() { level=DBG golp "$@"; }
+fnip() { level=INF golp "$@"; }
+nrwp() { level=WRN golp "$@"; }
+rrep() { level=ERR golp "$@"; }
+ltfp() { level=FTL golp "$@"; }
 _logColor=${_logColor:-$([[ -t 2 ]] && echo 1)} _logVerbosity=2
 _logDbgColor=$blue _logInfColor=$white _logWrnColor=$yellow _logErrColor=$red _logFtlColor=$bold$red
 # _______________________________________________________________________

@@ -69,7 +69,7 @@ public abstract class AbstractInjectionServlet extends HttpServlet {
         String endpoint = getWrapperEndpoint( request );
         if (endpoint != null) {
             HttpServletRequestEndpointWrapper wrappedRequest = new HttpServletRequestEndpointWrapper( request, endpoint );
-            HttpServletResponseEndpointWrapper wrappedResponse = new HttpServletResponseEndpointWrapper( response, endpoint );
+            HttpServletResponseEndpointWrapper wrappedResponse = new HttpServletResponseEndpointWrapper( wrappedRequest, response, endpoint );
 
             LOG.debug( "Wrapped request and response using endpoint: " + endpoint );
             super.service( wrappedRequest, wrappedResponse );
