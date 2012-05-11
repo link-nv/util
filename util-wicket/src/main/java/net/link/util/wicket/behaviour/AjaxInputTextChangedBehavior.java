@@ -6,21 +6,14 @@ import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.resources.JavascriptResourceReference;
-import org.apache.wicket.util.string.Strings;
 
 
-/**
- * Created by IntelliJ IDEA.
- * User: sgdesmet
- * Date: 31/10/11
- * Time: 11:16
- * To change this template use File | Settings | File Templates.
- */
-public abstract class AjaxInputTextChangedBehavior extends AbstractDefaultAjaxBehavior{
+public abstract class AjaxInputTextChangedBehavior extends AbstractDefaultAjaxBehavior {
 
-    private static final ResourceReference TEXTCHANGED_JS = new JavascriptResourceReference(AjaxInputTextChangedBehavior.class, "textchanged.js");
+    private static final ResourceReference TEXTCHANGED_JS = new JavascriptResourceReference( AjaxInputTextChangedBehavior.class,
+            "textchanged.js" );
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
     protected boolean enableClientTimer;
 
@@ -28,16 +21,14 @@ public abstract class AjaxInputTextChangedBehavior extends AbstractDefaultAjaxBe
      * Creates an ajax event behavior which triggers when the content of the input text field has changed.
      * It does so by appending a client side javascript which binds to 'oninput', 'onpropertychange', 'oncut', 'onpaste' and 'onkeyup' and
      * for each of these events checks if the content of the field has changed. If so, a callback to wicket is made.
-     *
+     * <p/>
      * It is also possible to enable a client side timer to check every 100ms to see if the content of the field has changed. This allows
      * to check if the content of the field has been changed by javascript.
-     *
-     * @param enableClientTimer
      */
-    public AjaxInputTextChangedBehavior(boolean enableClientTimer)
-	{
+    protected AjaxInputTextChangedBehavior(boolean enableClientTimer) {
+
         this.enableClientTimer = enableClientTimer;
-	}
+    }
 
     public boolean isEnableClientTimer() {
 
@@ -49,39 +40,32 @@ public abstract class AjaxInputTextChangedBehavior extends AbstractDefaultAjaxBe
         this.enableClientTimer = enableClientTimer;
     }
 
+    @Override
+    public void renderHead(IHeaderResponse response) {
+
+        super.renderHead( response );
+        renderTextchangedHead( response );
+    }
+
     /**
-	 * @see org.apache.wicket.ajax.AbstractDefaultAjaxBehavior#renderHead(org.apache.wicket.markup.html.IHeaderResponse)
-	 */
-	@Override
-	public void renderHead(IHeaderResponse response)
-	{
-		super.renderHead(response);
-		renderTextchangedHead( response );
-	}
+     * Render init and javascript
+     */
+    private void renderTextchangedHead(IHeaderResponse response) {
 
-	/**
-	 * Render init and javascript
-	 *
-	 * @param response
-	 */
-	private void renderTextchangedHead(IHeaderResponse response)
-	{
-		response.renderJavascriptReference( TEXTCHANGED_JS );
-		final String id = getComponent().getMarkupId();
+        response.renderJavascriptReference( TEXTCHANGED_JS );
+        final String id = getComponent().getMarkupId();
 
+        String initJS = String.format( String.format( "new Wicket.TextChanged('%%s','%%s',%s);", enableClientTimer ), id,
+                getCallbackUrl() );
+        response.renderOnLoadJavascript( initJS );
+    }
 
-		String initJS = String.format("new Wicket.TextChanged('%s','%s'," + enableClientTimer + ");", id,
-			getCallbackUrl() );
-		response.renderOnDomReadyJavascript( initJS );
-	}
-
-	@Override
-	protected void onBind()
-	{
-		// add empty AbstractDefaultAjaxBehavior to the component, to force
-		// rendering wicket-ajax.js reference if no other ajax behavior is on
-		// page
-		getComponent().add( new AbstractDefaultAjaxBehavior() {
+    @Override
+    protected void onBind() {
+        // add empty AbstractDefaultAjaxBehavior to the component, to force
+        // rendering wicket-ajax.js reference if no other ajax behavior is on
+        // page
+        getComponent().add( new AbstractDefaultAjaxBehavior() {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -89,24 +73,18 @@ public abstract class AjaxInputTextChangedBehavior extends AbstractDefaultAjaxBe
 
             }
         } );
-	}
+    }
 
     /**
      * Called when the value of the text field changes. Also provides the current value of the field.
-     * @param currentValue
-     * @param target
      */
-	protected abstract void onInputChanged(String currentValue, AjaxRequestTarget target);
+    protected abstract void onInputChanged(String currentValue, AjaxRequestTarget target);
 
-	/**
-	 * @see org.apache.wicket.ajax.AbstractDefaultAjaxBehavior#respond(org.apache.wicket.ajax.AjaxRequestTarget)
-	 */
-	@Override
-	protected void respond(AjaxRequestTarget target)
-	{
+    @Override
+    protected void respond(AjaxRequestTarget target) {
+
         final RequestCycle requestCycle = RequestCycle.get();
-		final String val = requestCycle.getRequest().getParameter("tval");
-		onInputChanged( val,  target );
-	}
-
+        final String val = requestCycle.getRequest().getParameter( "tval" );
+        onInputChanged( val, target );
+    }
 }

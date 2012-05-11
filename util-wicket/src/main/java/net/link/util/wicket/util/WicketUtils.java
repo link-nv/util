@@ -20,6 +20,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.LocaleUtils;
 import org.apache.wicket.*;
+import org.apache.wicket.feedback.ContainerFeedbackMessageFilter;
 import org.apache.wicket.injection.ComponentInjector;
 import org.apache.wicket.injection.ConfigurableInjector;
 import org.apache.wicket.protocol.http.*;
@@ -250,5 +251,18 @@ public abstract class WicketUtils {
         FocusOnReady focusOnReady = new FocusOnReady( component );
         componentPage.add( focusOnReady );
         return focusOnReady;
+    }
+
+    /**
+     * @param container the markup container to check
+     *
+     * @return whether the markup container or one of its childs has a feedback message for it
+     */
+    public static boolean hasError(final MarkupContainer container) {
+
+        if (null == container)
+            return false;
+
+        return !container.getSession().getFeedbackMessages().messages( new ContainerFeedbackMessageFilter( container ) ).isEmpty();
     }
 }

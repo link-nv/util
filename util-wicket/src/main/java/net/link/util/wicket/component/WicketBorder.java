@@ -1,37 +1,16 @@
-/*
- * SafeOnline project.
- *
- * Copyright 2006-2009 Lin.k N.V. All rights reserved.
- * Lin.k N.V. proprietary/confidential. Use is subject to license terms.
- */
 package net.link.util.wicket.component;
 
-import net.link.util.wicket.behaviour.FocusOnReady;
 import net.link.util.wicket.util.WicketUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.html.border.Border;
 import org.apache.wicket.model.*;
-import org.jetbrains.annotations.Nullable;
 
 
 /**
- * <h2>{@link WicketPanel}</h2>
- * <p/>
- * <p>
- * [description / usage].
- * </p>
- * <p/>
- * <p>
- * <i>May 11, 2009</i>
- * </p>
- *
- * @author wvdhaute
+ * Convenience wicket border subclass providing some generic functionality like i18n, ...
  */
-public abstract class WicketPanel extends Panel {
+public abstract class WicketBorder extends Border {
 
-    private FocusOnReady focusOnReady;
-
-    protected WicketPanel(String id) {
+    protected WicketBorder(String id) {
 
         super( id );
     }
@@ -53,7 +32,7 @@ public abstract class WicketPanel extends Panel {
             @Override
             public String getObject() {
 
-                return WicketUtils.localize( WicketPanel.this, format, args );
+                return WicketUtils.localize( WicketBorder.this, format, args );
             }
         };
     }
@@ -68,7 +47,7 @@ public abstract class WicketPanel extends Panel {
      */
     public String getLocalizedParameterString(String key, String... args) {
 
-        return new StringResourceModel( key, this, new Model<WicketPanel>( this ), args ).getString();
+        return new StringResourceModel( key, this, new Model<WicketBorder>( this ), args ).getString();
     }
 
     public AbstractReadOnlyModel<String> getLocalizedParameterModel(final String key, final String... args) {
@@ -81,22 +60,5 @@ public abstract class WicketPanel extends Panel {
                 return getLocalizedParameterString( key, args );
             }
         };
-    }
-
-    /**
-     * Cause a component to be focussed referenced by the path given by element ids separated by colons.
-     */
-    @Nullable
-    public FocusOnReady focus(final Component component) {
-
-        if (component == null)
-            return null;
-
-        if (focusOnReady == null)
-            add( focusOnReady = new FocusOnReady( component ) );
-        else
-            focusOnReady.setComponent( component );
-
-        return focusOnReady;
     }
 }
