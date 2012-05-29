@@ -58,7 +58,9 @@ runner=(     '> >'           \
              ' >>'           )
 
 # Variables for terminal requests.
-[[ -t 1 ]] && {
+[[ -t 2 ]] && {
+    salt=$(     tput smcup  || tput ti      )
+    ealt=$(     tput rmcup  || tput te      )
     hide=$(     tput civis  || tput vi      )
     show=$(     tput cvvis  || tput vs      )
     save=$(     tput sc                     )
@@ -154,6 +156,38 @@ unhex() {
 
 
 #  ______________________________________________________________________
+# |__ max _______________________________________________________________|
+#
+#       max numbers...
+#
+# Outputs the highest of the given numbers.
+#
+max() {
+  local max=$1 n
+  for n
+  do (( n > max )) && max=$n; done
+  printf %d "$max"
+} # _____________________________________________________________________
+
+
+
+#  ______________________________________________________________________
+# |__ min _______________________________________________________________|
+#
+#       min numbers...
+#
+# Outputs the lowest of the given numbers.
+#
+min() {
+  local min=$1 n
+  for n
+  do (( n < min )) && min=$n; done
+  printf %d "$min"
+} # _____________________________________________________________________
+
+
+
+#  ______________________________________________________________________
 # |__ Exists ____________________________________________________________|
 #
 #       exists application
@@ -181,6 +215,27 @@ eol() {
 
 
 #  ______________________________________________________________________
+# |__ Hr _______________________________________________________________|
+#
+#       hr pattern [length]
+#
+# Outputs a horizontal ruler of the given length in characters or the terminal column length otherwise.
+# The ruler is a repetition of the given pattern string.
+#
+hr() {
+    local pattern=$1 length=${2:-$COLUMNS} ruler=
+    (( length )) || length=$(tput cols)
+
+    while (( ${#ruler} < length )); do
+        ruler+=${pattern:0:length-${#ruler}}
+    done
+
+    printf %s "$ruler"
+} # _____________________________________________________________________
+
+
+
+#  ______________________________________________________________________
 # |__ CLoc ______________________________________________________________|
 #
 #       cloc
@@ -189,18 +244,78 @@ eol() {
 #
 cloc() {
     local old=$(stty -g)
+    trap 'stty "$old"' RETURN
     stty raw
 
     # If the tty has input waiting then we can't read back its response.  We'd only break and pollute the tty input buffer.
-    read -t 0 < /dev/tty 2>/dev/null && {
-        stty "$old"
-        return 1
-    }
+    read -t 0 < /dev/tty 2>/dev/null && return 1
 
     printf '\e[6n' > /dev/tty
     IFS='[;' read -dR _ row col < /dev/tty
     printf '%d %d' "$row" "$col"
-    stty "$old"
+} # _____________________________________________________________________
+
+
+
+#  ______________________________________________________________________
+# |__ readwhile ______________________________________________________________|
+#
+#       readwhile command [args]
+#
+# Outputs the characters typed by the user into the terminal's input buffer while running the given command.
+#
+readwhile() {
+    local old=$(stty -g) in result REPLY
+    trap 'stty "$old"' RETURN
+    stty raw
+
+    "$@"
+    result=$?
+
+    while read -t 0; do
+        IFS= read -rd '' -n1 && in+=$REPLY
+    done
+    printf %s "$in"
+
+    return $result
+} # _____________________________________________________________________
+
+
+
+#  ___________________________________________________________________________
+# |__ pushqueue ______________________________________________________________|
+#
+#       pushqueue element ...
+#
+# Pushes the given arguments as elements onto the queue.
+#
+pushqueue() {
+    [[ $_queue ]] || {
+        coproc _queue {
+            while IFS= read -r -d ''; do
+                printf '%s\0' "$REPLY"
+            done
+        }
+    }
+
+    printf '%s\0' "$@" >&"${_queue[1]}"
+} # _____________________________________________________________________
+
+
+
+#  __________________________________________________________________________
+# |__ popqueue ______________________________________________________________|
+#
+#       popqueue
+#
+# Pops one element off the queue.
+# If no elements are available on the queue, this command fails with exit code 1.
+#
+popqueue() {
+    local REPLY
+    [[ $_queue ]] && read -t0 <&"${_queue[0]}" || return
+    IFS= read -r -d '' <&"${_queue[0]}"
+    printf %s "$REPLY"
 } # _____________________________________________________________________
 
 
@@ -225,42 +340,45 @@ latest() (
 #  ______________________________________________________________________
 # |__ Logging ___________________________________________________________|
 #
-#       log [level] [format] [arguments...]
+#       log [format] [arguments...]
 #
 # Log an event at a certain importance level.  The event is expressed as a printf(1) format argument.
 # The current exit code remains unaffected by the execution of this function.
 #
 log() {
-    local exitcode=$? level=$1 supported=0 end=$'\n' type=msg conMsg= logMsg= format= colorFormat= date= info= args=() colorArgs=()
+    local exitcode=$? level=${level:-inf} supported=0 end=$'\n' type=msg conMsg= logMsg= format= colorFormat= date= info= arg= args=() colorArgs=() ruler=
 
     # Handle options.
-    [[ $1 = -p ]] && {
-        shift
-        level=$1
-        end='.. '
-        type=startProgress
-    }
-    [[ $1 = -P ]] && {
-        shift
-        level=$1
-        type=doneProgress
-    }
-    shift
-    format=$1
-    args=( "${@:2}" )
+    unset OPTIND
+    while getopts :puPr arg; do
+        case $arg in
+            p)
+                end='.. '
+                type=startProgress ;;
+            u)
+                end='.. '
+                type=updateProgress ;;
+            P)
+                type=doneProgress ;;
+            r)
+                ruler='____' ;;
+        esac
+    done
+    shift "$((OPTIND-1))"
+    format=$1 args=( "${@:2}" )
 
     # Level-specific settings.
     case $level in
         DBG)    (( supported = _logVerbosity >= 3 ))
-                color=$blue ;;
+                color=$_logDbgColor ;;
         INF)    (( supported = _logVerbosity >= 2 ))
-                color=$white ;;
+                color=$_logInfColor ;;
         WRN)    (( supported = _logVerbosity >= 1 ))
-                color=$yellow ;;
+                color=$_logWrnColor ;;
         ERR)    (( supported = _logVerbosity >= 0 ))
-                color=$red ;;
+                color=$_logErrColor ;;
         FTL)    (( supported = 1 ))
-                color=$bold$red ;;
+                color=$_logFtlColor ;;
         *)
                 log FTL "Log level %s does not exist" "$level"
                 exit 1 ;;
@@ -275,7 +393,18 @@ log() {
             if (( _logColor )); then
                 colorFormat=$(sed -e "s/$(requote "$reset")/$reset$color/g" -e "s/%[^a-z]*[a-z]/$reset$bold$color&$reset$color/g" <<< "$format")
                 colorArgs=("${args[@]//$reset/$reset$bold$color}")
-                printf -v conMsg "[%s %-3s] $color$colorFormat$reset$end" "$date" "$level" "${colorArgs[@]}"
+                printf -v conMsg "[%s %-3s] $color$colorFormat$reset$end$save" "$date" "$level" "${colorArgs[@]}"
+            else
+                conMsg=$logMsg
+            fi
+        ;;
+
+        updateProgress)
+            printf -v logMsg printf " [$format]" "${args[@]}"
+            if (( _logColor )); then
+                colorFormat=$(sed -e "s/$(requote "$reset")/$reset$color/g" -e "s/%[^a-z]*[a-z]/$reset$bold$color&$reset$color/g" <<< "$format")
+                colorArgs=("${args[@]//$reset/$reset$bold$color}")
+                printf -v conMsg "$load$eel$blue$bold[$reset$color$colorFormat$reset$blue$bold]$reset$end" "${colorArgs[@]}"
             else
                 conMsg=$logMsg
             fi
@@ -283,10 +412,11 @@ log() {
 
         doneProgress)
             case $exitcode in
-                0)  info=${format:+$(printf " ($format)" "${args[@]}")}
-                    printf -v logMsg "done%s.\n" "$info"
+                0)  printf -v logMsg "done${format:+ ($format)}.\n" "${args[@]}"
                     if (( _logColor )); then
-                        printf -v conMsg "${green}${bold}done${reset}%s.\n" "$info"
+                        colorFormat=$(sed -e "s/$(requote "$reset")/$reset$color/g" -e "s/%[^a-z]*[a-z]/$reset$bold$color&$reset$color/g" <<< "$format")
+                        colorArgs=("${args[@]//$reset/$reset$bold$color}")
+                        printf -v conMsg "$load$eel$green${bold}done${colorFormat:+ ($reset$color$colorFormat$reset$green$bold)}$reset.\n" "${colorArgs[@]}"
                     else
                         conMsg=$logMsg
                     fi
@@ -295,7 +425,7 @@ log() {
                 *)  info=${format:+$(printf ": $format" "${args[@]}")}
                     printf -v logMsg "error(%d%s).\n" "$exitcode" "$info"
                     if (( _logColor )); then
-                        printf -v conMsg "${red}error${reset}(${bold}${red}%d${reset}%s).\n" "$exitcode" "$info"
+                        printf -v conMsg "${eel}${red}error${reset}(${bold}${red}%d${reset}%s).\n" "$exitcode" "$info"
                     else
                         conMsg=$logMsg
                     fi
@@ -304,32 +434,51 @@ log() {
         ;;
     esac
 
+    # Create the log file.
+    if [[ $_logFile && ! -e $_logFile ]]; then
+        [[ $_logFile = */* ]] || $_logFile=./$logFile
+        mkdir -p "${_logFile%/*}" && touch "$_logFile"
+    fi
+
+    # Output the ruler.
+    if [[ $ruler ]]; then
+        printf >&2 '%s\n' "$(hr "$ruler")"
+        [[ -w $_logFile ]] \
+            && printf >> "$_logFile" '%s' "$ruler"
+    fi
+
     # Output the log message.
-    printf '%s' "$conMsg"
-    [[ $_logFile && ! -e $_logFile ]] && touch "$_logFile"
+    printf >&2 '%s' "$conMsg"
     [[ -w $_logFile ]] \
-        && printf '%s' "$logMsg" >> "$_logFile"
+        && printf >> "$_logFile" '%s' "$logMsg"
 
     return $exitcode
 }
-dbg() { log DBG "$@"; }
-inf() { log INF "$@"; }
-wrn() { log WRN "$@"; }
-err() { log ERR "$@"; }
-ftl() { log FTL "$@"; }
+dbg() { level=DBG log "$@"; }
+inf() { level=INF log "$@"; }
+wrn() { level=WRN log "$@"; }
+err() { level=ERR log "$@"; }
+ftl() { level=FTL log "$@"; }
 plog() { log -p "$@"; }
-golp() { log -P "$@" "$golp"; }
-pdbg() { plog DBG "$@"; }
-pinf() { plog INF "$@"; }
-pwrn() { plog WRN "$@"; }
-perr() { plog ERR "$@"; }
-pftl() { plog FTL "$@"; }
-gbdp() { golp=$gbdp golp DBG "$@"; }
-fnip() { golp=$fnip golp INF "$@"; }
-nrwp() { golp=$nrwp golp WRN "$@"; }
-rrep() { golp=$rrep golp ERR "$@"; }
-ltfp() { golp=$ltfp golp FTL "$@"; }
-{ _logColor=${_logColor:-$([[ -t 2 ]] && echo 1)} _logVerbosity=2; } 2>&1
+ulog() { log -u "$@"; }
+golp() { log -P "$@"; }
+pdbg() { level=DBG plog "$@"; }
+pinf() { level=INF plog "$@"; }
+pwrn() { level=WRN plog "$@"; }
+perr() { level=ERR plog "$@"; }
+pftl() { level=FTL plog "$@"; }
+udbg() { level=DBG ulog "$@"; }
+uinf() { level=INF ulog "$@"; }
+uwrn() { level=WRN ulog "$@"; }
+uerr() { level=ERR ulog "$@"; }
+uftl() { level=FTL ulog "$@"; }
+gbdp() { level=DBG golp "$@"; }
+fnip() { level=INF golp "$@"; }
+nrwp() { level=WRN golp "$@"; }
+rrep() { level=ERR golp "$@"; }
+ltfp() { level=FTL golp "$@"; }
+_logColor=${_logColor:-$([[ -t 2 ]] && echo 1)} _logVerbosity=2
+_logDbgColor=$blue _logInfColor=$white _logWrnColor=$yellow _logErrColor=$red _logFtlColor=$bold$red
 # _______________________________________________________________________
 
 
@@ -439,7 +588,7 @@ emit() {
         spinPid=$!
 
         # Execute the command for the spinner if one is given.
-        #sleep 1 # Let the spinner initialize itself properly first. # Can probably remove this now that we echo > spinPipe?
+        #fsleep 1 # Let the spinner initialize itself properly first. # Can probably remove this now that we echo > spinPipe?
         if   (( $# == 1 )); then command=$1
         elif (( $# >  1 )); then command=$(printf '%q ' "$@")
         else return 0; fi
@@ -590,7 +739,7 @@ spinner() {
                 "${graphics[i++ % 4]}" "$text"                      >&$fd
         fi
 
-        sleep .25 # Four iterations make one second.
+        fsleep .25 # Four iterations make one second.
 
         # Cancel when calling script disappears.
         kill -0 $$ >/dev/null || done="${red}aborted"
@@ -759,7 +908,7 @@ ask() {
         done
         REPLY=$reply
     else
-        read ${options:+-n1} ${silent:+-s}
+        read -e ${options:+-n1} ${silent:+-s}
     fi
     [[ $options && $REPLY ]] || (( silent )) && printf "\n"         >&$fd
 
@@ -888,31 +1037,21 @@ mutex() {
 
 
 #  ______________________________________________________________________
-# |__ SWait _____________________________________________________________|
+# |__ FSleep _____________________________________________________________|
 #
-#       swait pid...
+#       fsleep time
 #
-# Wait for the given PID(s).  The PID does not need to be a child of the
-# running shell.  Note that relying on PIDs always introduces race conditions
-# which may be potentially harmful and sometimes even a security issue.
+# Wait for the given amount of seconds.  The amount of seconds may be
+# fractional.
 #
-# This implementation requires the necessary permissions to send signals
-# to the PID(s) provided.
+# This implementation solves the problem portably, assuming that either
+# bash 4.x or a fractional sleep(1) is available.
 #
-swait() {
+fsleep() {
 
-    # Check usage.
-    (( ! $# )) || getArgs -q :h "$@" && {
-        emit -y 'Please provide one or more PIDs to wait for as argument.'
-        return 1
-    }
-
-    # Time to wait.
-    local pid
-    for pid; do
-        while kill -0 $pid 2>/dev/null
-        do sleep .1; done
-    done
+    local fifo=${TMPDIR:-/tmp}/.fsleep.$$
+    trap 'rm -f "$fifo"' RETURN
+    mkfifo "$fifo" && { read -t "$1" <> "$fifo" 2>/dev/null || sleep "$1"; }
 } # _____________________________________________________________________
 
 
@@ -1211,28 +1350,30 @@ inArray() {
 #  ______________________________________________________________________
 # |__ xpathNodes ________________________________________________________|
 #
-#       xpathNodes query [filename]
+#       xpathNodes query [files...]
 #
 # Outputs every xpath node that matches the query on a separate line.
 # Leading and trailing whitespace is always stripped.
 #
-#   filename    The path to the file that contains the document to run the query on.
+#   file        The path to the file that contains the document to run the query on.
 #   query       The XPath query to run on the document.
 #
 xpathNodes() {
-    local query=$1 filename=$2
-    [[ $filename ]] || filename=<(cat)
+    local query=$1; shift
+    [[ $1 ]] || set -- <(cat)
 
-    {
-        if xpath -e / <(echo '<a></a>') >/dev/null 2>&1; then
-            xpath -e "$query" "$filename" 2>&1
-        else
-            xpath "$filename" "$query" 2>&1
-        fi
-    } | {
-        read
-        sed -ne $'s/-- NODE --/\\\n/g' -e 's/^[[:space:]]*\(.*[^[:space:]]\)[[:space:]]*$/\1/p'
-    }
+    for file; do
+        {
+            if xpath -e / <(echo '<a></a>') >/dev/null 2>&1; then
+                xpath -e "$query" "$file" 2>&1
+            else
+                xpath "$file" "$query" 2>&1
+            fi
+        } | {
+            read
+            sed -ne $'s/-- NODE --/\\\n/g' -e 's/^[[:space:]]*\(.*[^[:space:]]\)[[:space:]]*$/\1/p'
+        }
+    done
 
     return "${PIPESTATUS[0]}"
 }

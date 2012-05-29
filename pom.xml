@@ -146,7 +146,7 @@
         <maven-release-plugin.version>2.1</maven-release-plugin.version>
         <maven-compiler-plugin.version>2.0.2</maven-compiler-plugin.version>
         <jboss-maven-plugin.version>1.3.1</jboss-maven-plugin.version>
-        <maven-surefire-plugin.version>2.3</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>2.12</maven-surefire-plugin.version>
         <maven-jar-plugin.version>2.1</maven-jar-plugin.version>
         <maven-dependency-plugin.version>2.1</maven-dependency-plugin.version>
         <maven-javadoc-plugin.version>2.5</maven-javadoc-plugin.version>
@@ -204,11 +204,6 @@
         <commons-lang.version>2.3</commons-lang.version>
         <jetbrains-annotations.version>7.0.2</jetbrains-annotations.version>
         <jackson.version>1.8.1</jackson.version>
-
-        <jaxb-api.version>2.2.4</jaxb-api.version>
-        <jaxws-api.version>2.2.8</jaxws-api.version>
-        <jaxws-rt.version>2.2.6</jaxws-rt.version>
-        <jaxb-impl.version>2.2.5</jaxb-impl.version>
 
         <!-- JBoss 4 -->
         <jboss.version>4.2.3.GA</jboss.version>
@@ -485,6 +480,50 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>${maven-deploy-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>1.0-beta-1</version>
+                    <executions>
+                        <execution>
+                            <id>enforce-banned-dependencies</id>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <bannedDependencies>
+                                        <excludes>
+                                            <!-- We use bcprov-jdk16 instead -->
+                                            <exclude>org.bouncycastle:bcprov-jdk15</exclude>
+                                            <!-- We use org.apache.* instead -->
+                                            <exclude>xml-apis:xml-apis</exclude>
+                                            <exclude>xml-apis:xmlParserAPIs</exclude>
+                                            <exclude>xerces:xmlParserAPIs</exclude>
+                                            <exclude>xerces:xercesImpl</exclude>
+                                            <exclude>apache-xerces:xercesImpl</exclude>
+                                            <exclude>apache-xerces:xml-apis</exclude>
+                                            <exclude>xalan:xalan</exclude>
+                                            <exclude>xml-security:xmlsec</exclude>
+                                            <exclude>wss4j:wss4j</exclude>
+                                            <exclude>xom:xom</exclude>
+                                            <exclude>velocity:velocity</exclude>
+                                            <!-- We use bridges to SLF4J instead -->
+                                            <!-- Libraries depending on logging implementations is evil anyway -->
+                                            <exclude>commons-logging:commons-logging</exclude>
+                                            <exclude>log4j:log4j</exclude>
+                                            <!-- We use persistence API 2.0 -->
+                                            <exclude>javax.persistence:persistence-api:1.0</exclude>
+                                            <exclude>net.lin-k.util:util-j2ee-jboss4</exclude>
+                                            <exclude>javax.ejb:ejb-api</exclude>
+                                        </excludes>
+                                    </bannedDependencies>
+                                </rules>
+                                <fail>true</fail>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -854,24 +893,9 @@
                 <version>${http.version}</version>
             </dependency>
             <dependency>
-                <groupId>javax.xml.bind</groupId>
-                <artifactId>jaxb-api</artifactId>
-                <version>${jaxb-api.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>javax.xml.soap</groupId>
                 <artifactId>saaj-api</artifactId>
                 <version>${saaj-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.xml.ws</groupId>
-                <artifactId>jaxws-api</artifactId>
-                <version>${jaxws-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.xml.ws</groupId>
-                <artifactId>jaxws-rt</artifactId>
-                <version>${jaxws-rt.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opensaml</groupId>

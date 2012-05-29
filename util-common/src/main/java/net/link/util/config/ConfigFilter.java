@@ -1,16 +1,14 @@
 package net.link.util.config;
 
-import com.lyndir.lhunath.opal.system.logging.Logger;
-import org.jetbrains.annotations.NotNull;
+import static com.google.common.base.Preconditions.*;
+import static com.lyndir.lhunath.opal.system.util.TypeUtils.*;
+import static net.link.util.config.ConfigHolder.*;
 
+import com.lyndir.lhunath.opal.system.logging.Logger;
+import java.io.IOException;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.lyndir.lhunath.opal.system.util.TypeUtils.loadClass;
-import static com.lyndir.lhunath.opal.system.util.TypeUtils.newInstance;
-import static net.link.util.config.ConfigHolder.*;
+import org.jetbrains.annotations.NotNull;
 
 
 /**
@@ -62,34 +60,27 @@ public class ConfigFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        logger.dbg( "[>>>] %s: %s @ %s", getConfigHolder( request ).getClass().getSimpleName(), servletContext.getServletContextName(),
+        ConfigHolder configHolder = getConfigHolder( request );
+        logger.dbg( "[>>>] %s: %s @ %s", configHolder.getClass().getSimpleName(), servletContext.getServletContextName(),
                 request instanceof HttpServletRequest? ((HttpServletRequest) request).getRequestURL(): null );
 
         try {
-            setLocalConfigHolder( getConfigHolder( request ) );
-
-            for (DefaultConfigFactory factory : factories()) {
+            setLocalConfigHolder( configHolder );
+            for (DefaultConfigFactory factory : configHolder.getFactories()) {
                 factory.setServletContext( servletContext );
                 factory.setServletRequest( request );
             }
 
-            //            factory( DefaultConfigFactory.class ).setServletContext( servletContext );
-            //            factory( DefaultConfigFactory.class ).setServletRequest( request );
-
             chain.doFilter( request, response );
         }
         finally {
-
-            for (DefaultConfigFactory factory : factories()) {
+            for (DefaultConfigFactory factory : configHolder.getFactories()) {
                 factory.unsetServletRequest();
                 factory.unsetServletContext();
             }
-
-            //            factory( DefaultConfigFactory.class ).unsetServletRequest();
-            //            factory( DefaultConfigFactory.class ).unsetServletContext();
-
             unsetLocalConfigHolder();
-            logger.dbg( "[<<<] %s: %s", getConfigHolder( request ).getClass().getSimpleName(), servletContext.getServletContextName() );
+
+            logger.dbg( "[<<<] %s: %s", configHolder.getClass().getSimpleName(), servletContext.getServletContextName() );
         }
     }
 
@@ -132,6 +123,6 @@ public class ConfigFilter implements Filter {
             configInstance = newInstance( configClass );
 
         // Create the holder.
-        return new ConfigHolder( configFactory, configClass, configInstance );
+        return new ConfigHolder( configClass, configFactory, configInstance );
     }
 }

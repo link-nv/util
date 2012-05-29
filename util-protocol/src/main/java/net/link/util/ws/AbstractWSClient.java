@@ -3,13 +3,12 @@ package net.link.util.ws;
 import static com.google.common.base.Preconditions.*;
 
 import com.lyndir.lhunath.opal.system.logging.exception.InternalInconsistencyException;
-import com.sun.xml.ws.developer.JAXWSProperties;
+import com.sun.xml.internal.ws.developer.JAXWSProperties;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import javax.net.ssl.*;
 import javax.xml.ws.BindingProvider;
-import javax.xml.ws.spi.Provider;
 import net.link.util.common.ApplicationMode;
 import net.link.util.pkix.X509CertificateTrustManager;
 import org.slf4j.Logger;
@@ -26,10 +25,6 @@ import org.slf4j.LoggerFactory;
 public class AbstractWSClient<P> {
 
     private static final Logger logger = LoggerFactory.getLogger( AbstractWSClient.class );
-
-    static {
-        System.setProperty( Provider.JAXWSPROVIDER_PROPERTY, "com.sun.xml.ws.spi.ProviderImpl" );
-    }
 
     private final P port;
 

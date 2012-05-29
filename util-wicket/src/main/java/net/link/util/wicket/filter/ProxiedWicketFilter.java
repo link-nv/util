@@ -4,7 +4,6 @@ import java.io.IOException;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import net.link.util.common.URLUtils;
 import net.link.util.servlet.HttpServletRequestEndpointWrapper;
 import net.link.util.servlet.HttpServletResponseEndpointWrapper;
 import org.apache.commons.logging.Log;
@@ -45,15 +44,15 @@ public abstract class ProxiedWicketFilter extends WicketFilter {
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
 
         LOG.debug( "servlet " + getClass() + " beginning service" );
-        String endpoint = getWrapperEndpoint( httpServletRequest );
-        if (endpoint != null) {
-            HttpServletRequestEndpointWrapper wrappedRequest = new HttpServletRequestEndpointWrapper( httpServletRequest, endpoint );
-            HttpServletResponseEndpointWrapper wrappedResponse = new HttpServletResponseEndpointWrapper( httpServletResponse, endpoint );
+        String baseURL = getBaseFor( httpServletRequest );
+        if (baseURL != null) {
+            HttpServletRequestEndpointWrapper wrappedRequest = new HttpServletRequestEndpointWrapper( httpServletRequest, baseURL );
+            HttpServletResponseEndpointWrapper wrappedResponse = new HttpServletResponseEndpointWrapper( wrappedRequest, httpServletResponse, baseURL );
 
-            LOG.debug( "Wrapped request and response using endpoint: " + endpoint );
+            LOG.debug( "Wrapped request and response using baseURL: " + baseURL );
             super.doFilter( wrappedRequest, wrappedResponse, chain );
         } else {
-            LOG.debug( "No endpoint defined.  Not wrapping request and response." );
+            LOG.debug( "No baseURL defined.  Not wrapping request and response." );
             super.doFilter( httpServletRequest, httpServletResponse, chain );
         }
     }
@@ -69,14 +68,14 @@ public abstract class ProxiedWicketFilter extends WicketFilter {
      *         for the servlet response's relative sendRedirects.  Basically: Deployment URL + context path as seen by the user agent.
      */
     @Nullable
-    protected String getWrapperEndpoint(HttpServletRequest request) {
+    protected String getBaseFor(HttpServletRequest request) {
 
         String forwardedProtocol = request.getHeader( X_FORWARDED_PROTO );
         if (forwardedProtocol != null) {
             if ("http".equalsIgnoreCase( forwardedProtocol ))
-                return URLUtils.concat( getHTTPBase(), request.getContextPath() );
+                return getHTTPBase();
             if ("https".equalsIgnoreCase( forwardedProtocol ))
-                return URLUtils.concat( getHTTPSBase(), request.getContextPath() );
+                return getHTTPSBase();
         }
 
         return null;

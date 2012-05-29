@@ -8,8 +8,8 @@
 package net.link.util.ws;
 
 import com.google.common.collect.MutableClassToInstanceMap;
-import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.server.AbstractMultiInstanceResolver;
+import com.sun.xml.internal.ws.api.message.Packet;
+import com.sun.xml.internal.ws.server.AbstractMultiInstanceResolver;
 import java.lang.reflect.Field;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;

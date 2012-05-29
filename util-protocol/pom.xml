@@ -35,10 +35,6 @@
 			<artifactId>wss4j</artifactId>
 		</dependency>
         <dependency>
-            <groupId>com.sun.xml.ws</groupId>
-            <artifactId>jaxws-rt</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml</artifactId>
         </dependency>

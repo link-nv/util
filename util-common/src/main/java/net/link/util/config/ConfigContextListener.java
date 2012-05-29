@@ -51,10 +51,8 @@ public abstract class ConfigContextListener implements ServletContextListener {
 
         try {
             setLocalConfigHolder( configHolder );
-            for (DefaultConfigFactory factory : factories()) {
+            for (DefaultConfigFactory factory : configHolder.getFactories())
                 factory.setServletContext( sce.getServletContext() );
-            }
-            //            factory( DefaultConfigFactory.class ).setServletContext( sce.getServletContext() );
 
             doContextInitialized( sce );
         }
@@ -72,10 +70,8 @@ public abstract class ConfigContextListener implements ServletContextListener {
 
         try {
             setLocalConfigHolder( configHolder );
-            for (DefaultConfigFactory factory : factories()) {
+            for (DefaultConfigFactory factory : configHolder.getFactories())
                 factory.setServletContext( sce.getServletContext() );
-            }
-            //            factory( DefaultConfigFactory.class ).setServletContext( sce.getServletContext() );
 
             doContextDestroyed( sce );
         }
