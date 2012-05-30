@@ -7,12 +7,11 @@
 
 package net.link.util.servlet;
 
+import com.lyndir.lhunath.opal.system.logging.Logger;
 import java.io.IOException;
 import java.net.URI;
 import java.util.regex.Pattern;
 import javax.servlet.http.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -28,15 +27,14 @@ import org.apache.commons.logging.LogFactory;
  */
 public class HttpServletResponseEndpointWrapper extends HttpServletResponseWrapper {
 
-    private static final Log LOG = LogFactory.getLog( HttpServletResponseEndpointWrapper.class );
+    private static final Logger  logger   = Logger.get( HttpServletResponseEndpointWrapper.class );
     private static final Pattern PROTOCOL = Pattern.compile( "^[^:/]*://" );
 
     private final HttpServletRequestEndpointWrapper wrappedRequest;
-    private final String baseURL;
+    private final String                            baseURL;
 
     /**
-     * @param response     The real {@link HttpServletResponse} that we're wrapping.
-     * @param baseURL
+     * @param response The real {@link HttpServletResponse} that we're wrapping.
      */
     public HttpServletResponseEndpointWrapper(final HttpServletRequestEndpointWrapper wrappedRequest, HttpServletResponse response,
                                               final String baseURL) {
@@ -46,9 +44,6 @@ public class HttpServletResponseEndpointWrapper extends HttpServletResponseWrapp
         this.baseURL = baseURL;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void sendRedirect(String location)
             throws IOException {
@@ -56,20 +51,21 @@ public class HttpServletResponseEndpointWrapper extends HttpServletResponseWrapp
         URI locationURI = URI.create( location );
         if (locationURI.isAbsolute()) {
             // Already absolute, nothing to do.
-            LOG.debug( "Not resolving redirect, already absolute: " + location );
+            logger.dbg( "Not resolving redirect, already absolute: %s", location );
             super.sendRedirect( location );
+            return;
         }
 
         String absoluteLocation;
         if (location.startsWith( "/" )) {
             // Relative to container root.
             absoluteLocation = URI.create( baseURL ).resolve( location ).toASCIIString();
-            LOG.debug( "Resolving redirect: " + location + " relative to container root: " + baseURL + " -> " + absoluteLocation );
+            logger.dbg( "Resolving redirect: %s  relative to container root: %s -> %s", location, baseURL, absoluteLocation );
         } else {
             // Relative to request URL.
             String requestURL = wrappedRequest.getRequestURL().toString();
             absoluteLocation = URI.create( requestURL ).resolve( location ).toASCIIString();
-            LOG.debug( "Resolving redirect: " + location + " relative to request URL: " + requestURL + " -> " + absoluteLocation );
+            logger.dbg( "Resolving redirect: %s relative to request URL: %s -> %s", location, requestURL, absoluteLocation );
         }
 
         super.sendRedirect( absoluteLocation );
