@@ -11,6 +11,7 @@ import javax.net.ssl.*;
 import javax.xml.ws.BindingProvider;
 import net.link.util.common.ApplicationMode;
 import net.link.util.pkix.X509CertificateTrustManager;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,15 +27,23 @@ public class AbstractWSClient<P> {
 
     private static final Logger logger = LoggerFactory.getLogger( AbstractWSClient.class );
 
+    public static final String JAX_WS_RI_HOSTNAME_VERIFIER  = "com.sun.xml.ws.transport.https.client.hostname.verifier";
+    public static final String JAX_WS_RI_SSL_SOCKET_FACTORY = "com.sun.xml.ws.transport.https.client.SSLSocketFactory";
+
     private final P port;
 
     protected AbstractWSClient(final P port) {
+
+        this( port, null );
+    }
+
+    protected AbstractWSClient(final P port, @Nullable final X509Certificate sslCertificate) {
 
         checkArgument( port instanceof BindingProvider, "Port must be a BindingProvider" );
 
         this.port = port;
 
-        registerTrustManager( null );
+        registerTrustManager( sslCertificate );
     }
 
     protected P getPort() {
@@ -57,10 +66,12 @@ public class AbstractWSClient<P> {
 
             // Setup TrustManager for validation
             getBindingProvider().getRequestContext().put( JAXWSProperties.SSL_SOCKET_FACTORY, sslContext.getSocketFactory() );
+            getBindingProvider().getRequestContext().put( JAX_WS_RI_SSL_SOCKET_FACTORY, sslContext.getSocketFactory() );
 
             // skip hostname validation for SSL in debug/demo mode ...
             if (ApplicationMode.get() != ApplicationMode.DEPLOYMENT) {
                 getBindingProvider().getRequestContext().put( JAXWSProperties.HOSTNAME_VERIFIER, new SkipHostnameVerifier() );
+                getBindingProvider().getRequestContext().put( JAX_WS_RI_HOSTNAME_VERIFIER, new SkipHostnameVerifier() );
             }
         }
         catch (KeyManagementException e) {
