@@ -84,14 +84,14 @@ public class ServerCrypto extends CryptoBase {
     public boolean verifyTrust(final X509Certificate[] certs)
             throws WSSecurityException {
 
-        return false;
+        return true;
     }
 
     @Override
     public boolean verifyTrust(final X509Certificate[] certs, final boolean enableRevocation)
             throws WSSecurityException {
 
-        return false;
+        return true;
     }
 
     @Override
