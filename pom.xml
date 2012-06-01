@@ -14,78 +14,17 @@
         <url>http://www.lin-k.net</url>
     </organization>
 
-    <!-- DEVELOPERS -->
-    <developers>
-        <developer>
-            <id>wvdhaute</id>
-            <name>Wim Vandenhaute</name>
-            <email>wim@lin-k.net</email>
-            <roles>
-                <role>development</role>
-            </roles>
-            <timezone>+1</timezone>
-            <properties>
-                <msn>wim.vandenhaute@easynet.be</msn>
-                <private-email>wim.vandenhaute@gmail.com
-                </private-email>
-            </properties>
-        </developer>
-        <developer>
-            <id>mbillemo</id>
-            <name>Maarten Billemont</name>
-            <email>maarten@lin-k.net</email>
-            <roles>
-                <role>development</role>
-            </roles>
-            <timezone>+1</timezone>
-            <properties>
-                <jabber>lhunath@gmail.com</jabber>
-                <msn>lhunath@lyndir.com</msn>
-                <msn>15559107</msn>
-                <private-email>lhunath@gmail.com</private-email>
-            </properties>
-        </developer>
-    </developers>
-
-    <!-- CODE MANAGEMENT -->
-    <scm>
-        <tag>HEAD</tag>
-        <url>http://buildserver/cgi-bin/gitweb.cgi?p=util.git</url>
-        <connection>
-            scm:git:ssh://buildserver/Users/devel/scm/git/util.git
-        </connection>
-        <developerConnection>
-            scm:git:ssh://buildserver/Users/devel/scm/git/util.git
-        </developerConnection>
-    </scm>
-    <issueManagement>
-        <system>JTrac</system>
-        <url>http://buildserver:7070/jtrac/app/
-        </url>
-    </issueManagement>
-    <ciManagement>
-        <system>Hudson</system>
-        <url>http://buildserver:7070/hudson/
-        </url>
-    </ciManagement>
-    <mailingLists>
-        <mailingList>
-            <name>safeonline-dev</name>
-            <post>safeonline-dev@lin-k.net</post>
-        </mailingList>
-    </mailingLists>
-
     <!-- DISTRIBUTION AND DEPLOYMENT -->
     <distributionManagement>
         <repository>
             <id>buildserver-release-repository</id>
-            <url>scpexe://buildserver/Users/devel/maven2/repositories/release
+            <url>scpexe://buildserver/Users/devel/maven2/repository
             </url>
             <uniqueVersion>false</uniqueVersion>
         </repository>
         <snapshotRepository>
             <id>buildserver-snapshot-repository</id>
-            <url>scpexe://buildserver/Users/devel/maven2/repositories/release
+            <url>scpexe://buildserver/Users/devel/maven2/repository
             </url>
             <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
