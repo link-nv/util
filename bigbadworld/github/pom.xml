@@ -22,11 +22,11 @@
     <distributionManagement>
         <repository>
             <id>embedded</id>
-            <url>file:${basedir}/../../../../maven-repository</url>
+            <url>file:${basedir}/maven-repository</url>
         </repository>
         <snapshotRepository>
             <id>embedded.snapshot</id>
-            <url>file:${basedir}/../../../../maven-repository</url>
+            <url>file:${basedir}/maven-repository</url>
         </snapshotRepository>
     </distributionManagement>
 
