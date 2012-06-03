@@ -79,7 +79,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <deploy.url>scpexe://buildserver/Users/devel/maven2/repositor</deploy.url>
+        <deploy.url>scpexe://buildserver/Users/devel/maven2/repository</deploy.url>
 
         <!-- DEFAULT VERSIONS, SEE PLUGINS -->
         <maven-release-plugin.version>2.1</maven-release-plugin.version>
