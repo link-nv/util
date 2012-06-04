@@ -14,6 +14,14 @@
         <url>http://www.lin-k.net</url>
     </organization>
 
+    <!-- CODE MANAGEMENT -->
+    <scm>
+        <tag>HEAD</tag>
+        <url>http://buildserver/cgi-bin/gitweb.cgi?p=util.git</url>
+        <connection>scm:git:ssh://git@github.com:link-nv/util.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:link-nv/util.git</developerConnection>
+    </scm>
+
     <!-- DISTRIBUTION AND DEPLOYMENT -->
     <distributionManagement>
         <repository>
