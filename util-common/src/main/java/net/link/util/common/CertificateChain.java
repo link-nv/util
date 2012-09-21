@@ -34,51 +34,58 @@ public class CertificateChain implements Iterable<X509Certificate>, Serializable
         if (unorderedCertificateChain.isEmpty() || unorderedCertificateChain.size() == 1)
             orderedCertificateChain.addAll( unorderedCertificateChain );
 
-        else if (unorderedCertificateChain.size() == 2) {
-            X509Certificate first = Iterables.get( unorderedCertificateChain, 0 );
-            X509Certificate second = Iterables.get( unorderedCertificateChain, 1 );
+        else {
+            // pick a random cert
+            X509Certificate nextCertificate = unorderedCertificateChain.iterator().next();
 
-            if (CertificateUtils.isSelfSigned( first )) {
-                orderedCertificateChain.add( second );
-                orderedCertificateChain.add( first );
-            } else {
-                orderedCertificateChain.add( first );
-                orderedCertificateChain.add( second );
-            }
-        } else {
-            // find self-signed root
-            for (X509Certificate rootCertificateCandidate : unorderedCertificateChain) {
-                if (CertificateUtils.isSelfSigned( rootCertificateCandidate )) {
-                    orderedCertificateChain.add( rootCertificateCandidate );
+            // build towards the root
+            while (true) {
+                final X509Certificate currentCertificate = nextCertificate;
+                orderedCertificateChain.addLast( currentCertificate );
+
+                // we're at the self-signed root
+                if (CertificateUtils.isSelfSigned(currentCertificate)) {
+                    break;
+                }
+
+                try {
+                    // find the parent
+                    X509Certificate parent = Iterables.find( unorderedCertificateChain, new Predicate<X509Certificate>() {
+                        @Override
+                        public boolean apply(final X509Certificate input) {
+                            return input.getSubjectX500Principal().equals( currentCertificate.getIssuerX500Principal() );
+                        }
+                    } );
+
+                    nextCertificate = parent;
+                }
+                catch (NoSuchElementException ignored) {
+                    // there is no parent so stop finding parents
                     break;
                 }
             }
 
-            // now go down
-            X509Certificate parentCertificate = orderedCertificateChain.getFirst();
+            // build towards the bottom
+            nextCertificate = orderedCertificateChain.getFirst();
             while (true) {
-                final X500Principal parentPrincipal = parentCertificate.getSubjectX500Principal();
+                final X509Certificate currentCertificate = nextCertificate;
 
                 try {
-                    X509Certificate childCertificate = Iterables.find( unorderedCertificateChain, new Predicate<X509Certificate>() {
+                    // find a child
+                    X509Certificate child = Iterables.find( unorderedCertificateChain, new Predicate<X509Certificate>() {
                         @Override
                         public boolean apply(final X509Certificate input) {
-
-                            return input.getIssuerX500Principal().equals( parentPrincipal );
+                            return (input.getIssuerX500Principal().equals( currentCertificate.getSubjectX500Principal() ) &&
+                                    !CertificateUtils.isSelfSigned( input ));
                         }
                     } );
 
-                    orderedCertificateChain.addFirst( parentCertificate = childCertificate );
+                    nextCertificate = child;
+                    orderedCertificateChain.addFirst( child );
                 }
                 catch (NoSuchElementException ignored) {
-                    if (unorderedCertificateChain.size() == orderedCertificateChain.size())
-                        // No child found for parent & all unordered certificates have been used.  All done.
-                        break;
-                    else
-                        // No child found for parent & not all unordered certificates used.
-                        throw new IllegalArgumentException( "Given certificate chain is missing some nodes or contains irrelevant nodes." //
-                                                            + "\nNodes: " + ObjectUtils.describe( unorderedCertificateChain ) //
-                                                            + "\nFailed at: " + ObjectUtils.describe( orderedCertificateChain ) );
+                    // there is no child anymore so stop finding children
+                    break;
                 }
             }
         }
