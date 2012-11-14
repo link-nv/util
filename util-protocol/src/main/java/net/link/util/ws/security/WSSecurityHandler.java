@@ -26,7 +26,7 @@ import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 import net.link.util.common.CertificateChain;
 import net.link.util.common.DomUtils;
-import net.link.util.j2ee.EJBUtils;
+import net.link.util.j2ee.JNDIUtils;
 import net.link.util.pkix.ClientCrypto;
 import net.link.util.pkix.ServerCrypto;
 import org.apache.ws.security.*;
@@ -58,7 +58,7 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
             try {
                 Context env = (Context) ctx.lookup( "java:comp/env" );
                 String configurationServiceJndiName = (String) env.lookup( "wsSecurityConfigurationServiceJndiName" );
-                configuration = EJBUtils.getEJB( configurationServiceJndiName, WSSecurityConfiguration.class );
+                configuration = JNDIUtils.getComponent( configurationServiceJndiName, WSSecurityConfiguration.class );
             }
             finally {
                 try {

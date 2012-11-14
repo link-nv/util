@@ -7,7 +7,6 @@
 
 package net.link.util.j2ee;
 
-import javax.ejb.EJBException;
 import javax.naming.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,14 +52,6 @@ public abstract class EJBUtils {
         if (jndiName == null)
             jndiName = NAMING_STRATEGY.calculateName( type );
 
-        try {
-            Object object = context.lookup( jndiName );
-
-            return type.cast( object );
-        }
-
-        catch (NamingException e) {
-            throw new EJBException( "Tried to look up bean: " + type + ", from JNDI(" + context.toString() + ") at: " + jndiName, e );
-        }
+        return JNDIUtils.getComponent( context, jndiName, type );
     }
 }

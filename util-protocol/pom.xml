@@ -26,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>net.lin-k.util</groupId>
-            <artifactId>util-j2ee-jboss6</artifactId>
+            <artifactId>util-j2ee</artifactId>
         </dependency>
 
         <!-- Dependencies: External -->
