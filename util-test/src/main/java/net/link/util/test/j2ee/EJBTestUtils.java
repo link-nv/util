@@ -464,22 +464,32 @@ public final class EJBTestUtils {
                 try {
                     bean = EJBUtils.getEJB( fieldType );
                 }
-                catch (EJBException e) {
-                    if (!fieldType.isInterface())
-                        throw new EJBException( "field is not an interface type", e );
-                    Local localAnnotation = fieldType.getAnnotation( Local.class );
-                    if (null == localAnnotation)
-                        throw new EJBException( "interface has no @Local annotation: " + fieldType.getName(), e );
-                    Remote remoteAnnotation = fieldType.getAnnotation( Remote.class );
-                    if (null != remoteAnnotation)
-                        throw new EJBException( "interface cannot have both @Local and @Remote annotation", e );
+                catch (InternalInconsistencyException e) {
 
-                    Class<?> beanType = getBeanType( fieldType, ejbAnnotation );
-                    bean = EJBTestUtils.newInstance( beanType, container, entityManager, sessionContext );
+                    bean = injectionFallback( fieldType, ejbAnnotation, e );
+                }
+                catch (EJBException e) {
+
+                    bean = injectionFallback( fieldType, ejbAnnotation, e );
                 }
 
                 setField( field, bean );
             }
+        }
+
+        private Object injectionFallback(final Class<?> fieldType, final EJB ejbAnnotation, final Exception e) {
+
+            if (!fieldType.isInterface())
+                throw new EJBException( "field is not an interface type", e );
+            Local localAnnotation = fieldType.getAnnotation( Local.class );
+            if (null == localAnnotation)
+                throw new EJBException( "interface has no @Local annotation: " + fieldType.getName(), e );
+            Remote remoteAnnotation = fieldType.getAnnotation( Remote.class );
+            if (null != remoteAnnotation)
+                throw new EJBException( "interface cannot have both @Local and @Remote annotation", e );
+
+            Class<?> beanType = getBeanType( fieldType, ejbAnnotation );
+            return EJBTestUtils.newInstance( beanType, container, entityManager, sessionContext );
         }
 
         private void setField(Field field, Object value) {
