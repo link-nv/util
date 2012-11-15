@@ -20,8 +20,9 @@ import javax.xml.namespace.QName;
 import net.link.util.common.CertificateChain;
 import net.link.util.common.DomUtils;
 import net.link.util.config.KeyProvider;
-import net.link.util.error.ValidationFailedException;
+import net.link.util.exception.ValidationFailedException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLObject;
@@ -220,7 +221,7 @@ public class SamlUtils {
         return sign( samlObject, keyProvider.getIdentityKeyPair(), keyProvider.getIdentityCertificateChain() );
     }
 
-    public static Element sign(SignableSAMLObject samlObject, KeyPair signerKeyPair, CertificateChain certificateChain) {
+    public static Element sign(SignableSAMLObject samlObject, KeyPair signerKeyPair, @Nullable CertificateChain certificateChain) {
 
         XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
         SignatureBuilder signatureBuilder = (SignatureBuilder) builderFactory.getBuilder( Signature.DEFAULT_ELEMENT_NAME );

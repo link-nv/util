@@ -141,7 +141,7 @@ public class PkiTestUtils {
         return new JcaX509CertificateConverter().setProvider( "BC" ).getCertificate( certificateBuilder.build( signer ) );
     }
 
-    public static X509Certificate generateTestSelfSignedCert(URI ocspUri)
+    public static X509Certificate generateTestSelfSignedCert(@Nullable URI ocspUri)
             throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, IOException, OperatorCreationException,
                    CertificateException {
 

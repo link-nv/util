@@ -6,7 +6,7 @@
 package net.link.util.saml;
 
 import java.util.List;
-import net.link.util.error.ValidationFailedException;
+import net.link.util.exception.ValidationFailedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;

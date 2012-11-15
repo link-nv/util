@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 import javax.servlet.http.*;
+import org.jetbrains.annotations.Nullable;
 
 
 /**
@@ -63,7 +64,7 @@ public class ServletUtils {
      * @throws IOException
      */
     public static String redirectToErrorPage(HttpServletRequest request, HttpServletResponse response, String errorPage,
-                                             String resourceBundleName, ErrorMessage... errorMessages)
+                                             @Nullable String resourceBundleName, ErrorMessage... errorMessages)
             throws IOException {
 
         HttpSession session = request.getSession();
