@@ -10,7 +10,7 @@ import java.security.cert.X509Certificate;
 import javax.net.ssl.*;
 import javax.xml.ws.BindingProvider;
 import net.link.util.common.ApplicationMode;
-import net.link.util.pkix.X509CertificateTrustManager;
+import net.link.util.ssl.X509CertificateTrustManager;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

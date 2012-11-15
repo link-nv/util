@@ -162,6 +162,7 @@
         <commons-lang.version>2.3</commons-lang.version>
         <jetbrains-annotations.version>7.0.2</jetbrains-annotations.version>
         <jackson.version>1.8.1</jackson.version>
+        <httpclient.version>4.1</httpclient.version>
 
         <!-- JBoss 4 -->
         <jboss.version>4.2.3.GA</jboss.version>
@@ -903,6 +904,11 @@
                 <groupId>commons-lang</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>${commons-lang.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jetbrains</groupId>

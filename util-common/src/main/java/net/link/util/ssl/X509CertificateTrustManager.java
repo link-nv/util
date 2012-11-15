@@ -1,4 +1,4 @@
-package net.link.util.pkix;
+package net.link.util.ssl;
 
 import com.google.common.collect.ObjectArrays;
 import com.lyndir.lhunath.opal.system.logging.Logger;
@@ -25,6 +25,12 @@ public class X509CertificateTrustManager implements X509TrustManager {
 
     private final X509Certificate  trustedCertificate;
     private final X509TrustManager defaultTrustManager;
+
+    public X509CertificateTrustManager() {
+
+        this.trustedCertificate = null;
+        this.defaultTrustManager = null;
+    }
 
     public X509CertificateTrustManager(final X509Certificate trustedCertificate) {
 
