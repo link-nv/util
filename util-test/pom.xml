@@ -20,7 +20,11 @@
         <!-- Specific Dependencies: util -->
         <dependency>
             <groupId>net.lin-k.util</groupId>
-            <artifactId>util-protocol</artifactId>
+            <artifactId>util-saml2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.lin-k.util</groupId>
+            <artifactId>util-ws</artifactId>
         </dependency>
         <dependency>
             <groupId>net.lin-k.util</groupId>

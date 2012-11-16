@@ -34,6 +34,7 @@ source mvn-tools || exit
 # loadModules -- invoke whenever the modules array is needed.
 loadModules() {
     (( ${#modules[@]} )) && return
+    local profiles
 
     # Build list of all modules allowed in the maven reactor.
     IFS=$'\n' read -d '' -r -a profiles < <(xpathNodes '/settings/activeProfiles/activeProfile/text()' ~/.m2/settings.xml) ||:
@@ -183,6 +184,9 @@ while (( ! nobuild )); do
 
     # Add manually specified targets.
     opts=()
+    for profile in "${profiles[@]}"; do
+        opts+=("-P$profile")
+    done
     for target; do
         [[ $target = -* ]] && { opts+=("$target"); continue; }
 
@@ -206,17 +210,17 @@ while (( ! nobuild )); do
     if (( ! nodistribution )); then
         loadModules
 
-    #    while read pom; do
-    #        if grep -q finalName "$pom" && grep -q $'<packaging>[ \t]*ear[ \t]*</' "$pom"; then
-    #            target=${pom%/pom.xml}; target=${target#./}
-    #
-    #            # Only consider this target if it's in the module list.
-    #            inArray "$target" "${modules[@]}" || continue
-    #
-    #            emit "Adding (FinalName) : $bold$target"
-    #            targets+=("$target")
-    #        fi
-    #    done < <(find . -name 'pom.xml')
+        while read pom; do
+            if grep -q finalName "$pom" && grep -q $'<packaging>[ \t]*ear[ \t]*</' "$pom"; then
+                target=${pom%/pom.xml}; target=${target#./}
+
+                # Only consider this target if it's in the module list.
+                inArray "$target" "${modules[@]}" || continue
+
+                emit "Adding (FinalName) : $bold$target"
+                targets+=("$target")
+            fi
+        done < <(find . -name 'pom.xml')
     fi
 
     targets=("${targets[@]#$PWD/}")

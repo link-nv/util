@@ -8,13 +8,11 @@
         <version>GIT-SNAPSHOT</version>
     </parent>
 
-    <name>Util Protocol</name>
-    <description>
-        Some protocol utility classes.
-    </description>
+    <name>Util Web Services</name>
+    <description>Web Service utility classes.</description>
 
     <groupId>net.lin-k.util</groupId>
-    <artifactId>util-protocol</artifactId>
+    <artifactId>util-ws</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -34,14 +32,6 @@
 			<groupId>org.apache.ws.security</groupId>
 			<artifactId>wss4j</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>org.opensaml</groupId>
-            <artifactId>opensaml</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>be.fedict</groupId>
-            <artifactId>jtrust</artifactId>
-        </dependency>
 
     </dependencies>
 

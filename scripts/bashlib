@@ -223,7 +223,7 @@ eol() {
 # The ruler is a repetition of the given pattern string.
 #
 hr() {
-    local pattern=$1 length=${2:-$COLUMNS} ruler=
+    local pattern=${1:--} length=${2:-$COLUMNS} ruler=
     (( length )) || length=$(tput cols)
 
     while (( ${#ruler} < length )); do
