@@ -137,18 +137,35 @@
         </dependency>
         <dependency>
             <groupId>net.lin-k.util</groupId>
-            <artifactId>util-protocol</artifactId>
+            <artifactId>util-ws</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>net.lin-k.util</groupId>
-            <artifactId>util-protocol</artifactId>
+            <artifactId>util-ws</artifactId>
             <classifier>sources</classifier>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>net.lin-k.util</groupId>
-            <artifactId>util-protocol</artifactId>
+            <artifactId>util-ws</artifactId>
+            <classifier>javadoc</classifier>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.lin-k.util</groupId>
+            <artifactId>util-saml2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.lin-k.util</groupId>
+            <artifactId>util-saml2</artifactId>
+            <classifier>sources</classifier>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.lin-k.util</groupId>
+            <artifactId>util-saml2</artifactId>
             <classifier>javadoc</classifier>
             <version>${project.version}</version>
         </dependency>
