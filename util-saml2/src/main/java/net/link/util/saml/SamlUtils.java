@@ -52,13 +52,11 @@ import org.w3c.dom.Element;
  */
 public class SamlUtils {
 
-    public static final Logger logger                   = Logger.get( SamlUtils.class );
+    public static final Logger              logger                   = Logger.get( SamlUtils.class );
     public static final MarshallerFactory   marshallerFactory        = Configuration.getMarshallerFactory();
     public static final UnmarshallerFactory unmarshallerFactory      = Configuration.getUnmarshallerFactory();
-    public static final QName               XML_SCHEMA_INSTANCE_TYPE = new QName( "http://www.w3.org/2001/XMLSchema-instance", "type",
-            "xsi" );
-    public static final QName               XML_SCHEMA_INSTANCE_NIL  = new QName( "http://www.w3.org/2001/XMLSchema-instance", "nil",
-                    "xsi" );
+    public static final QName               XML_SCHEMA_INSTANCE_TYPE = new QName( "http://www.w3.org/2001/XMLSchema-instance", "type", "xsi" );
+    public static final QName               XML_SCHEMA_INSTANCE_NIL  = new QName( "http://www.w3.org/2001/XMLSchema-instance", "nil", "xsi" );
 
     static {
         /*
@@ -79,7 +77,6 @@ public class SamlUtils {
      *
      * @param attributeValue attribute value to convert
      *
-     * @param attributeElement
      * @return converted {@link XMLObject}
      */
     public static XMLObject toAttributeValue(final QName attributeElement, Object attributeValue) {
@@ -117,8 +114,7 @@ public class SamlUtils {
 
         anyValue.getUnknownAttributes().put( XML_SCHEMA_INSTANCE_TYPE, xsType );
         anyValue.setTextContent( xsValue );
-        logger.dbg( "converting value %s of type %s to XML: xsType = %s, xsValue = %s", attributeValue, attributeValue.getClass(), xsType,
-                xsValue );
+        logger.dbg( "converting value %s of type %s to XML: xsType = %s, xsValue = %s", attributeValue, attributeValue.getClass(), xsType, xsValue );
 
         return anyValue;
     }
@@ -140,7 +136,7 @@ public class SamlUtils {
 
         if ("xs:boolean".equals( xsType ))
             return Boolean.valueOf( xsValue );
-        else if ("xs:integer".equals( xsType ))
+        else if ("xs:integer".equals( xsType ) || "xs:int".equals( xsType ))
             return Integer.valueOf( xsValue );
         else if ("xs:long".equals( xsType ))
             return Long.valueOf( xsValue );
@@ -157,8 +153,7 @@ public class SamlUtils {
         else if ("xs:string".equals( xsType ))
             return xsValue;
 
-        throw new IllegalArgumentException(
-                "XML Type (xsi:type=" + xsType + ") of attribute value (text=" + xsValue + ") not understood." );
+        throw new IllegalArgumentException( "XML Type (xsi:type=" + xsType + ") of attribute value (text=" + xsValue + ") not understood." );
     }
 
     public static <T extends XMLObject> T buildXMLObject(QName objectQName) {
@@ -349,8 +344,8 @@ public class SamlUtils {
         }
         catch (CertPathValidatorException e) {
             throw new ValidationFailedException(
-                    "Certificate chain did not validate against trusted certificates.\nChain:\n" + certificateChain
-                    + "\nTrusted Certificates:\n" + trustedCertificates, e );
+                    "Certificate chain did not validate against trusted certificates.\nChain:\n" + certificateChain + "\nTrusted Certificates:\n"
+                    + trustedCertificates, e );
         }
     }
 }
