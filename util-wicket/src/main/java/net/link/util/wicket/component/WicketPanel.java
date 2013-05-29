@@ -99,4 +99,12 @@ public abstract class WicketPanel extends Panel {
 
         return focusOnReady;
     }
+
+    public void unfocus() {
+
+        if (null != focusOnReady) {
+            remove( focusOnReady );
+            focusOnReady = null;
+        }
+    }
 }
