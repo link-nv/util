@@ -3,10 +3,11 @@ package net.link.util.common;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.lyndir.lhunath.opal.system.logging.exception.InternalInconsistencyException;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.security.cert.*;
 import java.util.List;
+import org.apache.commons.io.IOUtils;
+import org.bouncycastle.openssl.PEMWriter;
 import org.jetbrains.annotations.Nullable;
 
 
@@ -67,5 +68,22 @@ public abstract class CertificateUtils {
         }
         InputStream certInputStream = new ByteArrayInputStream( encodedCertificate );
         return (X509Certificate) certificateFactory.generateCertificate( certInputStream );
+    }
+
+    public static String toPem(Object object) {
+
+        StringWriter buffer = new StringWriter();
+        try {
+            PEMWriter writer = new PEMWriter( buffer );
+            writer.writeObject( object );
+            writer.close();
+            return buffer.toString();
+        }
+        catch (Exception e) {
+            throw new InternalInconsistencyException( String.format( "Cannot convert object to PEM format: %s", e.getMessage() ), e );
+        }
+        finally {
+            IOUtils.closeQuietly( buffer );
+        }
     }
 }
