@@ -6,7 +6,7 @@ import org.joda.time.Duration;
 
 
 /**
- * <h2>{@link WSSecurityConfiguration}<br> <sub>[in short] (TODO).</sub></h2>
+ * <h2>{@link WSSecurityConfiguration}<br> <sub>[in short].</sub></h2>
  * <p/>
  * <p> <i>03 30, 2011</i> </p>
  *

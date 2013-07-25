@@ -11,8 +11,8 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * <h2>{@link Property}<br>
- * <sub>[in short] (TODO).</sub></h2>
- *
+ * <sub>[in short].</sub></h2>
+ * <p/>
  * <p>
  * <i>09 15, 2010</i>
  * </p>

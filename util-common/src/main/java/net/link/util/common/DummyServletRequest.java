@@ -13,16 +13,17 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+
 /**
-* <h2>{@link DummyServletRequest}<br>
-* <sub>[in short] (TODO).</sub></h2>
-*
-* <p>
-* <i>10 05, 2010</i>
-* </p>
-*
-* @author lhunath
-*/
+ * <h2>{@link DummyServletRequest}<br>
+ * <sub>[in short] .</sub></h2>
+ * <p/>
+ * <p>
+ * <i>10 05, 2010</i>
+ * </p>
+ *
+ * @author lhunath
+ */
 @SuppressWarnings({ "ALL" })
 public class DummyServletRequest implements HttpServletRequest {
 

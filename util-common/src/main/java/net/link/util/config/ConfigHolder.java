@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * <h2>{@link ConfigHolder}<br> <sub>[in short] (TODO).</sub></h2>
+ * <h2>{@link ConfigHolder}<br> <sub>[in short].</sub></h2>
  * <p/>
  * <p> <i>09 17, 2010</i> </p>
  *
@@ -61,7 +61,7 @@ public class ConfigHolder {
     private static Class<ConfigHolder> globalConfigHolderType;
     private static ConfigHolder        globalConfigHolder;
 
-    private final ClassToInstanceMap<RootConfig> instances = MutableClassToInstanceMap.create();
+    private final ClassToInstanceMap<RootConfig>                         instances = MutableClassToInstanceMap.create();
     private final Map<Class<? extends RootConfig>, DefaultConfigFactory> factories = Maps.newHashMap();
 
     //    private final Class<C>             configType;
@@ -119,8 +119,7 @@ public class ConfigHolder {
     @SuppressWarnings({ "unchecked" })
     public static ConfigHolder get() {
 
-        return checkNotNull( holder.get(),
-                "No config holder set.  Set a global config holder or activate a local one (eg. using the ConfigFilter)." );
+        return checkNotNull( holder.get(), "No config holder set.  Set a global config holder or activate a local one (eg. using the ConfigFilter)." );
     }
 
     public static synchronized void setLocalConfigHolder(ConfigHolder instance) {
@@ -175,8 +174,7 @@ public class ConfigHolder {
         add( configType, defaultConfigFactory, config );
     }
 
-    public <C extends RootConfig> void add(@NotNull final Class<C> configType, @Nullable final DefaultConfigFactory defaultConfigFactory,
-                                           @Nullable C config) {
+    public <C extends RootConfig> void add(@NotNull final Class<C> configType, @Nullable final DefaultConfigFactory defaultConfigFactory, @Nullable C config) {
 
         factories.put( configType, defaultConfigFactory );
         instances.putInstance( configType, config );
@@ -224,8 +222,7 @@ public class ConfigHolder {
         if (config != null)
             return defaultConfigFactory.getDefaultWrapper( config );
 
-        return defaultConfigFactory.getDefaultImplementation(
-                checkNotNull( configType, "No config implementation OR config type class set." ) );
+        return defaultConfigFactory.getDefaultImplementation( checkNotNull( configType, "No config implementation OR config type class set." ) );
     }
 
     /**
@@ -265,6 +262,6 @@ public class ConfigHolder {
      */
     protected DefaultConfigFactory getFactory(Class<? extends RootConfig> configType) {
 
-        return factories.get(configType);
+        return factories.get( configType );
     }
 }

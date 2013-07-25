@@ -7,8 +7,8 @@ import net.link.util.common.CertificateChain;
 
 
 /**
- * <h2>{@link KeyProvider}<br> <sub>[in short] (TODO).</sub></h2>
- *
+ * <h2>{@link KeyProvider}<br> <sub>[in short].</sub></h2>
+ * <p/>
  * <p> <i>10 20, 2010</i> </p>
  *
  * @author lhunath

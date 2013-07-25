@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * <h2>{@link AbstractWSClient}<br> <sub>[in short] (TODO).</sub></h2>
+ * <h2>{@link AbstractWSClient}<br> <sub>[in short].</sub></h2>
  * <p/>
  * <p> <i>10 18, 2010</i> </p>
  *

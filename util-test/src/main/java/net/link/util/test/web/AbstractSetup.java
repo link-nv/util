@@ -5,13 +5,13 @@ import java.util.Map;
 
 
 /**
- * <h2>{@link AbstractSetup}<br> <sub>[in short] (TODO).</sub></h2>
+ * <h2>{@link AbstractSetup}<br> <sub>[in short].</sub></h2>
  * <p/>
  * <p> <i>10 01, 2010</i> </p>
  *
  * @author lhunath
  */
-@SuppressWarnings( { "RawUseOfParameterizedType" })
+@SuppressWarnings({ "RawUseOfParameterizedType" })
 public abstract class AbstractSetup<T> {
 
     private final Class<? extends T>  type;

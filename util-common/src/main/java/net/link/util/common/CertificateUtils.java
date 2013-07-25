@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 
 /**
- * <h2>{@link CertificateUtils}<br> <sub>[in short] (TODO).</sub></h2>
+ * <h2>{@link CertificateUtils}<br> <sub>[in short].</sub></h2>
  * <p/>
  * <p> <i>04 01, 2011</i> </p>
  *

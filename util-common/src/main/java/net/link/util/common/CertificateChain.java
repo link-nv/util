@@ -5,16 +5,14 @@ import static com.google.common.base.Preconditions.*;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.lyndir.lhunath.opal.system.util.ObjectUtils;
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.*;
-import javax.security.auth.x500.X500Principal;
 import org.jetbrains.annotations.NotNull;
 
 
 /**
- * <h2>{@link CertificateChain}<br> <sub>[in short] (TODO).</sub></h2>
+ * <h2>{@link CertificateChain}<br> <sub>[in short].</sub></h2>
  * <p/>
  * <p> <i>04 01, 2011</i> </p>
  *
@@ -44,7 +42,7 @@ public class CertificateChain implements Iterable<X509Certificate>, Serializable
                 orderedCertificateChain.addLast( currentCertificate );
 
                 // we're at the self-signed root
-                if (CertificateUtils.isSelfSigned(currentCertificate)) {
+                if (CertificateUtils.isSelfSigned( currentCertificate )) {
                     break;
                 }
 
@@ -53,6 +51,7 @@ public class CertificateChain implements Iterable<X509Certificate>, Serializable
                     X509Certificate parent = Iterables.find( unorderedCertificateChain, new Predicate<X509Certificate>() {
                         @Override
                         public boolean apply(final X509Certificate input) {
+
                             return input.getSubjectX500Principal().equals( currentCertificate.getIssuerX500Principal() );
                         }
                     } );
@@ -75,8 +74,9 @@ public class CertificateChain implements Iterable<X509Certificate>, Serializable
                     X509Certificate child = Iterables.find( unorderedCertificateChain, new Predicate<X509Certificate>() {
                         @Override
                         public boolean apply(final X509Certificate input) {
-                            return (input.getIssuerX500Principal().equals( currentCertificate.getSubjectX500Principal() ) &&
-                                    !CertificateUtils.isSelfSigned( input ));
+
+                            return (input.getIssuerX500Principal().equals( currentCertificate.getSubjectX500Principal() ) && !CertificateUtils.isSelfSigned(
+                                    input ));
                         }
                     } );
 

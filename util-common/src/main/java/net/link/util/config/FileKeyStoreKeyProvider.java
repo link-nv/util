@@ -7,8 +7,8 @@ import org.jetbrains.annotations.Nullable;
 
 
 /**
- * <h2>{@link FileKeyStoreKeyProvider}<br> <sub>[in short] (TODO).</sub></h2>
- *
+ * <h2>{@link FileKeyStoreKeyProvider}<br> <sub>[in short].</sub></h2>
+ * <p/>
  * <p> <i>10 20, 2010</i> </p>
  *
  * @author lhunath
@@ -26,7 +26,7 @@ public class FileKeyStoreKeyProvider extends KeyStoreKeyProvider {
     }
 
     public FileKeyStoreKeyProvider(@NotNull File keyStoreFile, @Nullable String keyStorePassword, @Nullable String keyEntryAlias,
-                                      @Nullable String keyEntryPassword) {
+                                   @Nullable String keyEntryPassword) {
 
         super( loadKeyStore( Files.newInputStreamSupplier( keyStoreFile ), keyStorePassword ), keyEntryAlias, keyEntryPassword );
     }

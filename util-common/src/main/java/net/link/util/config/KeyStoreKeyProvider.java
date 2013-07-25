@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 
 /**
- * <h2>{@link KeyStoreKeyProvider}<br> <sub>[in short] (TODO).</sub></h2>
+ * <h2>{@link KeyStoreKeyProvider}<br> <sub>[in short].</sub></h2>
  * <p/>
  * <p> <i>10 20, 2010</i> </p>
  *
@@ -38,8 +38,7 @@ public class KeyStoreKeyProvider extends KeyProviderImpl {
         super( getIdentity( keyStore, keyEntryAlias, keyEntryPassword ), KeyUtils.getCertificates( keyStore, null ) );
     }
 
-    private static KeyStore.PrivateKeyEntry getIdentity(final KeyStore keyStore, final String keyEntryAlias,
-                                                        final String keyEntryPassword) {
+    private static KeyStore.PrivateKeyEntry getIdentity(final KeyStore keyStore, final String keyEntryAlias, final String keyEntryPassword) {
 
         try {
             String alias = ObjectUtils.ifNotNullElse( keyEntryAlias, IDENTITY_ALIAS );
@@ -47,8 +46,8 @@ public class KeyStoreKeyProvider extends KeyProviderImpl {
 
             checkNotNull( entry, "Identity entry (alias: %s) missing from the key store.  Known entries: ", alias,
                     ImmutableList.copyOf( Iterators.forEnumeration( keyStore.aliases() ) ) );
-            checkState( entry instanceof KeyStore.PrivateKeyEntry,
-                    "Identity entry (alias: %s) in the key store should be a private key.  Found a: %s", alias, entry.getClass() );
+            checkState( entry instanceof KeyStore.PrivateKeyEntry, "Identity entry (alias: %s) in the key store should be a private key.  Found a: %s", alias,
+                    entry.getClass() );
 
             return (KeyStore.PrivateKeyEntry) entry;
         }

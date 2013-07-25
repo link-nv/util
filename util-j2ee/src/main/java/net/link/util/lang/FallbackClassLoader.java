@@ -4,7 +4,7 @@ import java.util.*;
 
 
 /**
- * <h2>{@link FallbackClassLoader}<br> <sub>[in short] (TODO).</sub></h2>
+ * <h2>{@link FallbackClassLoader}<br> <sub>[in short].</sub></h2>
  * <p/>
  * <p> <i>03 21, 2011</i> </p>
  *
@@ -31,7 +31,6 @@ public class FallbackClassLoader extends ClassLoader {
                 catch (ClassNotFoundException ignored) {
                 }
 
-        throw new ClassNotFoundException(
-                "None of the supported ClassLoaders can load the class: " + name + "\nSupported ClassLoaders: " + classLoaders );
+        throw new ClassNotFoundException( "None of the supported ClassLoaders can load the class: " + name + "\nSupported ClassLoaders: " + classLoaders );
     }
 }

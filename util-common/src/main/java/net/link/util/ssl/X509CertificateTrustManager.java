@@ -13,7 +13,7 @@ import net.link.util.common.CertificateChain;
 
 
 /**
- * <h2>{@link X509CertificateTrustManager}<br> <sub>[in short] (TODO).</sub></h2>
+ * <h2>{@link X509CertificateTrustManager}<br> <sub>[in short].</sub></h2>
  * <p/>
  * <p> <i>03 03, 2011</i> </p>
  *

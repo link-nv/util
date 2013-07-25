@@ -32,7 +32,7 @@ import org.joda.time.format.ISODateTimeFormat;
 
 
 /**
- * <h2>{@link DefaultConfigFactory}<br> <sub>[in short] (TODO).</sub></h2>
+ * <h2>{@link DefaultConfigFactory}<br> <sub>[in short].</sub></h2>
  * <p/>
  * <p> <i>09 14, 2010</i> </p>
  *
@@ -122,8 +122,8 @@ public class DefaultConfigFactory {
     @SuppressWarnings("HardcodedFileSeparator")
     protected Iterable<String> getPlainResources() {
 
-        return ImmutableList.of( String.format( "%s.properties", configResourceName ),
-                String.format( "../conf/%s.properties", configResourceName ), String.format( "../etc/%s.properties", configResourceName ) );
+        return ImmutableList.of( String.format( "%s.properties", configResourceName ), String.format( "../conf/%s.properties", configResourceName ),
+                String.format( "../etc/%s.properties", configResourceName ) );
     }
 
     protected ServletContext getServletContext() {
@@ -208,8 +208,8 @@ public class DefaultConfigFactory {
         // Get the proxy that will service this type.
         C proxy = proxyMap.getInstance( type );
         if (proxy == null)
-            proxyMap.putInstance( type, proxy = type.cast( Proxy.newProxyInstance( type.getClassLoader(), new Class[] { type },
-                    newDefaultImplementationHandler( proxyPrefix ) ) ) );
+            proxyMap.putInstance( type, proxy = type.cast(
+                    Proxy.newProxyInstance( type.getClassLoader(), new Class[] { type }, newDefaultImplementationHandler( proxyPrefix ) ) ) );
 
         return getDefaultWrapper( proxy );
     }
@@ -233,9 +233,8 @@ public class DefaultConfigFactory {
         // Get the proxy that will service this type.
         C wrapper = (C) wrapperMap.get( config );
         if (wrapper == null)
-            wrapperMap.put( config,
-                    wrapper = (C) Proxy.newProxyInstance( config.getClass().getClassLoader(), config.getClass().getInterfaces(),
-                            newDefaultWrapperHandler( config ) ) );
+            wrapperMap.put( config, wrapper = (C) Proxy.newProxyInstance( config.getClass().getClassLoader(), config.getClass().getInterfaces(),
+                    newDefaultWrapperHandler( config ) ) );
 
         return wrapper;
     }
@@ -466,8 +465,7 @@ public class DefaultConfigFactory {
             if ("classpath".equals( keyStoreType ))
                 return type.cast( new ResourceKeyStoreKeyProvider( keyStorePath, keyStorePass, keyEntryAlias, keyEntryPass ) );
             if ("url".equals( keyStoreType ))
-                return type.cast(
-                        new URLKeyStoreKeyProvider( URLUtils.newURL( keyStorePath ), keyStorePass, keyEntryAlias, keyEntryPass ) );
+                return type.cast( new URLKeyStoreKeyProvider( URLUtils.newURL( keyStorePath ), keyStorePass, keyEntryAlias, keyEntryPass ) );
             if ("file".equals( keyStoreType ))
                 return type.cast( new FileKeyStoreKeyProvider( new File( keyStorePath ), keyStorePass, keyEntryAlias, keyEntryPass ) );
             if ("class".equals( keyStoreType ))
@@ -480,8 +478,7 @@ public class DefaultConfigFactory {
                     catch (NoSuchMethodException ignored) {
                         //noinspection UnusedCatchParameter
                         try {
-                            return type.cast(
-                                    keyStoreClass.getConstructor( String.class, String.class ).newInstance( keyEntryAlias, keyEntryPass ) );
+                            return type.cast( keyStoreClass.getConstructor( String.class, String.class ).newInstance( keyEntryAlias, keyEntryPass ) );
                         }
                         catch (NoSuchMethodException ignored_) {
                             //noinspection UnusedCatchParameter
@@ -689,8 +686,7 @@ public class DefaultConfigFactory {
             Group configGroupAnnotation = TypeUtils.findAnnotation( method.getReturnType(), Group.class );
             if (configGroupAnnotation != null) {
                 checkState( configGroupAnnotation.prefix().equals( method.getName() ),
-                        "Method (%s) returns a group with a prefix (%s) that doesn't match the method's name.", method,
-                        configGroupAnnotation.prefix() );
+                        "Method (%s) returns a group with a prefix (%s) that doesn't match the method's name.", method, configGroupAnnotation.prefix() );
 
                 // Method return type is annotated with @Group, it's a config group: return a proxy for it.
                 return getDefaultImplementation( proxyPrefix, method.getReturnType() );
@@ -730,14 +726,13 @@ public class DefaultConfigFactory {
             Group configGroupAnnotation = TypeUtils.findAnnotation( method.getReturnType(), Group.class );
             if (configGroupAnnotation != null) {
                 checkState( configGroupAnnotation.prefix().equals( method.getName() ),
-                        "Method (%s) returns a group with a prefix (%s) that doesn't match the method's name.", method,
-                        configGroupAnnotation.prefix() );
+                        "Method (%s) returns a group with a prefix (%s) that doesn't match the method's name.", method, configGroupAnnotation.prefix() );
 
                 if (value == null) {
                     // FIXME: prefix is currently only of declaring class, but this breaks for methods deep in the hierarchy
                     // eg. foo.bar.baz, prefix should be "foo.bar", but it will be "bar"
-                    String prefix = checkNotNull( TypeUtils.findAnnotation( method.getDeclaringClass(), Group.class ),
-                            "Missing @Group on %s", method.getDeclaringClass() ).prefix();
+                    String prefix = checkNotNull( TypeUtils.findAnnotation( method.getDeclaringClass(), Group.class ), "Missing @Group on %s",
+                            method.getDeclaringClass() ).prefix();
 
                     value = getDefaultImplementation( prefix, method.getReturnType() );
                 } else
@@ -747,8 +742,7 @@ public class DefaultConfigFactory {
                 if (value == null)
                     value = getDefaultValueFor( method );
 
-            logger.dbg( "%s %s#%s = %s", method.getReturnType().getSimpleName(), method.getDeclaringClass().getSimpleName(),
-                    method.getName(), value );
+            logger.dbg( "%s %s#%s = %s", method.getReturnType().getSimpleName(), method.getDeclaringClass().getSimpleName(), method.getName(), value );
             return value;
         }
 

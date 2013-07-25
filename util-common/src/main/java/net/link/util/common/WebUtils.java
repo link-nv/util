@@ -5,15 +5,15 @@ import javax.servlet.http.HttpServletRequest;
 
 
 /**
- * <h2>{@link WebUtils}<br> <sub>[in short] (TODO).</sub></h2>
- *
+ * <h2>{@link WebUtils}<br> <sub>[in short].</sub></h2>
+ * <p/>
  * <p> <i>02 04, 2011</i> </p>
  *
  * @author lhunath
  */
 public abstract class WebUtils {
 
-    @SuppressWarnings( { "unchecked" })
+    @SuppressWarnings({ "unchecked" })
     public static Map<String, String[]> getParameterMap(final HttpServletRequest request) {
 
         return (Map<String, String[]>) request.getParameterMap();

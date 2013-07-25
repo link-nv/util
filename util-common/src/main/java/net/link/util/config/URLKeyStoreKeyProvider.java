@@ -8,8 +8,8 @@ import org.jetbrains.annotations.Nullable;
 
 
 /**
- * <h2>{@link URLKeyStoreKeyProvider}<br> <sub>[in short] (TODO).</sub></h2>
- *
+ * <h2>{@link URLKeyStoreKeyProvider}<br> <sub>[in short].</sub></h2>
+ * <p/>
  * <p> <i>10 20, 2010</i> </p>
  *
  * @author lhunath
@@ -27,7 +27,7 @@ public class URLKeyStoreKeyProvider extends KeyStoreKeyProvider {
     }
 
     public URLKeyStoreKeyProvider(@NotNull URL keyStoreURL, @Nullable String keyStorePassword, @Nullable String keyEntryAlias,
-                                     @Nullable String keyEntryPassword) {
+                                  @Nullable String keyEntryPassword) {
 
         super( loadKeyStore( Resources.newInputStreamSupplier( keyStoreURL ), keyStorePassword ), keyEntryAlias, keyEntryPassword );
     }
