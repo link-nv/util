@@ -5,7 +5,7 @@
     <parent>
         <groupId>net.lin-k</groupId>
         <artifactId>util</artifactId>
-        <version>1.51</version>
+        <version>GIT-SNAPSHOT</version>
     </parent>
 
     <name>Util J2EE for JBoss 6</name>
