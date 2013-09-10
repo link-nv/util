@@ -62,13 +62,6 @@
         </dependency>
         <dependency>
             <groupId>net.lin-k.util</groupId>
-            <artifactId>util-config-manual</artifactId>
-            <type>zip</type>
-            <classifier>pdf-zip</classifier>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.lin-k.util</groupId>
             <artifactId>util-j2ee</artifactId>
             <version>${project.version}</version>
         </dependency>
