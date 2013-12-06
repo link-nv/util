@@ -21,6 +21,10 @@
 
         <!-- Dependencies: External -->
         <dependency>
+            <groupId>be.fedict</groupId>
+            <artifactId>jtrust</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-core-lgpl</artifactId>
         </dependency>

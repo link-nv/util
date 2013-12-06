@@ -1,11 +1,12 @@
 package net.link.util.ssl;
 
+import be.fedict.trust.MemoryCertificateRepository;
+import be.fedict.trust.TrustValidator;
 import com.google.common.collect.ObjectArrays;
 import com.lyndir.lhunath.opal.system.logging.Logger;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+import java.security.cert.*;
 import java.util.Arrays;
 import javax.net.ssl.*;
 import net.link.util.common.ApplicationMode;
@@ -91,19 +92,23 @@ public class X509CertificateTrustManager implements X509TrustManager {
         if (chain.isEmpty())
             return false;
 
-        logger.inf( "checking if chain: %s (authType: %s) is trusted (by: %s).", Arrays.asList( chain ), authType, trustedCertificate );
-
-        // Check validity of end certificate.
-        X509Certificate identityCertificate = chain.getIdentityCertificate();
-        identityCertificate.checkValidity();
+        logger.inf( "checking if chain: \n\n%s (authType: %s) \n\n is trusted (by: %s).", Arrays.asList( chain ), authType, trustedCertificate );
 
         // If an SSL certificate is given, check the chain against it.
         if (trustedCertificate != null)
+
             try {
-                identityCertificate.verify( trustedCertificate.getPublicKey() );
+                MemoryCertificateRepository certificateRepository = new MemoryCertificateRepository();
+                certificateRepository.addTrustPoint( trustedCertificate );
+
+                TrustValidator trustValidator = new TrustValidator( certificateRepository );
+                trustValidator.isTrusted( chain.getOrderedCertificateChain() );
                 return true;
             }
-            catch (GeneralSecurityException e) {
+            catch (CertPathValidatorException e) {
+
+                logger.err( e, "Certificate chain did not validate against trusted certificates.\nChain: %s\n Trusted Certificates: %s\n", chain,
+                        trustedCertificate );
                 throw new CertificateException( e );
             }
 
