@@ -9,8 +9,7 @@ import java.security.KeyStore;
 import java.security.cert.*;
 import java.util.Arrays;
 import javax.net.ssl.*;
-import net.link.util.common.ApplicationMode;
-import net.link.util.common.CertificateChain;
+import net.link.util.common.*;
 
 
 /**
@@ -101,7 +100,14 @@ public class X509CertificateTrustManager implements X509TrustManager {
                 MemoryCertificateRepository certificateRepository = new MemoryCertificateRepository();
                 certificateRepository.addTrustPoint( trustedCertificate );
 
+                if (!chain.hasRootCertificate()) {
+                    // root certificate not included, take on assumption trustedCertificate == the rootCertificate
+                    chain.addRootCertificate( trustedCertificate );
+                }
+
                 TrustValidator trustValidator = new TrustValidator( certificateRepository );
+                trustValidator.addTrustLinker( new PublicKeyTrustLinker() );
+
                 trustValidator.isTrusted( chain.getOrderedCertificateChain() );
                 return true;
             }

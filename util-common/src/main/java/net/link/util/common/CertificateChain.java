@@ -101,6 +101,19 @@ public class CertificateChain implements Iterable<X509Certificate>, Serializable
         return getOrderedCertificateChain().size() > 1 && CertificateUtils.isSelfSigned( getOrderedCertificateChain().getLast() );
     }
 
+    public void addRootCertificate(final X509Certificate rootCertificate) {
+
+        if (hasRootCertificate()) {
+            throw new RuntimeException( String.format( "Already a root certificate \"%s\" in this chain.", getRootCertificate() ) );
+        }
+
+        if (!CertificateUtils.isSelfSigned( rootCertificate )) {
+            throw new RuntimeException( String.format( "Root certificate \"%s\" is not self-signed.", rootCertificate ) );
+        }
+
+        orderedCertificateChain.addLast( rootCertificate );
+    }
+
     /**
      * @return The root {@link X509Certificate}.
      */
