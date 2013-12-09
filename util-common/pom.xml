@@ -73,13 +73,6 @@
             <artifactId>httpclient</artifactId>
         </dependency>
 
-        <!-- Dependencies: Util -->
-        <dependency>
-            <groupId>net.lin-k.util</groupId>
-            <artifactId>util-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
     <reporting>
