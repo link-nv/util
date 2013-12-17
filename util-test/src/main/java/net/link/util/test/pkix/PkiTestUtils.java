@@ -32,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 
 
+@SuppressWarnings("UnusedDeclaration")
 public class PkiTestUtils {
 
     public static final    String DEFAULT_ALIAS         = "default";
@@ -71,12 +72,12 @@ public class PkiTestUtils {
     }
 
     public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String dn, DateTime notBefore, DateTime notAfter,
-                                                                @Nullable String signatureAlgorithm, boolean includeAuthorityKeyIdentifier,
-                                                                boolean caCert, boolean timeStampingPurpose)
+                                                                @Nullable String signatureAlgorithm, boolean includeAuthorityKeyIdentifier, boolean caCert,
+                                                                boolean timeStampingPurpose)
             throws IllegalStateException, IOException, CertificateException, OperatorCreationException {
 
-        return generateCertificate( keyPair.getPublic(), dn, keyPair.getPrivate(), null, notBefore, notAfter, signatureAlgorithm,
-                includeAuthorityKeyIdentifier, caCert, timeStampingPurpose, null );
+        return generateCertificate( keyPair.getPublic(), dn, keyPair.getPrivate(), null, notBefore, notAfter, signatureAlgorithm, includeAuthorityKeyIdentifier,
+                caCert, timeStampingPurpose, null );
     }
 
     public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String dn)
@@ -89,8 +90,8 @@ public class PkiTestUtils {
 
     public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn, PrivateKey issuerPrivateKey,
                                                       @Nullable X509Certificate issuerCert, DateTime notBefore, DateTime notAfter,
-                                                      @Nullable String signatureAlgorithm, boolean includeAuthorityKeyIdentifier,
-                                                      boolean caCert, boolean timeStampingPurpose, @Nullable URI ocspUri)
+                                                      @Nullable String signatureAlgorithm, boolean includeAuthorityKeyIdentifier, boolean caCert,
+                                                      boolean timeStampingPurpose, @Nullable URI ocspUri)
             throws IOException, CertificateException, OperatorCreationException {
 
         String finalSignatureAlgorithm = signatureAlgorithm;
@@ -108,8 +109,8 @@ public class PkiTestUtils {
         SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance( subjectPublicKey.getEncoded() );
         BigInteger serialNumber = new BigInteger( SERIALNUMBER_NUM_BITS, new SecureRandom() );
 
-        X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder( X500Name.getInstance( issuerDN.getDERObject() ),
-                serialNumber, notBefore.toDate(), notAfter.toDate(), X500Name.getInstance( subject.getDERObject() ), publicKeyInfo );
+        X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder( X500Name.getInstance( issuerDN.toASN1Primitive() ), serialNumber,
+                notBefore.toDate(), notAfter.toDate(), X500Name.getInstance( subject.toASN1Primitive() ), publicKeyInfo );
 
         // prepare signer
         ContentSigner signer = new JcaContentSignerBuilder( finalSignatureAlgorithm ).build( issuerPrivateKey );
@@ -127,13 +128,11 @@ public class PkiTestUtils {
         certificateBuilder.addExtension( X509Extension.basicConstraints, false, new BasicConstraints( caCert ) );
 
         if (timeStampingPurpose)
-            certificateBuilder.addExtension( X509Extension.extendedKeyUsage, true,
-                    new ExtendedKeyUsage( new DERSequence( KeyPurposeId.id_kp_timeStamping ) ) );
+            certificateBuilder.addExtension( X509Extension.extendedKeyUsage, true, new ExtendedKeyUsage( KeyPurposeId.id_kp_timeStamping ) );
 
         if (null != ocspUri) {
             GeneralName ocspName = new GeneralName( GeneralName.uniformResourceIdentifier, new DERIA5String( ocspUri.toString() ) );
-            AuthorityInformationAccess authorityInformationAccess = new AuthorityInformationAccess( X509ObjectIdentifiers.ocspAccessMethod,
-                    ocspName );
+            AuthorityInformationAccess authorityInformationAccess = new AuthorityInformationAccess( X509ObjectIdentifiers.ocspAccessMethod, ocspName );
             certificateBuilder.addExtension( X509Extension.authorityInfoAccess, false, authorityInformationAccess );
         }
 
@@ -142,20 +141,17 @@ public class PkiTestUtils {
     }
 
     public static X509Certificate generateTestSelfSignedCert(@Nullable URI ocspUri)
-            throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, IOException, OperatorCreationException,
-                   CertificateException {
+            throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, IOException, OperatorCreationException, CertificateException {
 
         KeyPair keyPair = generateKeyPair();
         DateTime now = new DateTime();
         DateTime notBefore = now.minusDays( 1 );
         DateTime notAfter = now.plusDays( 1 );
-        return generateCertificate( keyPair.getPublic(), "CN=Test", keyPair.getPrivate(), null, notBefore, notAfter, null, true, true,
-                false, ocspUri );
+        return generateCertificate( keyPair.getPublic(), "CN=Test", keyPair.getPrivate(), null, notBefore, notAfter, null, true, true, false, ocspUri );
     }
 
     public static KeyStore.PrivateKeyEntry generateKeyEntry(String dn)
-            throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, IOException, CertificateException,
-                   OperatorCreationException {
+            throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, IOException, CertificateException, OperatorCreationException {
 
         KeyPair keyPair = generateKeyPair();
         return new KeyStore.PrivateKeyEntry( keyPair.getPrivate(), new Certificate[] { generateSelfSignedCertificate( keyPair, dn ) } );
@@ -190,8 +186,8 @@ public class PkiTestUtils {
      * @param keyStorePassword the keystore password.
      * @param keyEntryPassword the keyentry password.
      */
-    public static KeyStore persistInJKSKeyStore(File pkcs12keyStore, PrivateKey privateKey, Certificate certificate,
-                                                String keyStorePassword, String keyEntryPassword)
+    public static KeyStore persistInJKSKeyStore(File pkcs12keyStore, PrivateKey privateKey, Certificate certificate, String keyStorePassword,
+                                                String keyEntryPassword)
             throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 
         return persistInKeyStore( pkcs12keyStore, "jks", privateKey, certificate, keyStorePassword, keyEntryPassword );
@@ -206,8 +202,8 @@ public class PkiTestUtils {
      * @param keyStorePassword the keystore password.
      * @param keyEntryPassword the keyentry password.
      */
-    public static KeyStore persistInPKCS12KeyStore(File pkcs12keyStore, PrivateKey privateKey, Certificate certificate,
-                                                   String keyStorePassword, String keyEntryPassword)
+    public static KeyStore persistInPKCS12KeyStore(File pkcs12keyStore, PrivateKey privateKey, Certificate certificate, String keyStorePassword,
+                                                   String keyEntryPassword)
             throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 
         return persistInKeyStore( pkcs12keyStore, "pkcs12", privateKey, certificate, keyStorePassword, keyEntryPassword );
@@ -223,8 +219,8 @@ public class PkiTestUtils {
      * @param keyStorePassword The keystore password.
      * @param keyEntryPassword The keyentry password.
      */
-    public static KeyStore persistInKeyStore(File pkcs12keyStore, String keyStoreType, PrivateKey privateKey, Certificate certificate,
-                                             String keyStorePassword, String keyEntryPassword)
+    public static KeyStore persistInKeyStore(File pkcs12keyStore, String keyStoreType, PrivateKey privateKey, Certificate certificate, String keyStorePassword,
+                                             String keyEntryPassword)
             throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 
         KeyStore keyStore = KeyStore.getInstance( keyStoreType );

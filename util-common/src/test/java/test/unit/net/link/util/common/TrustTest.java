@@ -2,13 +2,14 @@ package test.unit.net.link.util.common;
 
 import static org.junit.Assert.*;
 
-import be.fedict.trust.MemoryCertificateRepository;
 import be.fedict.trust.TrustValidator;
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.repository.MemoryCertificateRepository;
 import com.lyndir.lhunath.opal.system.logging.Logger;
 import java.io.InputStream;
 import java.security.cert.*;
 import net.link.util.common.CertificateChain;
-import net.link.util.common.PublicKeyTrustLinker;
+import net.link.util.common.LazyPublicKeyTrustLinker;
 import org.junit.Test;
 
 
@@ -49,12 +50,12 @@ public class TrustTest {
         // operate
 
         TrustValidator trustValidator = new TrustValidator( certificateRepository );
-        trustValidator.addTrustLinker( new PublicKeyTrustLinker() );
+        trustValidator.addTrustLinker( new LazyPublicKeyTrustLinker() );
 
         try {
             trustValidator.isTrusted( chain.getOrderedCertificateChain() );
         }
-        catch (CertPathValidatorException e) {
+        catch (TrustLinkerResultException e) {
             logger.err( e, e.getMessage() );
             fail();
         }

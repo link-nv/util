@@ -5,12 +5,14 @@
 
 package net.link.util.saml;
 
-import be.fedict.trust.MemoryCertificateRepository;
 import be.fedict.trust.TrustValidator;
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.repository.MemoryCertificateRepository;
 import com.google.common.base.Charsets;
 import com.lyndir.lhunath.opal.system.logging.Logger;
 import java.io.*;
 import java.security.*;
+import java.security.PublicKey;
 import java.security.cert.*;
 import java.security.cert.X509Certificate;
 import java.util.*;
@@ -50,6 +52,7 @@ import org.w3c.dom.Element;
  *
  * @author lhunath
  */
+@SuppressWarnings("UnusedDeclaration")
 public class SamlUtils {
 
     public static final Logger              logger                   = Logger.get( SamlUtils.class );
@@ -62,8 +65,7 @@ public class SamlUtils {
         /*
          * Next is because Sun loves to endorse crippled versions of Xerces.
          */
-        System.setProperty( "javax.xml.validation.SchemaFactory:http://www.w3.org/2001/XMLSchema",
-                "org.apache.xerces.jaxp.validation.XMLSchemaFactory" );
+        System.setProperty( "javax.xml.validation.SchemaFactory:http://www.w3.org/2001/XMLSchema", "org.apache.xerces.jaxp.validation.XMLSchemaFactory" );
         try {
             DefaultBootstrap.bootstrap();
         }
@@ -342,7 +344,7 @@ public class SamlUtils {
             TrustValidator trustValidator = new TrustValidator( certificateRepository );
             trustValidator.isTrusted( certificateChain.getOrderedCertificateChain() );
         }
-        catch (CertPathValidatorException e) {
+        catch (TrustLinkerResultException e) {
             throw new ValidationFailedException(
                     "Certificate chain did not validate against trusted certificates.\nChain:\n" + certificateChain + "\nTrusted Certificates:\n"
                     + trustedCertificates, e );

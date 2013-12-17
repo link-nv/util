@@ -25,6 +25,7 @@ import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
@@ -42,6 +43,7 @@ import org.joda.time.DateTime;
  *
  * @author fcorneli
  */
+@SuppressWarnings("UnusedDeclaration")
 public abstract class KeyUtils {
 
     protected static final int RSA_KEYSIZE           = 1024;
@@ -67,25 +69,22 @@ public abstract class KeyUtils {
                                                            String keyEntryPassword) {
 
         return loadFirstPrivateKeyEntry( keystoreType, keyStoreInputStream, //
-                keyStorePassword == null? null: keyStorePassword.toCharArray(),
-                keyEntryPassword == null? null: keyEntryPassword.toCharArray() );
+                keyStorePassword == null? null: keyStorePassword.toCharArray(), keyEntryPassword == null? null: keyEntryPassword.toCharArray() );
     }
 
-    public static PrivateKeyEntry loadPrivateKeyEntry(String keystoreType, InputStream keyStoreInputStream, String keyStorePassword,
-                                                      String keyEntryPassword, String alias) {
+    public static PrivateKeyEntry loadPrivateKeyEntry(String keystoreType, InputStream keyStoreInputStream, String keyStorePassword, String keyEntryPassword,
+                                                      String alias) {
 
         if (alias != null)
             return loadPrivateKeyEntry( keystoreType, keyStoreInputStream, //
-                    keyStorePassword == null? null: keyStorePassword.toCharArray(),
-                    keyEntryPassword == null? null: keyEntryPassword.toCharArray(), alias );
+                    keyStorePassword == null? null: keyStorePassword.toCharArray(), keyEntryPassword == null? null: keyEntryPassword.toCharArray(), alias );
 
         return loadFirstPrivateKeyEntry( keystoreType, keyStoreInputStream, //
-                keyStorePassword == null? null: keyStorePassword.toCharArray(),
-                keyEntryPassword == null? null: keyEntryPassword.toCharArray() );
+                keyStorePassword == null? null: keyStorePassword.toCharArray(), keyEntryPassword == null? null: keyEntryPassword.toCharArray() );
     }
 
-    public static ImmutableMap<String, X509Certificate> loadCertificates(String keystoreType, InputStream keyStoreInputStream,
-                                                                         String keyStorePassword, Predicate<String> ignoreAlias) {
+    public static ImmutableMap<String, X509Certificate> loadCertificates(String keystoreType, InputStream keyStoreInputStream, String keyStorePassword,
+                                                                         Predicate<String> ignoreAlias) {
 
         return loadCertificates( keystoreType, keyStoreInputStream, //
                 keyStorePassword == null? null: keyStorePassword.toCharArray(), ignoreAlias );
@@ -134,8 +133,8 @@ public abstract class KeyUtils {
         }
     }
 
-    public static PrivateKeyEntry loadPrivateKeyEntry(String keystoreType, InputStream keyStoreInputStream, char[] keyStorePassword,
-                                                      char[] keyEntryPassword, String alias) {
+    public static PrivateKeyEntry loadPrivateKeyEntry(String keystoreType, InputStream keyStoreInputStream, char[] keyStorePassword, char[] keyEntryPassword,
+                                                      String alias) {
 
         /* Find the keystore. */
         KeyStore keyStore = loadKeyStore( keystoreType, keyStoreInputStream, keyStorePassword );
@@ -184,8 +183,8 @@ public abstract class KeyUtils {
         }
     }
 
-    public static ImmutableMap<String, X509Certificate> loadCertificates(String keystoreType, InputStream keyStoreInputStream,
-                                                                         char[] keyStorePassword, Predicate<String> ignoreAlias) {
+    public static ImmutableMap<String, X509Certificate> loadCertificates(String keystoreType, InputStream keyStoreInputStream, char[] keyStorePassword,
+                                                                         Predicate<String> ignoreAlias) {
 
         return getCertificates( loadKeyStore( keystoreType, keyStoreInputStream, keyStorePassword ), ignoreAlias );
     }
@@ -295,21 +294,20 @@ public abstract class KeyUtils {
     }
 
     public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String dn, DateTime notBefore, DateTime notAfter,
-                                                                @Nullable String signatureAlgorithm, boolean caCert,
-                                                                boolean timeStampingPurpose) {
+                                                                @Nullable String signatureAlgorithm, boolean caCert, boolean timeStampingPurpose) {
 
-        return generateCertificate( keyPair.getPublic(), dn, keyPair.getPrivate(), null, notBefore, notAfter, signatureAlgorithm, caCert,
-                timeStampingPurpose, null );
+        return generateCertificate( keyPair.getPublic(), dn, keyPair.getPrivate(), null, notBefore, notAfter, signatureAlgorithm, caCert, timeStampingPurpose,
+                null );
     }
 
-    public static X509Certificate generateCertificate(PKCS10CertificationRequest csr, PrivateKey issuerPrivateKey,
-                                                      X509Certificate issuerCert, DateTime notBefore, DateTime notAfter,
-                                                      String inSignatureAlgorithm, boolean caCert, boolean timeStampingPurpose, URI ocspUri)
+    public static X509Certificate generateCertificate(PKCS10CertificationRequest csr, PrivateKey issuerPrivateKey, X509Certificate issuerCert,
+                                                      DateTime notBefore, DateTime notAfter, String inSignatureAlgorithm, boolean caCert,
+                                                      boolean timeStampingPurpose, URI ocspUri)
             throws InvalidKeyException, NoSuchAlgorithmException {
 
         try {
-            return generateCertificate( csr.getPublicKey(), csr.getCertificationRequestInfo().getSubject().toString(), issuerPrivateKey,
-                    issuerCert, notBefore, notAfter, inSignatureAlgorithm, caCert, timeStampingPurpose, ocspUri );
+            return generateCertificate( csr.getPublicKey(), csr.getCertificationRequestInfo().getSubject().toString(), issuerPrivateKey, issuerCert, notBefore,
+                    notAfter, inSignatureAlgorithm, caCert, timeStampingPurpose, ocspUri );
         }
         catch (NoSuchProviderException e) {
             throw new InternalInconsistencyException( e );
@@ -317,9 +315,8 @@ public abstract class KeyUtils {
     }
 
     public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn, PrivateKey issuerPrivateKey,
-                                                      @Nullable X509Certificate issuerCert, DateTime notBefore, DateTime notAfter,
-                                                      String inSignatureAlgorithm, boolean caCert, boolean timeStampingPurpose,
-                                                      @Nullable URI ocspUri) {
+                                                      @Nullable X509Certificate issuerCert, DateTime notBefore, DateTime notAfter, String inSignatureAlgorithm,
+                                                      boolean caCert, boolean timeStampingPurpose, @Nullable URI ocspUri) {
 
         try {
             String signatureAlgorithm = inSignatureAlgorithm;
@@ -337,8 +334,8 @@ public abstract class KeyUtils {
             SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance( subjectPublicKey.getEncoded() );
             BigInteger serialNumber = new BigInteger( SERIALNUMBER_NUM_BITS, new SecureRandom() );
 
-            X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder( X500Name.getInstance( issuerDN.getDERObject() ),
-                    serialNumber, notBefore.toDate(), notAfter.toDate(), X500Name.getInstance( subject.getDERObject() ), publicKeyInfo );
+            X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder( X500Name.getInstance( issuerDN.toASN1Primitive() ), serialNumber,
+                    notBefore.toDate(), notAfter.toDate(), X500Name.getInstance( subject.toASN1Primitive() ), publicKeyInfo );
 
             // prepare signer
             ContentSigner signer = new JcaContentSignerBuilder( signatureAlgorithm ).build( issuerPrivateKey );
@@ -353,13 +350,11 @@ public abstract class KeyUtils {
             certificateBuilder.addExtension( X509Extension.basicConstraints, false, new BasicConstraints( caCert ) );
 
             if (timeStampingPurpose)
-                certificateBuilder.addExtension( X509Extension.extendedKeyUsage, true,
-                        new ExtendedKeyUsage( new DERSequence( KeyPurposeId.id_kp_timeStamping ) ) );
+                certificateBuilder.addExtension( X509Extension.extendedKeyUsage, true, new ExtendedKeyUsage( KeyPurposeId.id_kp_timeStamping ) );
 
             if (null != ocspUri) {
                 GeneralName ocspName = new GeneralName( GeneralName.uniformResourceIdentifier, ocspUri.toString() );
-                AuthorityInformationAccess authorityInformationAccess = new AuthorityInformationAccess(
-                        X509ObjectIdentifiers.ocspAccessMethod, ocspName );
+                AuthorityInformationAccess authorityInformationAccess = new AuthorityInformationAccess( X509ObjectIdentifiers.ocspAccessMethod, ocspName );
                 certificateBuilder.addExtension( X509Extension.authorityInfoAccess, false, authorityInformationAccess );
             }
 
@@ -370,6 +365,9 @@ public abstract class KeyUtils {
             throw new InternalInconsistencyException( "X.509 is not supported.", e );
         }
         catch (OperatorCreationException e) {
+            throw new InternalInconsistencyException( e );
+        }
+        catch (CertIOException e) {
             throw new InternalInconsistencyException( e );
         }
     }
@@ -436,13 +434,11 @@ public abstract class KeyUtils {
             throw new InternalInconsistencyException( "KeyStores integrity algorithm not supported.", e );
         }
         catch (KeyStoreException e) {
-            throw new InternalInconsistencyException( "PKCS12 KeyStores not supported or store does not support the key or certificate.",
-                    e );
+            throw new InternalInconsistencyException( "PKCS12 KeyStores not supported or store does not support the key or certificate.", e );
         }
     }
 
-    public static KeyStore newKeyStore(PrivateKey privateKey, X509Certificate certificate, char[] keyStorePassword,
-                                       char[] keyEntryPassword) {
+    public static KeyStore newKeyStore(PrivateKey privateKey, X509Certificate certificate, char[] keyStorePassword, char[] keyEntryPassword) {
 
         try {
             KeyStore keyStore = newKeyStore();
@@ -451,8 +447,7 @@ public abstract class KeyUtils {
             return keyStore;
         }
         catch (KeyStoreException e) {
-            throw new InternalInconsistencyException( "PKCS12 KeyStores not supported or store does not support the key or certificate.",
-                    e );
+            throw new InternalInconsistencyException( "PKCS12 KeyStores not supported or store does not support the key or certificate.", e );
         }
     }
 
@@ -474,8 +469,7 @@ public abstract class KeyUtils {
             throw new InternalInconsistencyException( "KeyStores integrity algorithm not supported.", e );
         }
         catch (KeyStoreException e) {
-            throw new InternalInconsistencyException( "PKCS12 KeyStores not supported or store does not support the key or certificate.",
-                    e );
+            throw new InternalInconsistencyException( "PKCS12 KeyStores not supported or store does not support the key or certificate.", e );
         }
     }
 

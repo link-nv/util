@@ -19,6 +19,7 @@ import org.opensaml.xml.schema.XSAny;
 /**
  * SAML v2.0 utility class
  */
+@SuppressWarnings("UnusedDeclaration")
 public abstract class Saml1Utils extends SamlUtils {
 
     /**
@@ -46,11 +47,9 @@ public abstract class Saml1Utils extends SamlUtils {
                 // time skew
                 DateTime nowDt = now.toDateTime();
                 if (nowDt.plusMinutes( 5 ).isBefore( notBefore ) || nowDt.minusMinutes( 5 ).isAfter( notOnOrAfter ))
-                    throw new ValidationFailedException(
-                            "SAML2 assertion validation audience=" + expectedAudience + " : invalid SAML message timeframe" );
+                    throw new ValidationFailedException( "SAML2 assertion validation audience=" + expectedAudience + " : invalid SAML message timeframe" );
             } else if (now.isBefore( notBefore ) || now.isAfter( notOnOrAfter ))
-                throw new ValidationFailedException(
-                        "SAML2 assertion validation audience=" + expectedAudience + " : invalid SAML message timeframe" );
+                throw new ValidationFailedException( "SAML2 assertion validation audience=" + expectedAudience + " : invalid SAML message timeframe" );
         }
         if (assertion.getAuthenticationStatements().isEmpty())
             throw new ValidationFailedException( "SAML2 assertion validation audience=" + expectedAudience + " : missing AuthnStatement" );
@@ -58,8 +57,7 @@ public abstract class Saml1Utils extends SamlUtils {
 
         Subject subject = authnStatement.getSubject();
         if (null == subject)
-            throw new ValidationFailedException(
-                    "SAML2 assertion validation audience=" + expectedAudience + " : missing Assertion Subject" );
+            throw new ValidationFailedException( "SAML2 assertion validation audience=" + expectedAudience + " : missing Assertion Subject" );
 
         SubjectConfirmation subjectConfirmation = subject.getSubjectConfirmation();
 
@@ -90,14 +88,12 @@ public abstract class Saml1Utils extends SamlUtils {
         AudienceRestrictionCondition audienceRestriction = audienceRestrictions.get( 0 );
         List<Audience> audiences = audienceRestriction.getAudiences();
         if (audiences.isEmpty())
-            throw new ValidationFailedException(
-                    "SAML2 assertion validation audience=" + expectedAudience + " : no Audiences found in AudienceRestriction" );
+            throw new ValidationFailedException( "SAML2 assertion validation audience=" + expectedAudience + " : no Audiences found in AudienceRestriction" );
 
         Audience audience = audiences.get( 0 );
         if (!expectedAudience.equals( audience.getUri() ))
             throw new ValidationFailedException(
-                    "SAML2 assertion validation: audience name not correct, expected: " + expectedAudience + " was: "
-                    + audience.getUri() );
+                    "SAML2 assertion validation: audience name not correct, expected: " + expectedAudience + " was: " + audience.getUri() );
     }
 
     /**

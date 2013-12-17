@@ -1,12 +1,14 @@
 package net.link.util.ssl;
 
-import be.fedict.trust.MemoryCertificateRepository;
 import be.fedict.trust.TrustValidator;
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.repository.MemoryCertificateRepository;
 import com.google.common.collect.ObjectArrays;
 import com.lyndir.lhunath.opal.system.logging.Logger;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.cert.*;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import javax.net.ssl.*;
 import net.link.util.common.*;
@@ -106,12 +108,12 @@ public class X509CertificateTrustManager implements X509TrustManager {
                 }
 
                 TrustValidator trustValidator = new TrustValidator( certificateRepository );
-                trustValidator.addTrustLinker( new PublicKeyTrustLinker() );
+                trustValidator.addTrustLinker( new LazyPublicKeyTrustLinker() );
 
                 trustValidator.isTrusted( chain.getOrderedCertificateChain() );
                 return true;
             }
-            catch (CertPathValidatorException e) {
+            catch (TrustLinkerResultException e) {
 
                 logger.err( e, "Certificate chain did not validate against trusted certificates.\nChain: %s\n Trusted Certificates: %s\n", chain,
                         trustedCertificate );

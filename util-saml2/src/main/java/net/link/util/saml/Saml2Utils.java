@@ -45,6 +45,7 @@ import org.opensaml.xml.signature.impl.ExplicitKeySignatureTrustEngine;
 /**
  * SAML v2.0 utility class
  */
+@SuppressWarnings("UnusedDeclaration")
 public abstract class Saml2Utils extends SamlUtils {
 
     /**
@@ -72,29 +73,25 @@ public abstract class Saml2Utils extends SamlUtils {
                 // time skew
                 DateTime nowDt = now.toDateTime();
                 if (nowDt.plusMinutes( 5 ).isBefore( notBefore ) || nowDt.minusMinutes( 5 ).isAfter( notOnOrAfter ))
-                    throw new ValidationFailedException(
-                            "SAML2 assertion validation audience=" + expectedAudience + " : invalid SAML message timeframe" );
+                    throw new ValidationFailedException( "SAML2 assertion validation audience=" + expectedAudience + " : invalid SAML message timeframe" );
             } else if (now.isBefore( notBefore ) || now.isAfter( notOnOrAfter ))
-                throw new ValidationFailedException(
-                        "SAML2 assertion validation audience=" + expectedAudience + " : invalid SAML message timeframe" );
+                throw new ValidationFailedException( "SAML2 assertion validation audience=" + expectedAudience + " : invalid SAML message timeframe" );
         }
 
         Subject subject = assertion.getSubject();
         if (null == subject)
-            throw new ValidationFailedException(
-                    "SAML2 assertion validation audience=" + expectedAudience + " : missing Assertion Subject" );
+            throw new ValidationFailedException( "SAML2 assertion validation audience=" + expectedAudience + " : missing Assertion Subject" );
 
         if (subject.getSubjectConfirmations().isEmpty())
-            throw new ValidationFailedException(
-                    "SAML2 assertion validation audience=" + expectedAudience + " : missing SubjectConfirmation" );
+            throw new ValidationFailedException( "SAML2 assertion validation audience=" + expectedAudience + " : missing SubjectConfirmation" );
 
         SubjectConfirmation subjectConfirmation = subject.getSubjectConfirmations().get( 0 );
         SubjectConfirmationData subjectConfirmationData = subjectConfirmation.getSubjectConfirmationData();
         if (!subjectConfirmationData.getUnknownXMLObjects( KeyInfo.DEFAULT_ELEMENT_NAME ).isEmpty()) {
             // meaning a PublicKey is attached
             if (subjectConfirmationData.getUnknownXMLObjects( KeyInfo.DEFAULT_ELEMENT_NAME ).size() != 1)
-                throw new ValidationFailedException( "SAML2 assertion validation audience=" + expectedAudience
-                                                     + " : more then 1 KeyInfo element in SubjectConfirmationData" );
+                throw new ValidationFailedException(
+                        "SAML2 assertion validation audience=" + expectedAudience + " : more then 1 KeyInfo element in SubjectConfirmationData" );
         }
 
         if (assertion.getAuthnStatements().isEmpty())
@@ -105,8 +102,7 @@ public abstract class Saml2Utils extends SamlUtils {
             throw new ValidationFailedException( "SAML2 assertion validation audience=" + expectedAudience + " : missing AuthnContext" );
 
         if (null == authnStatement.getAuthnContext().getAuthnContextClassRef())
-            throw new ValidationFailedException(
-                    "SAML2 assertion validation audience=" + expectedAudience + " : missing AuthnContextClassRef" );
+            throw new ValidationFailedException( "SAML2 assertion validation audience=" + expectedAudience + " : missing AuthnContextClassRef" );
 
         if (expectedAudience != null)
             // Check whether the audience of the response corresponds to the original audience restriction
@@ -132,14 +128,12 @@ public abstract class Saml2Utils extends SamlUtils {
         AudienceRestriction audienceRestriction = audienceRestrictions.get( 0 );
         List<Audience> audiences = audienceRestriction.getAudiences();
         if (audiences.isEmpty())
-            throw new ValidationFailedException(
-                    "SAML2 assertion validation audience=" + expectedAudience + " : no Audiences found in AudienceRestriction" );
+            throw new ValidationFailedException( "SAML2 assertion validation audience=" + expectedAudience + " : no Audiences found in AudienceRestriction" );
 
         Audience audience = audiences.get( 0 );
         if (!expectedAudience.equals( audience.getAudienceURI() ))
             throw new ValidationFailedException(
-                    "SAML2 assertion validation: audience name not correct, expected: " + expectedAudience + " was: "
-                    + audience.getAudienceURI() );
+                    "SAML2 assertion validation: audience name not correct, expected: " + expectedAudience + " was: " + audience.getAudienceURI() );
     }
 
     public static void validateRedirectSignature(HttpServletRequest request, Collection<X509Certificate> trustedCertificates)
@@ -149,14 +143,13 @@ public abstract class Saml2Utils extends SamlUtils {
         if (trustedCertificates == null || trustedCertificates.isEmpty())
             throw new ValidationFailedException( "There are no credentials to validate against." );
 
-        Collection<Credential> trustedCredentials = Collections2.transform( trustedCertificates,
-                new Function<X509Certificate, Credential>() {
-                    @Override
-                    public Credential apply(final X509Certificate from) {
+        Collection<Credential> trustedCredentials = Collections2.transform( trustedCertificates, new Function<X509Certificate, Credential>() {
+            @Override
+            public Credential apply(final X509Certificate from) {
 
-                        return SecurityHelper.getSimpleCredential( from, null );
-                    }
-                } );
+                return SecurityHelper.getSimpleCredential( from, null );
+            }
+        } );
         StaticCredentialResolver credResolver = new StaticCredentialResolver( ImmutableList.copyOf( trustedCredentials ) );
         final SignatureTrustEngine engine = new ExplicitKeySignatureTrustEngine( credResolver,
                 Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver() );
@@ -203,21 +196,19 @@ public abstract class Saml2Utils extends SamlUtils {
      * @param trustedCertificates Certificates that are trusted.  The signature must validate against one of these.
      *
      * @return The certificate chain provided by the request or <code>null</code> if the binding does not support passing certificate
-     *         information. The chain can be empty if the binding supports passing certificate information but none are provided.
+     * information. The chain can be empty if the binding supports passing certificate information but none are provided.
      *
      * @throws ValidationFailedException The signature could not be trusted.
      */
     @Nullable
-    public static CertificateChain validateSignature(Signature signature, HttpServletRequest request,
-                                                     Collection<X509Certificate> trustedCertificates)
+    public static CertificateChain validateSignature(Signature signature, HttpServletRequest request, Collection<X509Certificate> trustedCertificates)
             throws ValidationFailedException {
 
         if (signature != null)
             return validatePostSignature( signature, trustedCertificates );
 
         // No signature inside the SAML object, must be in the queryString (SAML HTTP Redirect Binding)
-        validateRedirectSignature(
-                checkNotNull( request, "No signature found in SAML object and no query data provided to search for a signature." ),
+        validateRedirectSignature( checkNotNull( request, "No signature found in SAML object and no query data provided to search for a signature." ),
                 trustedCertificates );
 
         return null;
