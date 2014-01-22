@@ -1,4 +1,4 @@
-package net.link.util.ws.security;
+package net.link.util.ws.security.x509;
 
 import java.security.PrivateKey;
 import net.link.util.common.CertificateChain;

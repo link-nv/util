@@ -5,7 +5,7 @@
  * Lin.k N.V. proprietary/confidential. Use is subject to license terms.
  */
 
-package net.link.util.ws.security;
+package net.link.util.ws.security.x509;
 
 import org.joda.time.Duration;
 

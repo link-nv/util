@@ -20,8 +20,8 @@ import net.link.util.test.pkix.PkiTestUtils;
 import net.link.util.test.session.DummyLoginModule;
 import net.link.util.test.session.JaasTestUtils;
 import net.link.util.test.web.ws.WebServiceTestManager;
-import net.link.util.ws.security.WSSecurityConfiguration;
-import net.link.util.ws.security.WSSecurityHandler;
+import net.link.util.ws.security.x509.WSSecurityConfiguration;
+import net.link.util.ws.security.x509.WSSecurityX509TokenHandler;
 import org.joda.time.Duration;
 
 
@@ -75,7 +75,7 @@ public abstract class AbstractWSTest<T> extends AbstractUnitTests<T> {
         //noinspection RawUseOfParameterizedType
         binding.setHandlerChain( ImmutableList.<Handler>builder()
                                               .addAll( binding.getHandlerChain() )
-                                              .add( new WSSecurityHandler( mockWSSecurityClientConfig ) )
+                                              .add( new WSSecurityX509TokenHandler( mockWSSecurityClientConfig ) )
                                               .build() );
         webServiceTestManager.becomeEndpointOf( port );
 

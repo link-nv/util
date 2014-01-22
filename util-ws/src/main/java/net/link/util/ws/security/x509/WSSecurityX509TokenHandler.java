@@ -5,7 +5,7 @@
  * Lin.k N.V. proprietary/confidential. Use is subject to license terms.
  */
 
-package net.link.util.ws.security;
+package net.link.util.ws.security.x509;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -29,6 +29,7 @@ import net.link.util.common.DomUtils;
 import net.link.util.j2ee.JNDIUtils;
 import net.link.util.pkix.ClientCrypto;
 import net.link.util.pkix.ServerCrypto;
+import net.link.util.ws.security.SOAPUtils;
 import org.apache.ws.security.*;
 import org.apache.ws.security.message.*;
 import org.apache.ws.security.message.token.Timestamp;
@@ -41,17 +42,17 @@ import org.joda.time.Duration;
  *
  * @author fcorneli
  */
-public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
+public class WSSecurityX509TokenHandler implements SOAPHandler<SOAPMessageContext> {
 
-    static final Logger logger = Logger.get( WSSecurityHandler.class );
+    static final Logger logger = Logger.get( WSSecurityX509TokenHandler.class );
 
-    public static final String CERTIFICATE_CHAIN_PROPERTY  = WSSecurityHandler.class + ".x509";
-    public static final String TO_BE_SIGNED_IDS_SET        = WSSecurityHandler.class + ".toBeSignedIDs";
-    public static final String SIGNED_ELEMENTS_CONTEXT_KEY = WSSecurityHandler.class + ".signed.elements";
+    public static final String CERTIFICATE_CHAIN_PROPERTY  = WSSecurityX509TokenHandler.class + ".x509";
+    public static final String TO_BE_SIGNED_IDS_SET        = WSSecurityX509TokenHandler.class + ".toBeSignedIDs";
+    public static final String SIGNED_ELEMENTS_CONTEXT_KEY = WSSecurityX509TokenHandler.class + ".signed.elements";
 
     private final WSSecurityConfiguration configuration;
 
-    public WSSecurityHandler() {
+    public WSSecurityX509TokenHandler() {
 
         try {
             Context ctx = new InitialContext();
@@ -74,7 +75,7 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
         }
     }
 
-    public WSSecurityHandler(final WSSecurityConfiguration configuration) {
+    public WSSecurityX509TokenHandler(final WSSecurityConfiguration configuration) {
 
         this.configuration = configuration;
     }
@@ -88,8 +89,7 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
     @Override
     public Set<QName> getHeaders() {
 
-        return ImmutableSet.of(
-                new QName( "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "Security" ) );
+        return ImmutableSet.of( new QName( "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "Security" ) );
     }
 
     @Override
@@ -277,7 +277,7 @@ public class WSSecurityHandler implements SOAPHandler<SOAPMessageContext> {
 
         @SuppressWarnings("unchecked")
         List<Handler> handlerChain = port.getBinding().getHandlerChain();
-        handlerChain.add( new WSSecurityHandler( configuration ) );
+        handlerChain.add( new WSSecurityX509TokenHandler( configuration ) );
         port.getBinding().setHandlerChain( handlerChain );
     }
 

@@ -51,7 +51,7 @@ public class ServerCrypto extends CryptoBase {
             throws WSSecurityException {
 
         // just return loaded certificate from WS-Security Header
-        // real trust validation is done in the WSSecurityHandler's WSSecurityConfiguration instance
+        // real trust validation is done in the WSSecurityX509TokenHandler's WSSecurityConfiguration instance
         logger.dbg( "getCertificates for cryptotype: %s", cryptoType );
         return new X509Certificate[] { certificate };
     }
