@@ -106,6 +106,13 @@ public class WSSecurityUsernameTokenHandler implements SOAPHandler<SOAPMessageCo
      */
     private boolean handleOutboundDocument(SOAPPart document) {
 
+        String username = callback.getUsername();
+
+        if (null == username) {
+            logger.dbg( "No username provided, not adding WS-Security SOAP header" );
+            return true;
+        }
+
         logger.dbg( "Out: Adding WS-Security SOAP header" );
 
         try {
@@ -113,7 +120,7 @@ public class WSSecurityUsernameTokenHandler implements SOAPHandler<SOAPMessageCo
             wsSecHeader.insertSecurityHeader( document );
 
             WSSecUsernameToken wsSecUsernameToken = new WSSecUsernameToken();
-            wsSecUsernameToken.setUserInfo( callback.getUsername(), callback.getPassword() );
+            wsSecUsernameToken.setUserInfo( username, callback.getPassword() );
             if (callback.addNonce()) {
                 wsSecUsernameToken.addCreated();
                 wsSecUsernameToken.addNonce();
