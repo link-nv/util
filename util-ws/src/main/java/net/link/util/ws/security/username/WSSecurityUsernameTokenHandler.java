@@ -33,6 +33,9 @@ public class WSSecurityUsernameTokenHandler implements SOAPHandler<SOAPMessageCo
 
     private static final Logger logger = Logger.get( WSSecurityUsernameTokenHandler.class );
 
+    public static final String USERNAME_PROPERTY = WSSecurityUsernameTokenHandler.class + ".username";
+    public static final String PASSWORD_PROPERTY = WSSecurityUsernameTokenHandler.class + ".password";
+
     private final WSSecurityUsernameTokenCallback callback;
 
     public WSSecurityUsernameTokenHandler() {
@@ -134,7 +137,7 @@ public class WSSecurityUsernameTokenHandler implements SOAPHandler<SOAPMessageCo
     /**
      * Handles the inbound SOAP message. Puts the username,password on the @{link SOAPMessageContext}
      */
-    private boolean handleInboundDocument(SOAPPart document, SOAPMessageContext soapMessageContext) {
+    private boolean handleInboundDocument(SOAPPart document, final SOAPMessageContext soapMessageContext) {
 
         logger.dbg( "In: WS-Security header validation" );
 
@@ -157,6 +160,9 @@ public class WSSecurityUsernameTokenHandler implements SOAPHandler<SOAPMessageCo
                             }
 
                             wspc.setPassword( password );
+
+                            setUsername( soapMessageContext, wspc.getIdentifier() );
+                            setPassword( soapMessageContext, password );
                         } else {
                             throw new UnsupportedCallbackException( c, "Unrecognized Callback" );
                         }
@@ -183,6 +189,36 @@ public class WSSecurityUsernameTokenHandler implements SOAPHandler<SOAPMessageCo
         logger.dbg( "Username: \"%s\"", ut.getName() );
         logger.dbg( "Password: \"%s\"", ut.getPassword() );
         return true;
+    }
+
+    private static void setUsername(SOAPMessageContext context, String username) {
+
+        context.put( USERNAME_PROPERTY, username );
+        context.setScope( USERNAME_PROPERTY, MessageContext.Scope.APPLICATION );
+    }
+
+    private static void setPassword(SOAPMessageContext context, String password) {
+
+        context.put( PASSWORD_PROPERTY, password );
+        context.setScope( PASSWORD_PROPERTY, MessageContext.Scope.APPLICATION );
+    }
+
+    /**
+     * @return the username in the WS-Security username token, set by the {@link WSSecurityUsernameTokenHandler}.
+     */
+    @SuppressWarnings("unchecked")
+    public static String findUsername(MessageContext context) {
+
+        return (String) context.get( USERNAME_PROPERTY );
+    }
+
+    /**
+     * @return the password (plaintext) in the WS-Security username token, set by the {@link WSSecurityUsernameTokenHandler}.
+     */
+    @SuppressWarnings("unchecked")
+    public static String findPassword(MessageContext context) {
+
+        return (String) context.get( PASSWORD_PROPERTY );
     }
 
     /**
