@@ -15,4 +15,9 @@ public abstract class AbstractWSSecurityUsernameTokenCallback implements WSSecur
 
         return true;
     }
+
+    public boolean isInboundHeaderOptional() {
+
+        return false;
+    }
 }

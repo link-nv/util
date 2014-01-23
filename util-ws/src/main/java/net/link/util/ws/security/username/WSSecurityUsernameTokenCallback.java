@@ -36,6 +36,11 @@ public interface WSSecurityUsernameTokenCallback {
     boolean isDigestPassword();
 
     /**
+     * @return is an inbound header required or not.
+     */
+    boolean isInboundHeaderOptional();
+
+    /**
      * Call on validation of an incoming SOAP message with a username token header. Return the password for the specified username. The {@link
      * WSSecurityUsernameTokenHandler} will use that password to validate the digest of the password+nonce+created with the one in the SOAP header.
      *
