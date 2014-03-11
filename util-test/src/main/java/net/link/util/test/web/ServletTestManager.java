@@ -14,8 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.*;
 import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.security.SecurityHandler;
@@ -27,10 +25,8 @@ import org.mortbay.jetty.servlet.*;
  *
  * @author fcorneli
  */
-@SuppressWarnings( { "ProhibitedExceptionDeclared" })
+@SuppressWarnings({ "ProhibitedExceptionDeclared" })
 public class ServletTestManager {
-
-    static final Log LOG = LogFactory.getLog( ServletTestManager.class );
 
     private Server server;
 
@@ -57,10 +53,8 @@ public class ServletTestManager {
         @Override
         protected Session newSession(HttpServletRequest request) {
 
-            LOG.debug( "new session" );
             Session session = (Session) super.newSession( request );
             for (Map.Entry<String, Serializable> mapEntry : initialSessionAttributes.entrySet()) {
-                LOG.debug( "setting attribute: " + mapEntry.getKey() );
                 session.setAttribute( mapEntry.getKey(), mapEntry.getValue() );
             }
             return session;
@@ -70,8 +64,7 @@ public class ServletTestManager {
     public ServletContext setUp(ContainerSetup setup)
             throws Exception {
 
-        Context context = new Context( null, new SessionHandler( sessionManager = new TestHashSessionManager() ), new SecurityHandler(),
-                null, null );
+        Context context = new Context( null, new SessionHandler( sessionManager = new TestHashSessionManager() ), new SecurityHandler(), null, null );
         sessionManager.initialSessionAttributes.putAll( setup.getSessionAttributes() );
         context.setContextPath( contextPath = setup.getContextPath() );
         context.setInitParams( setup.getContextParameters() );
@@ -143,13 +136,12 @@ public class ServletTestManager {
         server.stop();
     }
 
-    @SuppressWarnings( { "unchecked" })
+    @SuppressWarnings({ "unchecked" })
     public Object getSessionAttribute(String name) {
 
         Map<String, AbstractSessionManager.Session> sessions = sessionManager.getSessionMap();
         AbstractSessionManager.Session session = sessions.values().iterator().next();
         String sessionId = session.getId();
-        LOG.debug( "session id: " + sessionId );
         return session.getAttribute( name );
     }
 
@@ -159,7 +151,7 @@ public class ServletTestManager {
      * @param name  session attribtue name
      * @param value session attribute value
      */
-    @SuppressWarnings( { "unchecked" })
+    @SuppressWarnings({ "unchecked" })
     public void setSessionAttribute(String name, Serializable value) {
 
         Map<String, AbstractSessionManager.Session> sessions = sessionManager.getSessionMap();

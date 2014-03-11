@@ -13,13 +13,9 @@ import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 public class TestSOAPMessageContext implements SOAPMessageContext {
-
-    private static final Log LOG = LogFactory.getLog( TestSOAPMessageContext.class );
 
     private SOAPMessage message;
 
@@ -117,7 +113,6 @@ public class TestSOAPMessageContext implements SOAPMessageContext {
     @Override
     public Object put(String key, Object value) {
 
-        LOG.debug( "put: " + key );
         return properties.put( key, value );
     }
 

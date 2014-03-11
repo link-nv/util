@@ -11,13 +11,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 public class TestClassLoader extends ClassLoader {
-
-    private static final Log LOG = LogFactory.getLog( TestClassLoader.class );
 
     private final Map<String, List<URL>> resources;
 
@@ -30,30 +26,23 @@ public class TestClassLoader extends ClassLoader {
     public Enumeration<URL> getResources(String name)
             throws IOException {
 
-        LOG.debug( "get resources for resource name: " + name );
         List<URL> resourceList = resources.get( name );
         if (null == resourceList)
             return super.getResources( name );
-        LOG.debug( "found test resources" );
-        Enumeration<URL> enumeration = Collections.enumeration( resourceList );
-        return enumeration;
+        return Collections.enumeration( resourceList );
     }
 
     @Override
     public InputStream getResourceAsStream(String name) {
 
-        LOG.debug( "getResourceAsStream: " + name );
         List<URL> resourceList = resources.get( name );
         if (null == resourceList)
             return super.getResourceAsStream( name );
         for (URL resource : resourceList) {
-            LOG.debug( "found resource: " + resource );
             try {
-                InputStream inputStream = resource.openStream();
-                return inputStream;
+                return resource.openStream();
             }
             catch (IOException e) {
-                LOG.debug( "error opening resource: " + resource );
             }
         }
         return null;

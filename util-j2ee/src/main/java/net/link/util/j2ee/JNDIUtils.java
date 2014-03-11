@@ -1,11 +1,9 @@
 package net.link.util.j2ee;
 
+import com.lyndir.lhunath.opal.system.logging.Logger;
 import com.lyndir.lhunath.opal.system.logging.exception.InternalInconsistencyException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.naming.*;
 import java.util.*;
+import javax.naming.*;
 
 
 /**
@@ -13,7 +11,7 @@ import java.util.*;
  */
 public class JNDIUtils {
 
-    private static final Log LOG = LogFactory.getLog( JNDIUtils.class );
+    private static final Logger logger = Logger.get( JNDIUtils.class );
 
     private static final ThreadLocal<Context> INITIAL_CONTEXT = new ThreadLocal<Context>() {
         @Override
@@ -31,13 +29,13 @@ public class JNDIUtils {
     public static void bindComponent(String jndiName, Object component)
             throws NamingException {
 
-        LOG.debug( "bind component: " + jndiName );
+        logger.dbg( "bind component: " + jndiName );
         InitialContext initialContext = new InitialContext();
         String[] names = jndiName.split( "/" );
         Context context = initialContext;
         for (int idx = 0; idx < names.length - 1; idx++) {
             String name = names[idx];
-            LOG.debug( "name: " + name );
+            logger.dbg( "name: " + name );
             NamingEnumeration<NameClassPair> listContent = context.list( "" );
             boolean subContextPresent = false;
             while (listContent.hasMore()) {
@@ -58,13 +56,13 @@ public class JNDIUtils {
     public static void unbindComponent(String jndiName)
             throws NamingException {
 
-        LOG.debug( "release component: " + jndiName );
+        logger.dbg( "release component: " + jndiName );
         InitialContext initialContext = new InitialContext();
         String[] names = jndiName.split( "/" );
         Context context = initialContext;
         for (int idx = 0; idx < names.length - 1; idx++) {
             String name = names[idx];
-            LOG.debug( "name: " + name );
+            logger.dbg( "name: " + name );
             NamingEnumeration<NameClassPair> listContent = context.list( "" );
             boolean subContextPresent = false;
             while (listContent.hasMore()) {
@@ -103,7 +101,7 @@ public class JNDIUtils {
 
     public static <Type> Map<String, Type> getComponentNames(InitialContext initialContext, String jndiPrefix, Class<Type> type) {
 
-        LOG.debug( "get component names at " + jndiPrefix );
+        logger.dbg( "get component names at " + jndiPrefix );
         HashMap<String, Type> names = new HashMap<String, Type>();
         NamingEnumeration<NameClassPair> result;
         try {
@@ -119,7 +117,7 @@ public class JNDIUtils {
             while (result.hasMore()) {
                 NameClassPair nameClassPair = result.next();
                 String objectName = nameClassPair.getName();
-                LOG.debug( objectName + ":" + nameClassPair.getClassName() );
+                logger.dbg( objectName + ":" + nameClassPair.getClassName() );
                 Object object = context.lookup( objectName );
 
                 // If the bean is bound to a /local of the objectName.
@@ -127,7 +125,7 @@ public class JNDIUtils {
                     Context objectContext = (Context) object;
                     objectName += "/local";
                     object = objectContext.lookup( "local" );
-                    LOG.debug( object.getClass().getName() );
+                    logger.dbg( object.getClass().getName() );
                 }
 
                 // Check the object type.
@@ -135,7 +133,7 @@ public class JNDIUtils {
                     String message = String.format( "object \"%s/%s\" is not a %s; it is a %s %s", jndiPrefix, objectName, type.getName(),
                             object == null? "null": "a " + object.getClass().getName(),
                             object == null? "null": Arrays.asList( object.getClass().getInterfaces() ) );
-                    LOG.error( message );
+                    logger.err( message );
                     throw new IllegalStateException( message );
                 }
 
@@ -163,7 +161,7 @@ public class JNDIUtils {
 
     public static <T> List<T> getComponents(InitialContext initialContext, String jndiPrefix, Class<T> type) {
 
-        LOG.debug( "get components at " + jndiPrefix );
+        logger.dbg( "get components at " + jndiPrefix );
         List<T> components = new LinkedList<T>();
         try {
             Context context;
@@ -177,13 +175,12 @@ public class JNDIUtils {
             while (result.hasMore()) {
                 NameClassPair nameClassPair = result.next();
                 String objectName = nameClassPair.getName();
-                LOG.debug( objectName + ":" + nameClassPair.getClassName() );
+                logger.dbg( objectName + ":" + nameClassPair.getClassName() );
                 Object object = context.lookup( objectName );
                 if (!type.isInstance( object )) {
-                    String message =
-                            "object \"" + jndiPrefix + "/" + objectName + "\" is not a " + type.getName() + "; it is " + (object == null
-                                    ? "null": "a " + object.getClass().getName());
-                    LOG.error( message );
+                    String message = "object \"" + jndiPrefix + "/" + objectName + "\" is not a " + type.getName() + "; it is " + (object == null? "null"
+                            : "a " + object.getClass().getName());
+                    logger.err( message );
                     throw new IllegalStateException( message );
                 }
                 T component = type.cast( object );
@@ -210,8 +207,7 @@ public class JNDIUtils {
         }
 
         catch (NamingException e) {
-            throw new InternalInconsistencyException(
-                    "Tried to look up bean: " + type + ", from JNDI(" + context.toString() + ") at: " + jndiName, e );
+            throw new InternalInconsistencyException( "Tried to look up bean: " + type + ", from JNDI(" + context.toString() + ") at: " + jndiName, e );
         }
     }
 }

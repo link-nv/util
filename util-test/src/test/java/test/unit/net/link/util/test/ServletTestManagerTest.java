@@ -16,8 +16,6 @@ import javax.servlet.http.*;
 import net.link.util.test.web.*;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 
 
@@ -27,9 +25,6 @@ import org.junit.Test;
  * @author fcorneli
  */
 public class ServletTestManagerTest {
-
-    static final Log LOG = LogFactory.getLog( ServletTestManagerTest.class );
-
 
     public static class TestServlet extends HttpServlet {
 
@@ -80,21 +75,17 @@ public class ServletTestManagerTest {
         protected void doGet(HttpServletRequest request, HttpServletResponse response)
                 throws ServletException, IOException {
 
-            LOG.debug( "doGet" );
             called = true;
             if (null != sessionAttributeName) {
                 HttpSession session = request.getSession();
-                LOG.debug( "setting session attribute: " + sessionAttributeName + " to " + sessionAttributeValue );
                 session.setAttribute( sessionAttributeName, sessionAttributeValue );
             }
             HttpSession session = request.getSession( false );
             if (null != session) {
-                LOG.debug( "session found" );
                 Enumeration<String> attribNamesEnum = session.getAttributeNames();
                 while (attribNamesEnum.hasMoreElements()) {
                     String attributeName = attribNamesEnum.nextElement();
                     Object attributeValue = session.getAttribute( attributeName );
-                    LOG.debug( "session attribute found: " + attributeName + ", value: " + attributeValue );
                     sessionAttributes.put( attributeName, attributeValue );
                 }
             }
@@ -125,11 +116,9 @@ public class ServletTestManagerTest {
         try {
             TestServlet.reset();
             String location = servletTestManager.getServletLocation();
-            LOG.debug( "location: " + location );
             HttpClient httpClient = new HttpClient();
             GetMethod getMethod = new GetMethod( location );
             int statusCode = httpClient.executeMethod( getMethod );
-            LOG.debug( "status code: " + statusCode );
             assertEquals( HttpServletResponse.SC_OK, statusCode );
             assertTrue( TestServlet.isCalled() );
         }
@@ -152,11 +141,9 @@ public class ServletTestManagerTest {
         try {
             TestServlet.reset();
             String location = servletTestManager.getServletLocation();
-            LOG.debug( "location: " + location );
             HttpClient httpClient = new HttpClient();
             GetMethod getMethod = new GetMethod( location );
             int statusCode = httpClient.executeMethod( getMethod );
-            LOG.debug( "status code: " + statusCode );
             assertEquals( HttpServletResponse.SC_OK, statusCode );
             assertTrue( TestServlet.isCalled() );
             assertEquals( "value1", TestServlet.getInitParam( "param1" ) );
@@ -207,7 +194,6 @@ public class ServletTestManagerTest {
             Enumeration<String> initParamNames = config.getInitParameterNames();
             while (initParamNames.hasMoreElements()) {
                 String initParamName = initParamNames.nextElement();
-                LOG.debug( "filter init param: " + initParamName );
                 String initParamValue = config.getInitParameter( initParamName );
                 initParams.put( initParamName, initParamValue );
             }
@@ -226,11 +212,9 @@ public class ServletTestManagerTest {
 
         try {
             String location = servletTestManager.getServletLocation();
-            LOG.debug( "location: " + location );
             HttpClient httpClient = new HttpClient();
             GetMethod getMethod = new GetMethod( location );
             int statusCode = httpClient.executeMethod( getMethod );
-            LOG.debug( "status code: " + statusCode );
             assertEquals( HttpServletResponse.SC_OK, statusCode );
             assertTrue( TestServlet.isCalled() );
             assertTrue( TestFilter.isCalled() );
@@ -256,11 +240,9 @@ public class ServletTestManagerTest {
 
         try {
             String location = servletTestManager.getServletLocation();
-            LOG.debug( "location: " + location );
             HttpClient httpClient = new HttpClient();
             GetMethod getMethod = new GetMethod( location );
             int statusCode = httpClient.executeMethod( getMethod );
-            LOG.debug( "status code: " + statusCode );
             assertEquals( HttpServletResponse.SC_OK, statusCode );
             assertTrue( TestServlet.isCalled() );
             assertTrue( TestFilter.isCalled() );
@@ -285,11 +267,9 @@ public class ServletTestManagerTest {
 
         try {
             String location = servletTestManager.getServletLocation();
-            LOG.debug( "location: " + location );
             HttpClient httpClient = new HttpClient();
             GetMethod getMethod = new GetMethod( location );
             int statusCode = httpClient.executeMethod( getMethod );
-            LOG.debug( "status code: " + statusCode );
             assertEquals( HttpServletResponse.SC_OK, statusCode );
             assertTrue( TestServlet.isCalled() );
             assertEquals( "value1", servletTestManager.getSessionAttribute( "attribute1" ) );
@@ -313,11 +293,9 @@ public class ServletTestManagerTest {
 
         try {
             String location = servletTestManager.getServletLocation();
-            LOG.debug( "location: " + location );
             HttpClient httpClient = new HttpClient();
             GetMethod getMethod = new GetMethod( location );
             int statusCode = httpClient.executeMethod( getMethod );
-            LOG.debug( "status code: " + statusCode );
             assertEquals( HttpServletResponse.SC_OK, statusCode );
             assertTrue( TestServlet.isCalled() );
             assertEquals( "value1", TestServlet.getSessionAttribute( "attribute1" ) );

@@ -7,22 +7,14 @@
 
 package net.link.util.j2ee;
 
+import com.lyndir.lhunath.opal.system.logging.Logger;
 import java.lang.reflect.Field;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import javax.ejb.EJB;
-import javax.servlet.Filter;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.UnavailableException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.*;
+import javax.servlet.http.*;
 import net.link.util.servlet.annotation.Context;
 import net.link.util.servlet.annotation.Init;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -34,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public abstract class AbstractInjectionFilter implements Filter {
 
-    private static final Log LOG = LogFactory.getLog( AbstractInjectionFilter.class );
+    private static final Logger logger = Logger.get( AbstractInjectionFilter.class );
 
     protected Map<String, String> configParams;
 
@@ -63,21 +55,23 @@ public abstract class AbstractInjectionFilter implements Filter {
                     mappedName = new FieldNamingStrategy().calculateName( fieldType );
                 if (mappedName == null || mappedName.length() == 0)
                     throw new ServletException( String.format( "field %s.%s's @EJB requires mappedName attribute", getClass(), field ) );
-                LOG.debug( "injecting: " + mappedName );
+                logger.dbg( "injecting: " + mappedName );
 
                 try {
                     Object ejbRef = EJBUtils.getEJB( mappedName, fieldType );
                     field.setAccessible( true );
                     try {
                         field.set( this, ejbRef );
-                    } catch (IllegalArgumentException e) {
-                        throw new ServletException( String.format( "while injecting into %s:", getClass() ), e );
-                    } catch (IllegalAccessException e) {
+                    }
+                    catch (IllegalArgumentException e) {
                         throw new ServletException( String.format( "while injecting into %s:", getClass() ), e );
                     }
-                } catch (RuntimeException e) {
-                    throw new ServletException(
-                            String.format( "couldn't resolve EJB named: %s (while injecting into %s)", mappedName, getClass() ), e );
+                    catch (IllegalAccessException e) {
+                        throw new ServletException( String.format( "while injecting into %s:", getClass() ), e );
+                    }
+                }
+                catch (RuntimeException e) {
+                    throw new ServletException( String.format( "couldn't resolve EJB named: %s (while injecting into %s)", mappedName, getClass() ), e );
                 }
             }
         }
@@ -96,7 +90,7 @@ public abstract class AbstractInjectionFilter implements Filter {
                 String name = initAnnotation.name();
                 if (null == name)
                     throw new ServletException( "@Init name attribute required" );
-                LOG.debug( "init: " + name );
+                logger.dbg( "init: " + name );
                 String defaultValue = initAnnotation.defaultValue();
                 boolean optional = initAnnotation.optional();
                 boolean checkContext = initAnnotation.checkContext();
@@ -114,9 +108,11 @@ public abstract class AbstractInjectionFilter implements Filter {
                 field.setAccessible( true );
                 try {
                     field.set( this, value );
-                } catch (IllegalArgumentException e) {
+                }
+                catch (IllegalArgumentException e) {
                     throw new ServletException( "illegal argument: " + e.getMessage(), e );
-                } catch (IllegalAccessException e) {
+                }
+                catch (IllegalAccessException e) {
                     throw new ServletException( "illegal access: " + e.getMessage(), e );
                 }
             }
@@ -125,7 +121,7 @@ public abstract class AbstractInjectionFilter implements Filter {
             while (initParamsEnum.hasMoreElements()) {
                 String paramName = initParamsEnum.nextElement();
                 String paramValue = config.getInitParameter( paramName );
-                LOG.debug( "config param: " + paramName + '=' + paramValue );
+                logger.dbg( "config param: " + paramName + '=' + paramValue );
                 configParams.put( paramName, paramValue );
             }
         }
@@ -144,7 +140,7 @@ public abstract class AbstractInjectionFilter implements Filter {
                 String name = contextAnnotation.name();
                 if (null == name)
                     throw new ServletException( "@Context name attribute required" );
-                LOG.debug( "init: " + name );
+                logger.dbg( "init: " + name );
                 String defaultValue = contextAnnotation.defaultValue();
                 boolean optional = contextAnnotation.optional();
 
@@ -159,9 +155,11 @@ public abstract class AbstractInjectionFilter implements Filter {
                 field.setAccessible( true );
                 try {
                     field.set( this, value );
-                } catch (IllegalArgumentException e) {
+                }
+                catch (IllegalArgumentException e) {
                     throw new ServletException( "illegal argument: " + e.getMessage(), e );
-                } catch (IllegalAccessException e) {
+                }
+                catch (IllegalAccessException e) {
                     throw new ServletException( "illegal access: " + e.getMessage(), e );
                 }
             }
@@ -170,21 +168,20 @@ public abstract class AbstractInjectionFilter implements Filter {
                 String paramName = initParamsEnum.nextElement();
                 if (null == configParams.get( paramName )) {
                     String paramValue = config.getServletContext().getInitParameter( paramName );
-                    LOG.debug( "config param: " + paramName + '=' + paramValue );
+                    logger.dbg( "config param: " + paramName + '=' + paramValue );
                     configParams.put( paramName, paramValue );
                 }
             }
         }
     }
 
-    protected static void addCookie(String name, String value, String path, HttpServletRequest httpRequest,
-                                    HttpServletResponse httpResponse) {
+    protected static void addCookie(String name, String value, String path, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
 
         if (hasCookie( name, httpRequest ))
             return;
         Cookie cookie = new Cookie( name, value );
         cookie.setPath( path );
-        LOG.debug( "adding cookie: " + name + '=' + value + " path=" + cookie.getPath() );
+        logger.dbg( "adding cookie: " + name + '=' + value + " path=" + cookie.getPath() );
         httpResponse.addCookie( cookie );
     }
 
@@ -192,7 +189,7 @@ public abstract class AbstractInjectionFilter implements Filter {
 
         Cookie cookie = new Cookie( name, value );
         cookie.setPath( path );
-        LOG.debug( "setting cookie: " + name + '=' + value );
+        logger.dbg( "setting cookie: " + name + '=' + value );
         httpResponse.addCookie( cookie );
     }
 
@@ -200,7 +197,7 @@ public abstract class AbstractInjectionFilter implements Filter {
 
         if (!hasCookie( name, httpRequest ))
             return;
-        LOG.debug( "removing cookie: " + name );
+        logger.dbg( "removing cookie: " + name );
         Cookie cookie = new Cookie( name, "" );
         cookie.setPath( path );
         cookie.setMaxAge( 0 );

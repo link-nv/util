@@ -10,8 +10,6 @@ package net.link.util.test.j2ee;
 import java.util.HashMap;
 import java.util.Map;
 import javax.management.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -20,8 +18,6 @@ import org.apache.commons.logging.LogFactory;
  * @author fcorneli
  */
 public class DynamicTestMBean implements DynamicMBean {
-
-    private static final Log LOG = LogFactory.getLog( DynamicTestMBean.class );
 
     private Map<String, MBeanActionHandler> actionHandlers = new HashMap<String, MBeanActionHandler>();
 
@@ -54,7 +50,6 @@ public class DynamicTestMBean implements DynamicMBean {
 
     public Object invoke(String actionName, Object[] params, @SuppressWarnings("unused") String[] signature) {
 
-        LOG.debug( "invoked: " + actionName );
         MBeanActionHandler actionHandler = actionHandlers.get( actionName );
         if (null == actionHandler)
             return null;

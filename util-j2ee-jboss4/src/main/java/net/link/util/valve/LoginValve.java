@@ -7,6 +7,7 @@
 
 package net.link.util.valve;
 
+import com.lyndir.lhunath.opal.system.logging.Logger;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -15,8 +16,6 @@ import org.apache.catalina.*;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.valves.ValveBase;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.security.SimplePrincipal;
 
 
@@ -27,41 +26,41 @@ import org.jboss.security.SimplePrincipal;
  */
 public class LoginValve extends ValveBase {
 
-    private static final Log LOG = LogFactory.getLog( LoginValve.class );
+    private static final Logger logger = Logger.get( LoginValve.class );
 
     public LoginValve() {
 
-        LOG.debug( "login valve construction" );
+        logger.dbg( "login valve construction" );
     }
 
     @Override
     public void invoke(Request request, Response response)
             throws IOException, ServletException {
 
-        LOG.debug( "login valve invoked" );
+        logger.dbg( "login valve invoked" );
 
         HttpServletRequest httpServletRequest = request.getRequest();
 
         HttpSession httpSession = httpServletRequest.getSession( false );
         if (null != httpSession) {
-            LOG.debug( "http session present" );
+            logger.dbg( "http session present" );
             String userId = (String) httpSession.getAttribute( "userId" );
             if (null != userId) {
-                LOG.debug( "setting user principal to " + userId );
+                logger.dbg( "setting user principal to " + userId );
                 request.setUserPrincipal( new SimplePrincipal( userId ) );
             }
         }
 
-        LOG.debug( "checking for context presence" );
+        logger.dbg( "checking for context presence" );
         Context context = request.getContext();
         if (null != context) {
-            LOG.debug( "context name: " + context.getName() );
-            LOG.debug( "context info: " + context.getInfo() );
-            LOG.debug( "context type: " + context.getClass().getName() );
+            logger.dbg( "context name: " + context.getName() );
+            logger.dbg( "context info: " + context.getInfo() );
+            logger.dbg( "context type: " + context.getClass().getName() );
             Realm realm = context.getRealm();
             if (null != realm) {
-                LOG.debug( "realm info: " + realm.getInfo() );
-                LOG.debug( "realm type: " + realm.getClass().getName() );
+                logger.dbg( "realm info: " + realm.getInfo() );
+                logger.dbg( "realm type: " + realm.getClass().getName() );
             }
         }
 

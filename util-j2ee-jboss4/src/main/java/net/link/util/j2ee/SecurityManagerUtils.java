@@ -7,17 +7,16 @@
 
 package net.link.util.j2ee;
 
+import com.lyndir.lhunath.opal.system.logging.Logger;
 import java.security.Principal;
 import javax.management.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.mx.util.MBeanServerLocator;
 import org.jboss.security.SimplePrincipal;
 
 
 public class SecurityManagerUtils {
 
-    private static final Log LOG = LogFactory.getLog( SecurityManagerUtils.class );
+    private static final Logger logger = Logger.get( SecurityManagerUtils.class );
 
     private SecurityManagerUtils() {
 
@@ -30,16 +29,18 @@ public class SecurityManagerUtils {
      */
     public static void flushCredentialCache(String login, String securityDomain) {
 
-        LOG.debug( "flush credential cache for " + login + " on security domain " + securityDomain );
+        logger.dbg( "flush credential cache for " + login + " on security domain " + securityDomain );
         Principal user = new SimplePrincipal( login );
         ObjectName jaasMgr;
         try {
             jaasMgr = new ObjectName( "jboss.security:service=JaasSecurityManager" );
-        } catch (MalformedObjectNameException e) {
+        }
+        catch (MalformedObjectNameException e) {
             String msg = "ObjectName error: " + e.getMessage();
-            LOG.error( msg );
+            logger.err( msg );
             throw new RuntimeException( msg, e );
-        } catch (NullPointerException e) {
+        }
+        catch (NullPointerException e) {
             throw new RuntimeException( "NPE: " + e.getMessage(), e );
         }
         Object[] params = { securityDomain, user };
@@ -47,17 +48,20 @@ public class SecurityManagerUtils {
         MBeanServer server = MBeanServerLocator.locateJBoss();
         try {
             server.invoke( jaasMgr, "flushAuthenticationCache", params, signature );
-        } catch (InstanceNotFoundException e) {
+        }
+        catch (InstanceNotFoundException e) {
             String msg = "instance not found: " + e.getMessage();
-            LOG.error( msg );
+            logger.err( msg );
             throw new RuntimeException( msg, e );
-        } catch (MBeanException e) {
+        }
+        catch (MBeanException e) {
             String msg = "mbean error: " + e.getMessage();
-            LOG.error( msg );
+            logger.err( msg );
             throw new RuntimeException( msg, e );
-        } catch (ReflectionException e) {
+        }
+        catch (ReflectionException e) {
             String msg = "reflection error: " + e.getMessage();
-            LOG.error( msg );
+            logger.err( msg );
             throw new RuntimeException( msg, e );
         }
     }

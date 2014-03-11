@@ -27,8 +27,6 @@ import javax.transaction.UserTransaction;
 import javax.xml.rpc.handler.MessageContext;
 import net.link.util.j2ee.EJBUtils;
 import net.sf.cglib.proxy.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.ejb3.annotation.*;
 import org.jboss.security.*;
 import org.jetbrains.annotations.Nullable;
@@ -40,8 +38,6 @@ import org.jetbrains.annotations.Nullable;
  * @author fcorneli
  */
 public final class EJBTestUtils {
-
-    static final Log LOG = LogFactory.getLog( EJBTestUtils.class );
 
     private EJBTestUtils() {
 
@@ -131,7 +127,6 @@ public final class EJBTestUtils {
             throw new IllegalStateException( "field of injection type not found" );
         selectedField.setAccessible( true );
         selectedField.set( object, value );
-        LOG.debug( "injected " + value + " into " + selectedField + " of " + object );
     }
 
     /**
@@ -187,8 +182,7 @@ public final class EJBTestUtils {
      * Instantiate a bean for the given type using a bean class from the given container; injecting the given entity manager and performing
      * {@link EJB} injections in it for the other beans provided by the container.
      */
-    public static <Type> Type newInstance(Class<Type> clazz, Class<?>[] container, EntityManager entityManager, String callerPrincipalName,
-                                          String... roles) {
+    public static <Type> Type newInstance(Class<Type> clazz, Class<?>[] container, EntityManager entityManager, String callerPrincipalName, String... roles) {
 
         TestSessionContext testSessionContext = new TestSessionContext( callerPrincipalName, roles );
         return newInstance( clazz, container, entityManager, testSessionContext );
@@ -198,8 +192,7 @@ public final class EJBTestUtils {
      * Instantiate a bean for the given type using a bean class from the given container; injecting the given entity manager and performing
      * {@link EJB} injections in it for the other beans provided by the container.
      */
-    public static <Type> Type newInstance(Class<Type> clazz, Class<?>[] container, EntityManager entityManager,
-                                          String callerPrincipalName) {
+    public static <Type> Type newInstance(Class<Type> clazz, Class<?>[] container, EntityManager entityManager, String callerPrincipalName) {
 
         TestSessionContext testSessionContext = new TestSessionContext( callerPrincipalName, (String[]) null );
         return newInstance( clazz, container, entityManager, testSessionContext );
@@ -210,8 +203,7 @@ public final class EJBTestUtils {
      * {@link EJB} injections in it for the other beans provided by the container.
      */
     @SuppressWarnings("unchecked")
-    public static <Type> Type newInstance(Class<Type> type, Class<?>[] container, EntityManager entityManager,
-                                          SessionContext sessionContext) {
+    public static <Type> Type newInstance(Class<Type> type, Class<?>[] container, EntityManager entityManager, SessionContext sessionContext) {
 
         Class<Type> beanType = type;
         if (type.isInterface()) {
@@ -241,8 +233,8 @@ public final class EJBTestUtils {
         catch (InvocationTargetException e) {
             throw new InternalInconsistencyException( "While instantiating: " + beanType, e );
         }
-        TestContainerMethodInterceptor testContainerMethodInterceptor = new TestContainerMethodInterceptor( instance, container,
-                entityManager, sessionContext );
+        TestContainerMethodInterceptor testContainerMethodInterceptor = new TestContainerMethodInterceptor( instance, container, entityManager,
+                sessionContext );
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass( beanType );
         enhancer.setCallback( testContainerMethodInterceptor );
@@ -269,8 +261,6 @@ public final class EJBTestUtils {
      */
     static class TestContainerMethodInterceptor implements MethodInterceptor {
 
-        private static final Log interceptorLOG = LogFactory.getLog( TestContainerMethodInterceptor.class );
-
         private final Object object;
 
         private final Class<?>[] container;
@@ -288,8 +278,7 @@ public final class EJBTestUtils {
         }
 
         @Override
-        public Object intercept(@SuppressWarnings("unused") Object obj, Method method, Object[] args,
-                                @SuppressWarnings("unused") MethodProxy proxy)
+        public Object intercept(@SuppressWarnings("unused") Object obj, Method method, Object[] args, @SuppressWarnings("unused") MethodProxy proxy)
                 throws Throwable {
 
             validateSessionBean();
@@ -322,7 +311,6 @@ public final class EJBTestUtils {
                         /*
                          * The following is not 100% correct, but will do for most of the tests.
                          */
-                        interceptorLOG.debug( "transaction management: REQUIRED_NEW" );
                         entityTransaction.commit();
                         entityTransaction.begin();
                     }
@@ -457,8 +445,6 @@ public final class EJBTestUtils {
                     continue;
 
                 Class<?> fieldType = field.getType();
-                if (field.getName().endsWith( "auditService" ))
-                    LOG.debug( "injecting: " + fieldType + " into field: " + field + " of " + clazz );
 
                 Object bean;
                 try {
@@ -782,8 +768,6 @@ public final class EJBTestUtils {
 
     static class TestTimerService implements TimerService {
 
-        private static final Log serviceLOG = LogFactory.getLog( TestTimerService.class );
-
         @Nullable
         @Override
         @SuppressWarnings("unused")
@@ -798,7 +782,6 @@ public final class EJBTestUtils {
         public Timer createTimer(Date arg0, Serializable arg1)
                 throws IllegalArgumentException, IllegalStateException, EJBException {
 
-            serviceLOG.debug( "createTimer" );
             return new TestTimer();
         }
 

@@ -7,6 +7,7 @@
 
 package net.link.util.servlet;
 
+import com.lyndir.lhunath.opal.system.logging.Logger;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
@@ -14,8 +15,6 @@ import java.util.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import net.link.util.servlet.annotation.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -35,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public abstract class AbstractInjectionServlet extends HttpServlet {
 
-    static final Log LOG = LogFactory.getLog( AbstractInjectionServlet.class );
+    private static final Logger logger = Logger.get( AbstractInjectionServlet.class );
 
     protected Map<String, String> configParams;
 
@@ -65,16 +64,16 @@ public abstract class AbstractInjectionServlet extends HttpServlet {
             throw new RuntimeException( e );
         }
 
-        LOG.debug( "servlet " + getClass() + " beginning service" );
+        logger.dbg( "servlet " + getClass() + " beginning service" );
         String endpoint = getWrapperEndpoint( request );
         if (endpoint != null) {
             HttpServletRequestEndpointWrapper wrappedRequest = new HttpServletRequestEndpointWrapper( request, endpoint );
             HttpServletResponseEndpointWrapper wrappedResponse = new HttpServletResponseEndpointWrapper( wrappedRequest, response, endpoint );
 
-            LOG.debug( "Wrapped request and response using endpoint: " + endpoint );
+            logger.dbg( "Wrapped request and response using endpoint: " + endpoint );
             super.service( wrappedRequest, wrappedResponse );
         } else {
-            LOG.debug( "No endpoint defined.  Not wrapping request and response." );
+            logger.dbg( "No endpoint defined.  Not wrapping request and response." );
             super.service( request, response );
         }
     }
@@ -104,7 +103,7 @@ public abstract class AbstractInjectionServlet extends HttpServlet {
      * </p>
      *
      * @return The endpoint URL that the wrapper should use to replace the servlet request's requestURI and to calculate the absolute URL
-     *         for the servlet response's relative sendRedirects.
+     * for the servlet response's relative sendRedirects.
      */
     protected abstract String getWrapperEndpoint(HttpServletRequest request);
 
@@ -277,7 +276,7 @@ public abstract class AbstractInjectionServlet extends HttpServlet {
                 String name = initAnnotation.name();
                 if (null == name)
                     throw new ServletException( "@Init name attribute required" );
-                LOG.debug( "init: " + name );
+                logger.dbg( "init: " + name );
                 String defaultValue = initAnnotation.defaultValue();
                 boolean optional = initAnnotation.optional();
                 boolean checkContext = initAnnotation.checkContext();
@@ -308,7 +307,7 @@ public abstract class AbstractInjectionServlet extends HttpServlet {
             while (initParamsEnum.hasMoreElements()) {
                 String paramName = initParamsEnum.nextElement();
                 String paramValue = config.getInitParameter( paramName );
-                LOG.debug( "config param: " + paramName + "=" + paramValue );
+                logger.dbg( "config param: " + paramName + "=" + paramValue );
                 configParams.put( paramName, paramValue );
             }
         }
@@ -327,7 +326,7 @@ public abstract class AbstractInjectionServlet extends HttpServlet {
                 String name = contextAnnotation.name();
                 if (null == name)
                     throw new ServletException( "@Context name attribute required" );
-                LOG.debug( "init: " + name );
+                logger.dbg( "init: " + name );
                 String defaultValue = contextAnnotation.defaultValue();
                 boolean optional = contextAnnotation.optional();
 
@@ -355,7 +354,7 @@ public abstract class AbstractInjectionServlet extends HttpServlet {
                 String paramName = initParamsEnum.nextElement();
                 if (null == configParams.get( paramName )) {
                     String paramValue = config.getServletContext().getInitParameter( paramName );
-                    LOG.debug( "config param: " + paramName + "=" + paramValue );
+                    logger.dbg( "config param: " + paramName + "=" + paramValue );
                     configParams.put( paramName, paramValue );
                 }
             }
@@ -385,7 +384,7 @@ public abstract class AbstractInjectionServlet extends HttpServlet {
                 catch (IllegalAccessException e) {
                     throw new ServletException( "illegal access: " + e.getMessage(), e );
                 }
-                LOG.debug( "outjecting to session attribute: " + outName );
+                logger.dbg( "outjecting to session attribute: " + outName );
                 session.setAttribute( outName, value );
             }
         }

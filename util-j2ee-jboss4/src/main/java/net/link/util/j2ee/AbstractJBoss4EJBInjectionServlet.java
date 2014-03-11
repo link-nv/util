@@ -6,18 +6,17 @@
  */
 package net.link.util.j2ee;
 
+import com.lyndir.lhunath.opal.system.logging.Logger;
 import java.lang.reflect.Field;
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import net.link.util.servlet.AbstractInjectionServlet;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
  * <h2>{@link AbstractEJBInjectionServlet}<br>
  * <sub>An {@link AbstractInjectionServlet} that also performs {@link EJB} injections.</sub></h2>
- *
+ * <p/>
  * <p>
  * <i>Jan 1, 2010</i>
  * </p>
@@ -26,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public abstract class AbstractJBoss4EJBInjectionServlet extends AbstractEJBInjectionServlet {
 
-    static final Log LOG = LogFactory.getLog( AbstractJBoss4EJBInjectionServlet.class );
+    private static final Logger logger = Logger.get( AbstractJBoss4EJBInjectionServlet.class );
 
     protected void injectEjbs()
             throws ServletException {
@@ -45,21 +44,23 @@ public abstract class AbstractJBoss4EJBInjectionServlet extends AbstractEJBInjec
                     mappedName = new FieldNamingStrategy().calculateName( fieldType );
                 if (mappedName == null || mappedName.length() == 0)
                     throw new ServletException( String.format( "field %s.%s's @EJB requires mappedName attribute", getClass(), field ) );
-                LOG.debug( "injecting: " + mappedName );
+                logger.dbg( "injecting: " + mappedName );
 
                 try {
                     Object ejbRef = EJBUtils.getEJB( mappedName, fieldType );
                     field.setAccessible( true );
                     try {
                         field.set( this, ejbRef );
-                    } catch (IllegalArgumentException e) {
-                        throw new ServletException( String.format( "while injecting into %s:", getClass() ), e );
-                    } catch (IllegalAccessException e) {
+                    }
+                    catch (IllegalArgumentException e) {
                         throw new ServletException( String.format( "while injecting into %s:", getClass() ), e );
                     }
-                } catch (RuntimeException e) {
-                    throw new ServletException( String.format( "couldn't resolve EJB named: %s (while injecting into %s)", mappedName,
-                            getClass() ), e );
+                    catch (IllegalAccessException e) {
+                        throw new ServletException( String.format( "while injecting into %s:", getClass() ), e );
+                    }
+                }
+                catch (RuntimeException e) {
+                    throw new ServletException( String.format( "couldn't resolve EJB named: %s (while injecting into %s)", mappedName, getClass() ), e );
                 }
             }
         }

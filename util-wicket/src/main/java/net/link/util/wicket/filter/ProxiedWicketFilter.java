@@ -1,13 +1,12 @@
 package net.link.util.wicket.filter;
 
+import com.lyndir.lhunath.opal.system.logging.Logger;
 import java.io.IOException;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.link.util.servlet.HttpServletRequestEndpointWrapper;
 import net.link.util.servlet.HttpServletResponseEndpointWrapper;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.wicket.protocol.http.WicketFilter;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,7 +33,7 @@ import org.jetbrains.annotations.Nullable;
 public abstract class ProxiedWicketFilter extends WicketFilter {
 
     private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
-    static final         Log    LOG               = LogFactory.getLog( ProxiedWicketFilter.class );
+    private static final Logger logger            = Logger.get( ProxiedWicketFilter.class );
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -43,16 +42,16 @@ public abstract class ProxiedWicketFilter extends WicketFilter {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
 
-        LOG.debug( "servlet " + getClass() + " beginning service" );
+        logger.dbg( "servlet " + getClass() + " beginning service" );
         String baseURL = getBaseFor( httpServletRequest );
         if (baseURL != null) {
             HttpServletRequestEndpointWrapper wrappedRequest = new HttpServletRequestEndpointWrapper( httpServletRequest, baseURL );
             HttpServletResponseEndpointWrapper wrappedResponse = new HttpServletResponseEndpointWrapper( wrappedRequest, httpServletResponse, baseURL );
 
-            LOG.debug( "Wrapped request and response using baseURL: " + baseURL );
+            logger.dbg( "Wrapped request and response using baseURL: " + baseURL );
             super.doFilter( wrappedRequest, wrappedResponse, chain );
         } else {
-            LOG.debug( "No baseURL defined.  Not wrapping request and response." );
+            logger.dbg( "No baseURL defined.  Not wrapping request and response." );
             super.doFilter( httpServletRequest, httpServletResponse, chain );
         }
     }
@@ -65,7 +64,7 @@ public abstract class ProxiedWicketFilter extends WicketFilter {
      * is not found, the default implementation of this method returns {@code null}, meaning no wrapping will take place.
      *
      * @return The endpoint URL that the wrapper should use to replace the servlet request's requestURI and to calculate the absolute URL
-     *         for the servlet response's relative sendRedirects.  Basically: Deployment URL + context path as seen by the user agent.
+     * for the servlet response's relative sendRedirects.  Basically: Deployment URL + context path as seen by the user agent.
      */
     @Nullable
     protected String getBaseFor(HttpServletRequest request) {

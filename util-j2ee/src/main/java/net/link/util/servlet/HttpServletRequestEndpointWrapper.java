@@ -7,11 +7,10 @@
 
 package net.link.util.servlet;
 
+import com.lyndir.lhunath.opal.system.logging.Logger;
 import java.net.URI;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -21,10 +20,9 @@ import org.apache.commons.logging.LogFactory;
  */
 public class HttpServletRequestEndpointWrapper extends HttpServletRequestWrapper {
 
-    private static final Log LOG = LogFactory.getLog( HttpServletRequestEndpointWrapper.class );
+    private static final Logger logger = Logger.get( HttpServletRequestEndpointWrapper.class );
 
     private final URI baseURI;
-
 
     public HttpServletRequestEndpointWrapper(HttpServletRequest request, String baseURL) {
 
@@ -38,7 +36,7 @@ public class HttpServletRequestEndpointWrapper extends HttpServletRequestWrapper
 
         String requestURI = getRequestURI();
         String requestURL = baseURI.resolve( requestURI ).toASCIIString();
-        LOG.debug( "Resolving request URI: " + requestURI + " with base: " + baseURI + " -> " + requestURL  );
+        logger.dbg( "Resolving request URI: " + requestURI + " with base: " + baseURI + " -> " + requestURL );
 
         return new StringBuffer( requestURL );
     }

@@ -13,14 +13,10 @@ import java.util.LinkedList;
 import javax.annotation.PostConstruct;
 import javax.persistence.*;
 import net.sf.cglib.proxy.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.ejb.Ejb3Configuration;
 
 
 public class EntityTestManager {
-
-    private static final Log LOG = LogFactory.getLog( EntityTestManager.class );
 
     private int batchSize;
 
@@ -76,7 +72,6 @@ public class EntityTestManager {
         // configureMySql( "localhost", 3306, "safeonline", "safeonline", "safeonline", true );
 
         for (Class<?> entityClass : entityClasses) {
-            LOG.debug( "adding annotated class: " + entityClass.getName() );
             configuration.addAnnotatedClass( entityClass );
         }
         entityManagerFactory = configuration.createEntityManagerFactory();
@@ -135,7 +130,6 @@ public class EntityTestManager {
 
     public void newTransaction() {
 
-        LOG.debug( "new transaction" );
         EntityTransaction transaction = entityManager.getTransaction();
         transaction.commit();
         transaction.begin();
@@ -183,7 +177,6 @@ public class EntityTestManager {
     public static void init(Class<?> clazz, Object bean)
             throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 
-        LOG.debug( "Initializing: " + bean );
         Method[] methods = clazz.getDeclaredMethods();
         for (Method method : methods) {
             PostConstruct postConstruct = method.getAnnotation( PostConstruct.class );
@@ -224,29 +217,22 @@ public class EntityTestManager {
             throw new RuntimeException( "no entity manager field found" );
         }
 
-        private static final Log interceptorLOG = LogFactory.getLog( TransactionMethodInterceptor.class );
-
-        public Object intercept(@SuppressWarnings("unused") Object obj, Method method, Object[] args,
-                                @SuppressWarnings("unused") MethodProxy proxy)
+        public Object intercept(@SuppressWarnings("unused") Object obj, Method method, Object[] args, @SuppressWarnings("unused") MethodProxy proxy)
                 throws Throwable {
 
             EntityManager entityManager = entityManagerFactory.createEntityManager();
             try {
                 field.set( object, entityManager );
-                interceptorLOG.debug( "begin transaction" );
                 entityManager.getTransaction().begin();
                 Object result = method.invoke( object, args );
-                interceptorLOG.debug( "commit transaction" );
                 entityManager.getTransaction().commit();
                 return result;
             }
             catch (InvocationTargetException e) {
-                interceptorLOG.debug( "rollback transaction" );
                 entityManager.getTransaction().rollback();
                 throw e.getTargetException();
             }
             catch (Exception e) {
-                interceptorLOG.error( "exception received" );
                 throw e;
             }
             finally {

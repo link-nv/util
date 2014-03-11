@@ -6,13 +6,11 @@
  */
 package net.link.util.j2ee;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.lyndir.lhunath.opal.system.logging.Logger;
+import java.lang.reflect.Field;
+import javax.ejb.EJB;
 import org.jboss.annotation.ejb.LocalBinding;
 import org.jboss.annotation.ejb.RemoteBinding;
-
-import javax.ejb.EJB;
-import java.lang.reflect.Field;
 
 
 /**
@@ -32,37 +30,38 @@ import java.lang.reflect.Field;
  */
 public class FieldNamingStrategy implements NamingStrategy {
 
+    private static final Logger logger = Logger.get( FieldNamingStrategy.class );
+
     public String calculateName(Class<?> ejbType) {
 
         try {
-            if (ejbType.isAnnotationPresent(LocalBinding.class))
-                return ejbType.getAnnotation(LocalBinding.class).jndiBinding();
+            if (ejbType.isAnnotationPresent( LocalBinding.class ))
+                return ejbType.getAnnotation( LocalBinding.class ).jndiBinding();
 
-            if (ejbType.isAnnotationPresent(RemoteBinding.class))
-                return ejbType.getAnnotation(RemoteBinding.class).jndiBinding();
+            if (ejbType.isAnnotationPresent( RemoteBinding.class ))
+                return ejbType.getAnnotation( RemoteBinding.class ).jndiBinding();
 
-            return ejbType.getDeclaredField("JNDI_BINDING").get(null).toString();
+            return ejbType.getDeclaredField( "JNDI_BINDING" ).get( null ).toString();
         }
 
         catch (IllegalArgumentException e) {
-            getLog().error("[BUG] Object is not the right type.", e);
-        } catch (SecurityException e) {
-            getLog().error("[BUG] Field injected not allowed.", e);
-        } catch (IllegalAccessException e) {
-            getLog().error("[BUG] Field injected not allowed.", e);
-        } catch (NoSuchFieldException e) {
-            getLog().error("[BUG] JNDI_BINDING field is not declared.", e);
+            logger.err( e, "[BUG] Object is not the right type." );
+        }
+        catch (SecurityException e) {
+            logger.err( e, "[BUG] Field injected not allowed." );
+        }
+        catch (IllegalAccessException e) {
+            logger.err( e, "[BUG] Field injected not allowed." );
+        }
+        catch (NoSuchFieldException e) {
+            logger.err( e, "[BUG] JNDI_BINDING field is not declared." );
         }
 
-        throw new IllegalArgumentException("Bean injection not supported for bean of type: " + ejbType);
+        throw new IllegalArgumentException( "Bean injection not supported for bean of type: " + ejbType );
     }
 
     public boolean isSupported(Field field) {
-        return field.isAnnotationPresent(EJB.class);
-    }
 
-    private Log getLog() {
-
-        return LogFactory.getLog(getClass());
+        return field.isAnnotationPresent( EJB.class );
     }
 }

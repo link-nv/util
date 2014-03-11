@@ -13,8 +13,6 @@ import java.util.Map;
 import javax.ejb.Local;
 import javax.naming.*;
 import net.link.util.j2ee.NamingStrategy;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.ejb3.annotation.LocalBinding;
 
 
@@ -24,8 +22,6 @@ import org.jboss.ejb3.annotation.LocalBinding;
  * @author fcorneli
  */
 public class JNDITestUtils {
-
-    private static final Log LOG = LogFactory.getLog( JNDITestUtils.class );
 
     private Map<String, Object> components = new HashMap<String, Object>();
 
@@ -53,7 +49,6 @@ public class JNDITestUtils {
     public void bindComponent(String jndiName, Object component)
             throws NamingException {
 
-        LOG.debug( "bind component: " + jndiName );
         components.put( jndiName, component );
 
         InitialContext initialContext = new InitialContext();
@@ -63,7 +58,6 @@ public class JNDITestUtils {
         Context context = initialContext;
         for (int idx = 0; idx < names.length - 1; idx++) {
             String name = names[idx];
-            LOG.debug( "name: " + name );
             NamingEnumeration<NameClassPair> contextContent = context.list( "" );
 
             boolean subContextPresent = false;
@@ -136,7 +130,6 @@ public class JNDITestUtils {
 
         InitialContext initialContext = new InitialContext();
         for (String name : components.keySet()) {
-            LOG.debug( "unbinding: " + name );
             initialContext.unbind( name );
         }
     }
@@ -149,7 +142,6 @@ public class JNDITestUtils {
         else if (TypeUtils.hasAnnotation( beanClass, Local.class ) && namingStrategy != null)
             return namingStrategy.calculateName( beanClass );
 
-        throw new IllegalArgumentException(
-                "Could not determine the JNDI binding for: " + beanClass + " (has no LocalBinding or Local annotation?)" );
+        throw new IllegalArgumentException( "Could not determine the JNDI binding for: " + beanClass + " (has no LocalBinding or Local annotation?)" );
     }
 }

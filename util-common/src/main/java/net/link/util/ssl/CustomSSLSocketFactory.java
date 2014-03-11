@@ -1,19 +1,18 @@
 package net.link.util.ssl;
 
+import com.lyndir.lhunath.opal.system.logging.Logger;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.security.*;
 import java.security.cert.X509Certificate;
 import javax.net.ssl.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 @SuppressWarnings("UnusedDeclaration")
 public class CustomSSLSocketFactory extends SSLSocketFactory {
 
-    private static final Log LOG = LogFactory.getLog( CustomSSLSocketFactory.class );
+    private static final Logger logger = Logger.get( CustomSSLSocketFactory.class );
 
     private final SSLContext sslContext;
 
@@ -118,11 +117,11 @@ public class CustomSSLSocketFactory extends SSLSocketFactory {
 
         SSLSocketFactory sslSocketFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
         if (!(sslSocketFactory instanceof CustomSSLSocketFactory)) {
-            LOG.debug( "installing OpenID SSL Socket Factory..." );
+            logger.dbg( "installing OpenID SSL Socket Factory..." );
             CustomSSLSocketFactory openIDSSLSocketFactory = new CustomSSLSocketFactory( serverCertificate );
             HttpsURLConnection.setDefaultSSLSocketFactory( openIDSSLSocketFactory );
         } else {
-            LOG.debug( "OpenID SSL Socket Factory already installed." );
+            logger.dbg( "OpenID SSL Socket Factory already installed." );
         }
     }
 
@@ -137,13 +136,13 @@ public class CustomSSLSocketFactory extends SSLSocketFactory {
 
         SSLSocketFactory sslSocketFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
         if (!(sslSocketFactory instanceof CustomSSLSocketFactory)) {
-            LOG.debug( "installing OpenID SSL Socket Factory..." );
+            logger.dbg( "installing OpenID SSL Socket Factory..." );
             CustomSSLSocketFactory openIDSSLSocketFactory = new CustomSSLSocketFactory();
             HttpsURLConnection.setDefaultSSLSocketFactory( openIDSSLSocketFactory );
             System.setProperty( "java.protocol.handler.pkgs", "javax.net.ssl" );
             HttpsURLConnection.setDefaultHostnameVerifier( org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER );
         } else {
-            LOG.debug( "OpenID SSL Socket Factory already installed." );
+            logger.dbg( "OpenID SSL Socket Factory already installed." );
         }
     }
 }

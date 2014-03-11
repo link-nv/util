@@ -12,14 +12,9 @@ import java.lang.reflect.*;
 import java.lang.reflect.Proxy;
 import junit.framework.TestCase;
 import net.sf.cglib.proxy.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 public class EJBTestUtilsTest extends TestCase {
-
-    private static final Log LOG = LogFactory.getLog( EJBTestUtilsTest.class );
-
 
     public interface TestIface {
 
@@ -29,18 +24,13 @@ public class EJBTestUtilsTest extends TestCase {
 
     public static class TestClass implements TestIface {
 
-        private static final Log testLOG = LogFactory.getLog( TestClass.class );
-
         public void func() {
 
-            testLOG.debug( "func invoked" );
         }
     }
 
 
     private static class TestInvocationHandler implements InvocationHandler {
-
-        private static final Log handlerLOG = LogFactory.getLog( TestInvocationHandler.class );
 
         private final Object object;
 
@@ -49,11 +39,10 @@ public class EJBTestUtilsTest extends TestCase {
             this.object = object;
         }
 
-        @SuppressWarnings( { "ProhibitedExceptionDeclared" })
+        @SuppressWarnings({ "ProhibitedExceptionDeclared" })
         public Object invoke(@SuppressWarnings("unused") Object proxy, Method method, Object[] args)
                 throws Throwable {
 
-            handlerLOG.debug( "invoke" );
             return method.invoke( object, args );
         }
     }
@@ -71,13 +60,10 @@ public class EJBTestUtilsTest extends TestCase {
         testObject.func();
 
         // Verify
-        LOG.debug( "testObject type: " + testObject.getClass().getName() );
         assertFalse( testObject instanceof TestClass );
     }
 
     private static class TestInterceptor implements MethodInterceptor {
-
-        private static final Log interceptorLOG = LogFactory.getLog( TestInterceptor.class );
 
         private final Object object;
 
@@ -86,12 +72,10 @@ public class EJBTestUtilsTest extends TestCase {
             this.object = object;
         }
 
-        @SuppressWarnings( { "ProhibitedExceptionDeclared" })
-        public Object intercept(@SuppressWarnings("unused") Object obj, Method method, Object[] args,
-                                @SuppressWarnings("unused") MethodProxy proxy)
+        @SuppressWarnings({ "ProhibitedExceptionDeclared" })
+        public Object intercept(@SuppressWarnings("unused") Object obj, Method method, Object[] args, @SuppressWarnings("unused") MethodProxy proxy)
                 throws Throwable {
 
-            interceptorLOG.debug( "intercept" );
             return method.invoke( object, args );
         }
     }

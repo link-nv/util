@@ -16,8 +16,6 @@ import javax.interceptor.InvocationContext;
 import net.link.util.validation.annotation.ValidatorAnnotation;
 import net.link.util.validation.validator.Validator;
 import net.link.util.validation.validator.ValidatorCatalog;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -26,8 +24,6 @@ import org.apache.commons.logging.LogFactory;
  * @author cornelis
  */
 public class InputValidation {
-
-    private static final Log LOG = LogFactory.getLog( InputValidation.class );
 
     @AroundInvoke
     @SuppressWarnings("unchecked")
@@ -41,8 +37,7 @@ public class InputValidation {
         for (int parameterIdx = 0; parameterIdx < allParameterAnnotations.length; parameterIdx++) {
             Annotation[] parameterAnnotations = allParameterAnnotations[parameterIdx];
             for (Annotation parameterAnnotation : parameterAnnotations) {
-                ValidatorAnnotation validatorClassAnnotation = parameterAnnotation.annotationType().getAnnotation(
-                        ValidatorAnnotation.class );
+                ValidatorAnnotation validatorClassAnnotation = parameterAnnotation.annotationType().getAnnotation( ValidatorAnnotation.class );
                 if (null == validatorClassAnnotation)
                     continue;
                 Class<? extends Validator<A>> validatorClass = (Class<? extends Validator<A>>) validatorClassAnnotation.value();

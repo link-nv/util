@@ -14,8 +14,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Endpoint;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -24,8 +22,6 @@ import org.apache.commons.logging.LogFactory;
  * @author fcorneli
  */
 public class WebServiceTestManager {
-
-    private static final Log LOG = LogFactory.getLog( WebServiceTestManager.class );
 
     private Endpoint endpoint;
 
@@ -55,7 +51,6 @@ public class WebServiceTestManager {
 
         httpServer = HttpServer.create();
         port = getFreePort();
-        LOG.debug( "using port: " + port );
         httpServer.bind( new InetSocketAddress( port ), 1 );
         executorService = Executors.newFixedThreadPool( 1 );
         httpServer.setExecutor( executorService );
