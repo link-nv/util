@@ -50,34 +50,43 @@ public class WSSecurityX509TokenHandler implements SOAPHandler<SOAPMessageContex
     public static final String TO_BE_SIGNED_IDS_SET        = WSSecurityX509TokenHandler.class + ".toBeSignedIDs";
     public static final String SIGNED_ELEMENTS_CONTEXT_KEY = WSSecurityX509TokenHandler.class + ".signed.elements";
 
-    private final WSSecurityConfiguration configuration;
+    private WSSecurityConfiguration configuration;
 
     public WSSecurityX509TokenHandler() {
-
-        try {
-            Context ctx = new InitialContext();
-            try {
-                Context env = (Context) ctx.lookup( "java:comp/env" );
-                String configurationServiceJndiName = (String) env.lookup( "wsSecurityConfigurationServiceJndiName" );
-                configuration = JNDIUtils.getComponent( configurationServiceJndiName, WSSecurityConfiguration.class );
-            }
-            finally {
-                try {
-                    ctx.close();
-                }
-                catch (NamingException e) {
-                    logger.err( e, "While closing: %s", ctx );
-                }
-            }
-        }
-        catch (NamingException e) {
-            throw new RuntimeException( "'wsSecurityConfigurationServiceJndiName' not specified", e );
-        }
+        // do nothing, needed tho
     }
 
     public WSSecurityX509TokenHandler(final WSSecurityConfiguration configuration) {
 
         this.configuration = configuration;
+    }
+
+    private WSSecurityConfiguration getWSSecConfiguration() {
+
+        if (null == this.configuration) {
+
+            try {
+                Context ctx = new InitialContext();
+                try {
+                    Context env = (Context) ctx.lookup( "java:comp/env" );
+                    String configurationServiceJndiName = (String) env.lookup( "wsSecurityConfigurationServiceJndiName" );
+                    this.configuration = JNDIUtils.getComponent( configurationServiceJndiName, WSSecurityConfiguration.class );
+                }
+                finally {
+                    try {
+                        ctx.close();
+                    }
+                    catch (NamingException e) {
+                        logger.err( e, "While closing: %s", ctx );
+                    }
+                }
+            }
+            catch (NamingException e) {
+                throw new RuntimeException( "'wsSecurityConfigurationServiceJndiName' not specified", e );
+            }
+        }
+
+        return this.configuration;
     }
 
     @PostConstruct
@@ -120,14 +129,14 @@ public class WSSecurityX509TokenHandler implements SOAPHandler<SOAPMessageContex
      */
     private boolean handleOutboundDocument(SOAPPart document, SOAPMessageContext soapMessageContext) {
 
-        if (!configuration.isOutboundSignatureNeeded()) {
+        if (!getWSSecConfiguration().isOutboundSignatureNeeded()) {
             logger.dbg( "Out: Not adding WS-Security SOAP header" );
             return true;
         }
 
         logger.dbg( "Out: Adding WS-Security SOAP header" );
         try {
-            CertificateChain certificateChain = configuration.getIdentityCertificateChain();
+            CertificateChain certificateChain = getWSSecConfiguration().getIdentityCertificateChain();
 
             WSSecHeader wsSecHeader = new WSSecHeader();
             wsSecHeader.insertSecurityHeader( document );
@@ -135,13 +144,12 @@ public class WSSecurityX509TokenHandler implements SOAPHandler<SOAPMessageContex
             WSSecSignature wsSecSignature = new WSSecSignature();
             wsSecSignature.setKeyIdentifierType( WSConstants.BST_DIRECT_REFERENCE );
             wsSecSignature.setUseSingleCertificate( !certificateChain.hasRootCertificate() );
-            wsSecSignature.prepare( document, new ClientCrypto( certificateChain, configuration.getPrivateKey() ), wsSecHeader );
+            wsSecSignature.prepare( document, new ClientCrypto( certificateChain, getWSSecConfiguration().getPrivateKey() ), wsSecHeader );
 
             List<WSEncryptionPart> wsEncryptionParts = Lists.newLinkedList();
 
             SOAPConstants soapConstants = WSSecurityUtil.getSOAPConstants( document.getDocumentElement() );
-            wsEncryptionParts.add(
-                    new WSEncryptionPart( soapConstants.getBodyQName().getLocalPart(), soapConstants.getEnvelopeURI(), "Content" ) );
+            wsEncryptionParts.add( new WSEncryptionPart( soapConstants.getBodyQName().getLocalPart(), soapConstants.getEnvelopeURI(), "Content" ) );
 
             WSSecTimestamp wsSecTimeStamp = new WSSecTimestamp();
             wsSecTimeStamp.setTimeToLive( 0 );
@@ -181,7 +189,7 @@ public class WSSecurityX509TokenHandler implements SOAPHandler<SOAPMessageContex
         }
         logger.dbg( "results: %s", wsSecurityEngineResults );
         if (null == wsSecurityEngineResults) {
-            if (!configuration.isInboundSignatureOptional())
+            if (!getWSSecConfiguration().isInboundSignatureOptional())
                 throw SOAPUtils.createSOAPFaultException( "No WS-Security header was found but is required.", "InvalidSecurity" );
 
             logger.dbg( "Allowing inbound message without signature: it's set to optional" );
@@ -234,7 +242,7 @@ public class WSSecurityX509TokenHandler implements SOAPHandler<SOAPMessageContex
         CertificateChain certificateChain = findCertificateChain( soapMessageContext );
         if (null == certificateChain)
             throw SOAPUtils.createSOAPFaultException( "missing X509Certificate chain in WS-Security header", "InvalidSecurity" );
-        if (!configuration.isCertificateChainTrusted( certificateChain ))
+        if (!getWSSecConfiguration().isCertificateChainTrusted( certificateChain ))
             throw SOAPUtils.createSOAPFaultException( "can't trust X509Certificate chain in WS-Security header", "InvalidSecurity" );
 
         /*
@@ -246,7 +254,7 @@ public class WSSecurityX509TokenHandler implements SOAPHandler<SOAPMessageContex
         if (!isElementSigned( soapMessageContext, timestampId ))
             throw SOAPUtils.createSOAPFaultException( "Timestamp not signed", "FailedCheck" );
         Duration age = new Duration( timestamp.getCreated().getTime(), System.currentTimeMillis() );
-        Duration maximumAge = configuration.getMaximumAge();
+        Duration maximumAge = getWSSecConfiguration().getMaximumAge();
         if (age.isLongerThan( maximumAge )) {
             logger.dbg( "Maximum age exceeded by %s (since %s)", maximumAge.minus( age ), timestamp.getCreated().getTime() );
             throw SOAPUtils.createSOAPFaultException( "Message too old", "FailedCheck" );
