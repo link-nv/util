@@ -7,11 +7,11 @@
 
 package net.link.util.servlet;
 
-import com.lyndir.lhunath.opal.system.logging.Logger;
 import java.io.IOException;
 import java.net.URI;
 import java.util.regex.Pattern;
 import javax.servlet.http.*;
+import net.link.util.logging.Logger;
 
 
 /**
@@ -36,8 +36,7 @@ public class HttpServletResponseEndpointWrapper extends HttpServletResponseWrapp
     /**
      * @param response The real {@link HttpServletResponse} that we're wrapping.
      */
-    public HttpServletResponseEndpointWrapper(final HttpServletRequestEndpointWrapper wrappedRequest, HttpServletResponse response,
-                                              final String baseURL) {
+    public HttpServletResponseEndpointWrapper(final HttpServletRequestEndpointWrapper wrappedRequest, HttpServletResponse response, final String baseURL) {
 
         super( response );
         this.wrappedRequest = wrappedRequest;

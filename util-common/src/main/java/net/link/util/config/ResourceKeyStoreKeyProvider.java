@@ -3,7 +3,7 @@ package net.link.util.config;
 import static com.google.common.base.Preconditions.*;
 
 import com.google.common.io.InputSupplier;
-import com.lyndir.lhunath.opal.system.logging.Logger;
+import net.link.util.logging.Logger;
 import java.io.IOException;
 import java.io.InputStream;
 import org.jetbrains.annotations.NotNull;

@@ -8,7 +8,7 @@ package net.link.util.test;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
-import com.lyndir.lhunath.opal.system.logging.Logger;
+import net.link.util.logging.Logger;
 import java.util.*;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;

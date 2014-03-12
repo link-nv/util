@@ -1,15 +1,11 @@
 package net.link.util.config;
 
 import static com.google.common.base.Preconditions.*;
-import static com.lyndir.lhunath.opal.system.util.ObjectUtils.*;
+import static net.link.util.util.ObjectUtils.*;
 
 import com.google.common.base.*;
 import com.google.common.collect.*;
 import com.google.common.io.Resources;
-import com.lyndir.lhunath.opal.system.logging.Logger;
-import com.lyndir.lhunath.opal.system.logging.exception.InternalInconsistencyException;
-import com.lyndir.lhunath.opal.system.util.StringUtils;
-import com.lyndir.lhunath.opal.system.util.TypeUtils;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.*;
@@ -21,8 +17,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
+import net.link.util.InternalInconsistencyException;
 import net.link.util.common.KeyUtils;
 import net.link.util.common.URLUtils;
+import net.link.util.logging.Logger;
+import net.link.util.util.StringUtils;
+import net.link.util.util.TypeUtils;
 import org.bouncycastle.util.encoders.Base64;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -262,8 +262,8 @@ public class DefaultConfigFactory {
      *               for the method call.
      *
      * @return An invocation handler that implements the logic which provides default values when methods on the given config
-     *         implementation
-     *         yield no value.
+     * implementation
+     * yield no value.
      */
     protected InvocationHandler newDefaultWrapperHandler(@NotNull Object config) {
 
@@ -307,7 +307,7 @@ public class DefaultConfigFactory {
      * @param method The method identifies the configuration item that was requested.
      *
      * @return The default value for the configuration item. <b>Should be of the same type as the method's return type .</b> See {@link
-     *         #toType(String, Class)} for type conversion.
+     * #toType(String, Class)} for type conversion.
      */
     @Nullable
     protected final Object getDefaultValueFor(@NotNull Method method) {

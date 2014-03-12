@@ -1,6 +1,6 @@
 package net.link.util.ssl;
 
-import com.lyndir.lhunath.opal.system.logging.Logger;
+import net.link.util.logging.Logger;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;

@@ -6,15 +6,15 @@
  */
 package net.link.util.j2ee;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Function;
 import com.google.common.base.Throwables;
-import com.lyndir.lhunath.opal.system.logging.Logger;
-import com.lyndir.lhunath.opal.system.util.ObjectUtils;
-import com.lyndir.lhunath.opal.system.util.TypeUtils;
 import java.lang.reflect.Field;
 import javax.ejb.EJB;
+import net.link.util.logging.Logger;
+import net.link.util.util.ObjectUtils;
+import net.link.util.util.TypeUtils;
 import org.jboss.ejb3.annotation.LocalBinding;
 import org.jboss.ejb3.annotation.RemoteBinding;
 import org.jetbrains.annotations.Nullable;

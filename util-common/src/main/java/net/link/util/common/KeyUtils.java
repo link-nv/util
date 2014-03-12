@@ -9,7 +9,7 @@ package net.link.util.common;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
-import com.lyndir.lhunath.opal.system.logging.exception.InternalInconsistencyException;
+import net.link.util.InternalInconsistencyException;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.URI;

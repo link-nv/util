@@ -2,7 +2,7 @@ package net.link.util.ws;
 
 import static com.google.common.base.Preconditions.*;
 
-import com.lyndir.lhunath.opal.system.logging.exception.InternalInconsistencyException;
+import net.link.util.InternalInconsistencyException;
 import com.sun.xml.internal.ws.developer.JAXWSProperties;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;

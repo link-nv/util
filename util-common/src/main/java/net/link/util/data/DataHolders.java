@@ -1,7 +1,7 @@
 package net.link.util.data;
 
 import com.google.common.collect.Maps;
-import com.lyndir.lhunath.opal.system.logging.exception.InternalInconsistencyException;
+import net.link.util.InternalInconsistencyException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 

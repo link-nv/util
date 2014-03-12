@@ -1,7 +1,7 @@
 package net.link.util.ws.security.username;
 
 import com.google.common.collect.ImmutableSet;
-import com.lyndir.lhunath.opal.system.logging.Logger;
+import net.link.util.logging.Logger;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;

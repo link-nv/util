@@ -7,7 +7,7 @@
 
 package net.link.util.j2ee;
 
-import com.lyndir.lhunath.opal.system.logging.Logger;
+import net.link.util.logging.Logger;
 import java.security.Principal;
 import javax.management.*;
 import org.jboss.mx.util.MBeanServerLocator;

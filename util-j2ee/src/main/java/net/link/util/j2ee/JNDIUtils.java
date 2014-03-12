@@ -1,7 +1,7 @@
 package net.link.util.j2ee;
 
-import com.lyndir.lhunath.opal.system.logging.Logger;
-import com.lyndir.lhunath.opal.system.logging.exception.InternalInconsistencyException;
+import net.link.util.logging.Logger;
+import net.link.util.InternalInconsistencyException;
 import java.util.*;
 import javax.naming.*;
 

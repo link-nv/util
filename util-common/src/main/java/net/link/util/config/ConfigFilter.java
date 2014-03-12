@@ -1,10 +1,10 @@
 package net.link.util.config;
 
 import static com.google.common.base.Preconditions.*;
-import static com.lyndir.lhunath.opal.system.util.TypeUtils.*;
 import static net.link.util.config.ConfigHolder.*;
+import static net.link.util.util.TypeUtils.*;
 
-import com.lyndir.lhunath.opal.system.logging.Logger;
+import net.link.util.logging.Logger;
 import java.io.IOException;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;

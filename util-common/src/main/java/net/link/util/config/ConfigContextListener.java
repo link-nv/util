@@ -3,7 +3,7 @@ package net.link.util.config;
 import static com.google.common.base.Preconditions.*;
 import static net.link.util.config.ConfigHolder.*;
 
-import com.lyndir.lhunath.opal.system.logging.Logger;
+import net.link.util.logging.Logger;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import org.jetbrains.annotations.NotNull;

@@ -1,6 +1,6 @@
 package net.link.util.saml;
 
-import com.lyndir.lhunath.opal.system.logging.Logger;
+import net.link.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import org.opensaml.common.SAMLObject;
 import org.opensaml.common.SignableSAMLObject;

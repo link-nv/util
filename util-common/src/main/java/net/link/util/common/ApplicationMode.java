@@ -1,6 +1,6 @@
 package net.link.util.common;
 
-import com.lyndir.lhunath.opal.system.logging.exception.InternalInconsistencyException;
+import net.link.util.InternalInconsistencyException;
 
 
 public enum ApplicationMode {

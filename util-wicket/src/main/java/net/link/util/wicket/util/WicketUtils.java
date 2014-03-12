@@ -6,7 +6,7 @@
  */
 package net.link.util.wicket.util;
 
-import com.lyndir.lhunath.opal.system.logging.Logger;
+import net.link.util.logging.Logger;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.*;

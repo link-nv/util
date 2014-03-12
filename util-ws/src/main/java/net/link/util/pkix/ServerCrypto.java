@@ -7,8 +7,8 @@
 
 package net.link.util.pkix;
 
-import com.lyndir.lhunath.opal.system.logging.Logger;
-import com.lyndir.lhunath.opal.system.logging.exception.InternalInconsistencyException;
+import net.link.util.logging.Logger;
+import net.link.util.InternalInconsistencyException;
 import java.io.InputStream;
 import java.security.PrivateKey;
 import java.security.PublicKey;

@@ -7,7 +7,7 @@
 
 package net.link.util.test.j2ee;
 
-import com.lyndir.lhunath.opal.system.logging.exception.InternalInconsistencyException;
+import net.link.util.InternalInconsistencyException;
 import java.io.Serializable;
 import java.lang.reflect.*;
 import java.security.Identity;

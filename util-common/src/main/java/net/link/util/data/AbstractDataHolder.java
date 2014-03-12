@@ -2,10 +2,10 @@ package net.link.util.data;
 
 import static com.google.common.base.Preconditions.*;
 
-import com.lyndir.lhunath.opal.system.logging.Logger;
-import com.lyndir.lhunath.opal.system.logging.exception.InternalInconsistencyException;
-import com.lyndir.lhunath.opal.system.util.TypeUtils;
 import java.io.*;
+import net.link.util.InternalInconsistencyException;
+import net.link.util.logging.Logger;
+import net.link.util.util.TypeUtils;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;

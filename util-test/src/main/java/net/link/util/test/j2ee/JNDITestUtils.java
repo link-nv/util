@@ -7,12 +7,12 @@
 
 package net.link.util.test.j2ee;
 
-import com.lyndir.lhunath.opal.system.util.TypeUtils;
 import java.util.HashMap;
 import java.util.Map;
 import javax.ejb.Local;
 import javax.naming.*;
 import net.link.util.j2ee.NamingStrategy;
+import net.link.util.util.TypeUtils;
 import org.jboss.ejb3.annotation.LocalBinding;
 
 

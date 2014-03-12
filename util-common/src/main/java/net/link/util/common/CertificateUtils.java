@@ -2,7 +2,7 @@ package net.link.util.common;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.lyndir.lhunath.opal.system.logging.exception.InternalInconsistencyException;
+import net.link.util.InternalInconsistencyException;
 import java.io.*;
 import java.security.cert.*;
 import java.util.List;

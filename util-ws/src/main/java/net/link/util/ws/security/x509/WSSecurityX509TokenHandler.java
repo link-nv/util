@@ -9,7 +9,7 @@ package net.link.util.ws.security.x509;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.lyndir.lhunath.opal.system.logging.Logger;
+import net.link.util.logging.Logger;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import javax.annotation.PostConstruct;

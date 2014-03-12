@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.repository.MemoryCertificateRepository;
-import com.lyndir.lhunath.opal.system.logging.Logger;
+import net.link.util.logging.Logger;
 import java.io.InputStream;
 import java.security.cert.*;
 import net.link.util.common.CertificateChain;

@@ -6,7 +6,7 @@
  */
 package net.link.util.j2ee;
 
-import com.lyndir.lhunath.opal.system.logging.Logger;
+import net.link.util.logging.Logger;
 import java.lang.reflect.Field;
 import javax.ejb.EJB;
 import javax.servlet.ServletException;

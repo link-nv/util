@@ -149,6 +149,7 @@
         <easymock.version>2.3</easymock.version>
         <easymockclassextension.version>2.2.2</easymockclassextension.version>
         <cglib.version>2.1_3</cglib.version>
+        <objenesis.version>1.3</objenesis.version>
 
         <hibernate-entitymanager.version>3.6.0.Final</hibernate-entitymanager.version>
         <hibernate-core.version>3.6.2.Final</hibernate-core.version>
@@ -169,11 +170,11 @@
         <catalina.version>5.5.15</catalina.version>
         <slf4j.version>1.5.11</slf4j.version>
         <logback.version>0.9.15</logback.version>
-        <opal.version>1.6</opal.version>
         <commons-lang.version>2.3</commons-lang.version>
         <jetbrains-annotations.version>7.0.2</jetbrains-annotations.version>
         <jackson.version>1.8.1</jackson.version>
         <httpclient.version>4.1</httpclient.version>
+        <jsr305.version>2.0.1</jsr305.version>
 
         <!-- JBoss 4 -->
         <jboss.version>4.2.3.GA</jboss.version>
@@ -752,6 +753,12 @@
                 <version>${cglib.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.objenesis</groupId>
+                <artifactId>objenesis</artifactId>
+                <version>${objenesis.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.mortbay.jetty</groupId>
                 <artifactId>jetty</artifactId>
                 <version>${jetty.version}</version>
@@ -854,16 +861,6 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.lyndir.lhunath.opal</groupId>
-                <artifactId>opal-system</artifactId>
-                <version>${opal.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.lyndir.lhunath.opal</groupId>
-                <artifactId>opal-wicket</artifactId>
-                <version>${opal.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>commons-lang</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>${commons-lang.version}</version>
@@ -878,6 +875,11 @@
                 <artifactId>annotations</artifactId>
                 <version>${jetbrains-annotations.version}</version>
                 <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>${jsr305.version}</version>
             </dependency>
 
         </dependencies>

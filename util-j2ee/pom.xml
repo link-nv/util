@@ -19,6 +19,11 @@
 
     <dependencies>
 
+        <dependency>
+            <groupId>net.lin-k.util</groupId>
+            <artifactId>util-common</artifactId>
+        </dependency>
+
         <!-- Specific Dependencies: External -->
         <dependency>
             <groupId>commons-io</groupId>
@@ -27,10 +32,6 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.lyndir.lhunath.opal</groupId>
-            <artifactId>opal-system</artifactId>
         </dependency>
 
     </dependencies>

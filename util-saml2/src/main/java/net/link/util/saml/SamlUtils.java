@@ -9,7 +9,7 @@ import be.fedict.trust.TrustValidator;
 import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.repository.MemoryCertificateRepository;
 import com.google.common.base.Charsets;
-import com.lyndir.lhunath.opal.system.logging.Logger;
+import net.link.util.logging.Logger;
 import java.io.*;
 import java.security.*;
 import java.security.PublicKey;
