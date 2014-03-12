@@ -29,14 +29,6 @@
             <artifactId>servlet-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging-api</artifactId>
-        </dependency>
-        <!--<dependency>-->
-            <!--<groupId>tomcat</groupId>-->
-            <!--<artifactId>catalina</artifactId>-->
-        <!--</dependency>-->
-        <dependency>
             <groupId>com.lyndir.lhunath.opal</groupId>
             <artifactId>opal-system</artifactId>
         </dependency>

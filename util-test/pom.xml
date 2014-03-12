@@ -67,10 +67,6 @@
 
         <!-- Specific Dependencies: External -->
         <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.easymock</groupId>
             <artifactId>easymock</artifactId>
         </dependency>

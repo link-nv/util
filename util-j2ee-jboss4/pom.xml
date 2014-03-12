@@ -35,10 +35,6 @@
             <artifactId>servlet-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>jboss.messaging</groupId>
             <artifactId>jboss-messaging</artifactId>
         </dependency>

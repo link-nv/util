@@ -40,10 +40,6 @@
             <groupId>org.picketbox</groupId>
             <artifactId>jbosssx-client</artifactId>
         </dependency>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging-api</artifactId>
-        </dependency>
 
     </dependencies>
 
