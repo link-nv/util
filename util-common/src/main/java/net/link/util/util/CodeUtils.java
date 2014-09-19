@@ -107,11 +107,13 @@ public abstract class CodeUtils {
                 url.append( encodeURL( otherURLParams[urlFormatIndex - 1] ) );
             }
         }
+        if (lastURLFormatOffset != urlFormat.length())
+            url.append( urlFormat.substring( lastURLFormatOffset, urlFormat.length() ) );
 
         try {
             return new URL( url.toString() );
         }
-        catch (final MalformedURLException e) {
+        catch (MalformedURLException e) {
             logger.err( e, "The URL template does not appear to specify a valid URL: %s", urlFormat );
             throw new IllegalArgumentException( e );
         }
