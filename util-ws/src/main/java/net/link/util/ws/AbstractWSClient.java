@@ -1,19 +1,21 @@
 package net.link.util.ws;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkArgument;
 
-import net.link.util.InternalInconsistencyException;
 import com.sun.xml.internal.ws.developer.JAXWSProperties;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import javax.net.ssl.*;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
 import javax.xml.ws.BindingProvider;
+import net.link.util.InternalInconsistencyException;
 import net.link.util.common.ApplicationMode;
+import net.link.util.logging.Logger;
 import net.link.util.ssl.X509CertificateTrustManager;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -25,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AbstractWSClient<P> {
 
-    private static final Logger logger = LoggerFactory.getLogger( AbstractWSClient.class );
+    private static final Logger logger = Logger.get( AbstractWSClient.class );
 
     public static final String JAX_WS_RI_HOSTNAME_VERIFIER  = "com.sun.xml.ws.transport.https.client.hostname.verifier";
     public static final String JAX_WS_RI_SSL_SOCKET_FACTORY = "com.sun.xml.ws.transport.https.client.SSLSocketFactory";
@@ -58,7 +60,7 @@ public class AbstractWSClient<P> {
 
     protected void registerTrustManager(final X509Certificate trustedCertificate) {
 
-        logger.info( "Installing trust manager on: {}, for: {} ", getClass(), trustedCertificate );
+        logger.dbg( "Installing trust manager on: {}, for: {} ", getClass(), trustedCertificate );
 
         try {
             SSLContext sslContext = SSLContext.getInstance( "TLS" );

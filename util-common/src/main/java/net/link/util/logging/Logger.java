@@ -15,7 +15,7 @@ import org.slf4j.Marker;
  */
 public class Logger implements Serializable {
 
-    private final     Class<?>         type;
+    private final     String           name;
     private transient org.slf4j.Logger logger;
 
     // Create a logger --
@@ -27,7 +27,12 @@ public class Logger implements Serializable {
      */
     public static Logger get(final Class<?> type) {
 
-        return new Logger( type );
+        return new Logger( type.getCanonicalName() );
+    }
+
+    public static Logger get(final String name) {
+
+        return new Logger( name );
     }
 
     // Event logging --
@@ -393,13 +398,13 @@ public class Logger implements Serializable {
     public org.slf4j.Logger slf4j() {
 
         if (logger == null)
-            logger = LoggerFactory.getLogger( type );
+            logger = LoggerFactory.getLogger( name );
 
         return logger;
     }
 
-    private Logger(final Class<?> type) {
+    private Logger(final String name) {
 
-        this.type = type;
+        this.name = name;
     }
 }
