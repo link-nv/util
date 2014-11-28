@@ -76,7 +76,6 @@
         <module>util-test</module>
         <module>util-j2ee</module>
         <module>util-j2ee-jboss6</module>
-        <module>util-wicket</module>
         <module>util-common</module>
         <module>util-ws</module>
         <module>util-saml2</module>
@@ -129,10 +128,6 @@
         <!-- DEFAULT VERSIONS, SEE DEPENDENCIES -->
         <release.version>1.25</release.version>
         <servlet-api.version>2.4</servlet-api.version>
-
-        <wicket.version>1.4.18</wicket.version>
-        <wicket-datetime.version>1.4.6</wicket-datetime.version>
-        <wicket-javaee.version>1.1-safe-online</wicket-javaee.version>
 
         <jtrust.version>2.0.1</jtrust.version>
         <opensaml.version>2.6.1</opensaml.version>
@@ -489,11 +484,6 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>net.lin-k.util</groupId>
-                <artifactId>util-wicket</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>jboss.messaging</groupId>
                 <artifactId>jboss-messaging</artifactId>
                 <version>${jboss-messaging.version}</version>
@@ -601,32 +591,6 @@
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-mapper-lgpl</artifactId>
                 <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.wicket</groupId>
-                <artifactId>wicket</artifactId>
-                <version>${wicket.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.wicket</groupId>
-                <artifactId>wicket-extensions</artifactId>
-                <version>${wicket.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.wicket</groupId>
-                <artifactId>wicket-ioc</artifactId>
-                <version>${wicket.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.wicket</groupId>
-                <artifactId>wicket-datetime</artifactId>
-                <version>${wicket-datetime.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.ws.security</groupId>

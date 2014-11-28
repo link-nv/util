@@ -162,22 +162,5 @@
             <classifier>javadoc</classifier>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>net.lin-k.util</groupId>
-            <artifactId>util-wicket</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.lin-k.util</groupId>
-            <artifactId>util-wicket</artifactId>
-            <classifier>sources</classifier>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.lin-k.util</groupId>
-            <artifactId>util-wicket</artifactId>
-            <classifier>javadoc</classifier>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 </project>
