@@ -75,7 +75,6 @@
         <module>util-jpa</module>
         <module>util-test</module>
         <module>util-j2ee</module>
-        <module>util-j2ee-jboss4</module>
         <module>util-j2ee-jboss6</module>
         <module>util-wicket</module>
         <module>util-common</module>
@@ -436,7 +435,6 @@
                                             <exclude>log4j:log4j</exclude>
                                             <!-- We use persistence API 2.0 -->
                                             <exclude>javax.persistence:persistence-api:1.0</exclude>
-                                            <exclude>net.lin-k.util:util-j2ee-jboss4</exclude>
                                             <exclude>javax.ejb:ejb-api</exclude>
                                         </excludes>
                                     </bannedDependencies>
@@ -473,11 +471,6 @@
             <dependency>
                 <groupId>net.lin-k.util</groupId>
                 <artifactId>util-j2ee</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>net.lin-k.util</groupId>
-                <artifactId>util-j2ee-jboss4</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -882,11 +875,6 @@
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
                 <version>${jsr305.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>${guava.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.gson</groupId>

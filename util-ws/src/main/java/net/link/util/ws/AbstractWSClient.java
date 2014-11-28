@@ -6,6 +6,7 @@ import com.sun.xml.internal.ws.developer.JAXWSProperties;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
@@ -39,13 +40,13 @@ public class AbstractWSClient<P> {
         this( port, null );
     }
 
-    protected AbstractWSClient(final P port, @Nullable final X509Certificate sslCertificate) {
+    protected AbstractWSClient(final P port, @Nullable final X509Certificate[] sslCertificates) {
 
         checkArgument( port instanceof BindingProvider, "Port must be a BindingProvider" );
 
         this.port = port;
 
-        registerTrustManager( sslCertificate );
+        registerTrustManager( sslCertificates );
     }
 
     protected P getPort() {
@@ -58,13 +59,17 @@ public class AbstractWSClient<P> {
         return (BindingProvider) port;
     }
 
-    protected void registerTrustManager(final X509Certificate trustedCertificate) {
+    protected void registerTrustManager(final X509Certificate[] trustedCertificates) {
 
-        logger.dbg( "Installing trust manager on: {}, for: {} ", getClass(), trustedCertificate );
+        if (null == trustedCertificates) {
+            return;
+        }
+
+        logger.dbg( "Installing trust manager on: {}, for: {} ", getClass(), Arrays.asList( trustedCertificates ) );
 
         try {
             SSLContext sslContext = SSLContext.getInstance( "TLS" );
-            sslContext.init( null, new TrustManager[] { new X509CertificateTrustManager( trustedCertificate ) }, null );
+            sslContext.init( null, new TrustManager[] { new X509CertificateTrustManager( trustedCertificates ) }, null );
 
             // Setup TrustManager for validation
             getBindingProvider().getRequestContext().put( JAXWSProperties.SSL_SOCKET_FACTORY, sslContext.getSocketFactory() );

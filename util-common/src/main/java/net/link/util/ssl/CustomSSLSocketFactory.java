@@ -1,12 +1,17 @@
 package net.link.util.ssl;
 
-import net.link.util.logging.Logger;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.security.*;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import javax.net.ssl.*;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import net.link.util.logging.Logger;
 
 
 @SuppressWarnings("UnusedDeclaration")
@@ -34,17 +39,17 @@ public class CustomSSLSocketFactory extends SSLSocketFactory {
     /**
      * Trust only the given server certificate, and the default trusted server certificates.
      *
-     * @param serverCertificate SSL certificate to trust
+     * @param serverCertificates SSL certificates to trust (> 1 for rollover purposes)
      *
      * @throws NoSuchAlgorithmException could not get an SSLContext instance
      * @throws KeyManagementException   failed to initialize the SSLContext
-     * @throws KeyStoreException        failed to intialize the {@link X509CertificateTrustManager}
+     * @throws KeyStoreException        failed to initialize the {@link X509CertificateTrustManager}
      */
-    public CustomSSLSocketFactory(X509Certificate serverCertificate)
+    public CustomSSLSocketFactory(X509Certificate[] serverCertificates)
             throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException {
 
         sslContext = SSLContext.getInstance( "SSL" );
-        TrustManager trustManager = new X509CertificateTrustManager( serverCertificate );
+        TrustManager trustManager = new X509CertificateTrustManager( serverCertificates );
         TrustManager[] trustManagers = { trustManager };
         sslContext.init( null, trustManagers, null );
     }
@@ -106,22 +111,22 @@ public class CustomSSLSocketFactory extends SSLSocketFactory {
     /**
      * Install the OpenID SSL Socket Factory. Trusts the given server certificate and all default trusted server certificates.
      *
-     * @param serverCertificate SSL Certificate to trust
+     * @param serverCertificates SSL certificates to trust (> 1 for rollover purposes)
      *
      * @throws NoSuchAlgorithmException could not get an SSLContext instance
      * @throws KeyManagementException   failed to initialize the SSLContext
-     * @throws KeyStoreException        failed to intialize the {@link X509CertificateTrustManager}
+     * @throws KeyStoreException        failed to initialize the {@link X509CertificateTrustManager}
      */
-    public static void install(X509Certificate serverCertificate)
+    public static void install(X509Certificate[] serverCertificates)
             throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 
         SSLSocketFactory sslSocketFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
         if (!(sslSocketFactory instanceof CustomSSLSocketFactory)) {
-            logger.dbg( "installing OpenID SSL Socket Factory..." );
-            CustomSSLSocketFactory openIDSSLSocketFactory = new CustomSSLSocketFactory( serverCertificate );
-            HttpsURLConnection.setDefaultSSLSocketFactory( openIDSSLSocketFactory );
+            logger.dbg( "installing Custom SSL Socket Factory..." );
+            CustomSSLSocketFactory customSSLSocketFactory = new CustomSSLSocketFactory( serverCertificates );
+            HttpsURLConnection.setDefaultSSLSocketFactory( customSSLSocketFactory );
         } else {
-            logger.dbg( "OpenID SSL Socket Factory already installed." );
+            logger.dbg( "Custom SSL Socket Factory already installed." );
         }
     }
 
