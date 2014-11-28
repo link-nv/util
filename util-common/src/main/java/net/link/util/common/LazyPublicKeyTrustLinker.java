@@ -1,6 +1,7 @@
 package net.link.util.common;
 
-import be.fedict.trust.linker.*;
+import be.fedict.trust.linker.PublicKeyTrustLinker;
+import be.fedict.trust.linker.TrustLinkerResult;
 import be.fedict.trust.policy.AlgorithmPolicy;
 import be.fedict.trust.revocation.RevocationData;
 import java.security.cert.X509Certificate;
@@ -17,7 +18,7 @@ public class LazyPublicKeyTrustLinker extends PublicKeyTrustLinker {
     @Override
     public TrustLinkerResult hasTrustLink(X509Certificate childCertificate, X509Certificate certificate, Date validationDate, RevocationData revocationData,
                                           AlgorithmPolicy algorithmPolicy)
-            throws TrustLinkerResultException, Exception {
+            throws Exception {
 
         super.hasTrustLink( childCertificate, certificate, validationDate, revocationData, algorithmPolicy );
 
