@@ -3,12 +3,14 @@ package net.link.util.ssl;
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.repository.MemoryCertificateRepository;
+import com.google.common.collect.Lists;
 import com.google.common.collect.ObjectArrays;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.List;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
@@ -29,7 +31,7 @@ public class X509CertificateTrustManager implements X509TrustManager {
 
     static final Logger logger = Logger.get( X509CertificateTrustManager.class );
 
-    private final X509Certificate[] trustedCertificates;
+    private       X509Certificate[] trustedCertificates;
     private final X509TrustManager  defaultTrustManager;
 
     public X509CertificateTrustManager() {
@@ -40,7 +42,19 @@ public class X509CertificateTrustManager implements X509TrustManager {
 
     public X509CertificateTrustManager(final X509Certificate[] trustedCertificates) {
 
-        this.trustedCertificates = trustedCertificates;
+        // check certificates and get rid of null ones
+        if (null != trustedCertificates) {
+
+            List<X509Certificate> certificateList = Lists.newLinkedList();
+            for (X509Certificate certificate : trustedCertificates) {
+                if (null != certificate) {
+                    certificateList.add( certificate );
+                }
+            }
+            if (!certificateList.isEmpty()) {
+                this.trustedCertificates = certificateList.toArray( new X509Certificate[certificateList.size()] );
+            }
+        }
 
         X509TrustManager x509TrustManager = null;
         try {
