@@ -3,6 +3,7 @@ package net.link.util.ssl;
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.repository.MemoryCertificateRepository;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.ObjectArrays;
 import java.security.GeneralSecurityException;
@@ -16,6 +17,7 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import net.link.util.common.ApplicationMode;
 import net.link.util.common.CertificateChain;
+import net.link.util.common.CertificateUtils;
 import net.link.util.common.LazyPublicKeyTrustLinker;
 import net.link.util.logging.Logger;
 
@@ -126,7 +128,9 @@ public class X509CertificateTrustManager implements X509TrustManager {
 
             for (X509Certificate trustedCertificate : trustedCertificates) {
 
-                if (isTrusted( chain, trustedCertificate )) {
+                CertificateChain chainCopy = new CertificateChain( ImmutableList.copyOf( chain.getOrderedCertificateChain() ) );
+
+                if (isTrusted( chainCopy, trustedCertificate )) {
                     return true;
                 }
             }
@@ -153,8 +157,15 @@ public class X509CertificateTrustManager implements X509TrustManager {
             certificateRepository.addTrustPoint( trustedCertificate );
 
             if (!chain.hasRootCertificate()) {
-                // root certificate not included, take on assumption trustedCertificate == the rootCertificate
-                chain.addRootCertificate( trustedCertificate );
+
+                // check not chain of 1 self signed cert
+                if (1 == chain.getOrderedCertificateChain().size() && CertificateUtils.isSelfSigned( chain.getOrderedCertificateChain().getFirst() )) {
+                    // let it be
+                } else {
+
+                    // root certificate not included, take on assumption trustedCertificate == the rootCertificate
+                    chain.addRootCertificate( trustedCertificate );
+                }
             }
 
             TrustValidator trustValidator = new TrustValidator( certificateRepository );

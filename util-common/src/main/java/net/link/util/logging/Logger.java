@@ -1,6 +1,6 @@
 package net.link.util.logging;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Throwables;
 import java.io.Serializable;
@@ -51,8 +51,13 @@ public class Logger implements Serializable {
      */
     public Logger trc(@Nullable final Marker marker, @Nullable final Throwable cause, final String descriptionFormat, final Object... descriptionArguments) {
 
-        if (slf4j().isTraceEnabled())
-            slf4j().trace( marker, String.format( descriptionFormat, descriptionArguments ), cause );
+        if (slf4j().isTraceEnabled()) {
+            if (null == descriptionArguments || 0 == descriptionArguments.length) {
+                slf4j().trace( marker, descriptionFormat, cause );
+            } else {
+                slf4j().trace( marker, String.format( descriptionFormat, descriptionArguments ), cause );
+            }
+        }
 
         return this;
     }
@@ -104,8 +109,13 @@ public class Logger implements Serializable {
      */
     public Logger dbg(@Nullable final Marker marker, @Nullable final Throwable cause, final String descriptionFormat, final Object... descriptionArguments) {
 
-        if (slf4j().isDebugEnabled())
-            slf4j().debug( marker, String.format( descriptionFormat, descriptionArguments ), cause );
+        if (slf4j().isDebugEnabled()) {
+            if (null == descriptionArguments || 0 == descriptionArguments.length) {
+                slf4j().debug( marker, descriptionFormat, cause );
+            } else {
+                slf4j().debug( marker, String.format( descriptionFormat, descriptionArguments ), cause );
+            }
+        }
 
         return this;
     }
@@ -155,8 +165,13 @@ public class Logger implements Serializable {
      */
     public Logger inf(@Nullable final Marker marker, @Nullable final Throwable cause, final String descriptionFormat, final Object... descriptionArguments) {
 
-        if (slf4j().isInfoEnabled())
-            slf4j().info( marker, String.format( descriptionFormat, descriptionArguments ), cause );
+        if (slf4j().isInfoEnabled()) {
+            if (null == descriptionArguments || 0 == descriptionArguments.length) {
+                slf4j().info( marker, descriptionFormat, cause );
+            } else {
+                slf4j().info( marker, String.format( descriptionFormat, descriptionArguments ), cause );
+            }
+        }
 
         return this;
     }
@@ -208,8 +223,13 @@ public class Logger implements Serializable {
      */
     public Logger wrn(@Nullable final Marker marker, @Nullable final Throwable cause, final String descriptionFormat, final Object... descriptionArguments) {
 
-        if (slf4j().isWarnEnabled())
-            slf4j().warn( marker, String.format( descriptionFormat, descriptionArguments ), cause );
+        if (slf4j().isWarnEnabled()) {
+            if (null == descriptionArguments || 0 == descriptionArguments.length) {
+                slf4j().warn( marker, descriptionFormat, cause );
+            } else {
+                slf4j().warn( marker, String.format( descriptionFormat, descriptionArguments ), cause );
+            }
+        }
 
         return this;
     }
@@ -259,8 +279,13 @@ public class Logger implements Serializable {
      */
     public Logger err(@Nullable final Marker marker, @Nullable final Throwable cause, final String descriptionFormat, final Object... descriptionArguments) {
 
-        if (slf4j().isErrorEnabled())
-            slf4j().error( marker, String.format( descriptionFormat, descriptionArguments ), cause );
+        if (slf4j().isErrorEnabled()) {
+            if (null == descriptionArguments || 0 == descriptionArguments.length) {
+                slf4j().error( marker, descriptionFormat, cause );
+            } else {
+                slf4j().error( marker, String.format( descriptionFormat, descriptionArguments ), cause );
+            }
+        }
 
         return this;
     }
@@ -397,8 +422,9 @@ public class Logger implements Serializable {
 
     public org.slf4j.Logger slf4j() {
 
-        if (logger == null)
+        if (logger == null) {
             logger = LoggerFactory.getLogger( name );
+        }
 
         return logger;
     }
