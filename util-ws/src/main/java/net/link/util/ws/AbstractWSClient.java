@@ -61,11 +61,11 @@ public class AbstractWSClient<P> {
 
     protected void registerTrustManager(final X509Certificate[] trustedCertificates) {
 
-        if (null == trustedCertificates) {
+        if (null == trustedCertificates && ApplicationMode.get() == ApplicationMode.DEPLOYMENT) {
             return;
         }
 
-        logger.dbg( "Installing trust manager on: {}, for: {} ", getClass(), Arrays.asList( trustedCertificates ) );
+        logger.dbg( "Installing trust manager on: {}, for: {} ", getClass(), null != trustedCertificates? Arrays.asList( trustedCertificates ): null );
 
         try {
             SSLContext sslContext = SSLContext.getInstance( "TLS" );
