@@ -1,13 +1,13 @@
 package net.link.util.ws.security.username;
 
 import com.google.common.collect.ImmutableSet;
-import net.link.util.logging.Logger;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.PostConstruct;
-import javax.naming.*;
-import javax.security.auth.callback.*;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPPart;
 import javax.xml.ws.BindingProvider;
@@ -15,10 +15,15 @@ import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
-import net.link.util.j2ee.JNDIUtils;
+import net.link.util.InternalInconsistencyException;
+import net.link.util.logging.Logger;
 import net.link.util.pkix.ServerCrypto;
 import net.link.util.ws.security.SOAPUtils;
-import org.apache.ws.security.*;
+import org.apache.ws.security.WSConstants;
+import org.apache.ws.security.WSPasswordCallback;
+import org.apache.ws.security.WSSecurityEngine;
+import org.apache.ws.security.WSSecurityEngineResult;
+import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.message.WSSecHeader;
 import org.apache.ws.security.message.WSSecUsernameToken;
 import org.apache.ws.security.message.token.UsernameToken;
@@ -36,34 +41,37 @@ public class WSSecurityUsernameTokenHandler implements SOAPHandler<SOAPMessageCo
     public static final String USERNAME_PROPERTY = WSSecurityUsernameTokenHandler.class + ".username";
     public static final String PASSWORD_PROPERTY = WSSecurityUsernameTokenHandler.class + ".password";
 
-    private final WSSecurityUsernameTokenCallback callback;
+    private WSSecurityUsernameTokenCallback callback;
 
     public WSSecurityUsernameTokenHandler() {
-
-        try {
-            Context ctx = new InitialContext();
-            try {
-                Context env = (Context) ctx.lookup( "java:comp/env" );
-                String callbackJndiName = (String) env.lookup( "wsSecurityUsernameTokenCallbackJndiName" );
-                callback = JNDIUtils.getComponent( callbackJndiName, WSSecurityUsernameTokenCallback.class );
-            }
-            finally {
-                try {
-                    ctx.close();
-                }
-                catch (NamingException e) {
-                    logger.err( e, "While closing: %s", ctx );
-                }
-            }
-        }
-        catch (NamingException e) {
-            throw new RuntimeException( "'wsSecurityUsernameTokenCallbackJndiName' not specified", e );
-        }
+        // do nothing, needed tho
     }
 
     public WSSecurityUsernameTokenHandler(WSSecurityUsernameTokenCallback callback) {
 
         this.callback = callback;
+    }
+
+    /**
+     * Override this method to supply the WS-Security config callback
+     */
+    protected WSSecurityUsernameTokenCallback loadWsSecurityUsernameTokenCallback() {
+
+        return null;
+    }
+
+    private WSSecurityUsernameTokenCallback getWsSecurityUsernameTokenCallback() {
+
+        if (null == callback) {
+            callback = loadWsSecurityUsernameTokenCallback();
+        }
+
+        if (null == callback) {
+            throw new InternalInconsistencyException(
+                    "No WS-Security callback was found, either install the handler @ runtime to provide one or extend this handler and override the loadWsSecurityUsernameTokenCallback method." );
+        }
+
+        return callback;
     }
 
     @PostConstruct
@@ -106,7 +114,7 @@ public class WSSecurityUsernameTokenHandler implements SOAPHandler<SOAPMessageCo
      */
     private boolean handleOutboundDocument(SOAPPart document) {
 
-        String username = callback.getUsername();
+        String username = getWsSecurityUsernameTokenCallback().getUsername();
 
         if (null == username) {
             logger.dbg( "No username provided, not adding WS-Security SOAP header" );
@@ -120,12 +128,12 @@ public class WSSecurityUsernameTokenHandler implements SOAPHandler<SOAPMessageCo
             wsSecHeader.insertSecurityHeader( document );
 
             WSSecUsernameToken wsSecUsernameToken = new WSSecUsernameToken();
-            wsSecUsernameToken.setUserInfo( username, callback.getPassword() );
-            if (callback.addNonce()) {
+            wsSecUsernameToken.setUserInfo( username, getWsSecurityUsernameTokenCallback().getPassword() );
+            if (getWsSecurityUsernameTokenCallback().addNonce()) {
                 wsSecUsernameToken.addCreated();
                 wsSecUsernameToken.addNonce();
             }
-            if (callback.isDigestPassword()) {
+            if (getWsSecurityUsernameTokenCallback().isDigestPassword()) {
                 wsSecUsernameToken.setPasswordType( WSConstants.PASSWORD_DIGEST );
             } else {
                 wsSecUsernameToken.setPasswordType( WSConstants.PASSWORD_TEXT );
@@ -161,7 +169,7 @@ public class WSSecurityUsernameTokenHandler implements SOAPHandler<SOAPMessageCo
                         if (c instanceof WSPasswordCallback) {
                             WSPasswordCallback wspc = (WSPasswordCallback) c;
 
-                            String password = callback.handle( wspc.getIdentifier() );
+                            String password = getWsSecurityUsernameTokenCallback().handle( wspc.getIdentifier() );
                             if (null == password) {
                                 throw SOAPUtils.createSOAPFaultException( "Username is unknown, invalid security header", "FailedCheck" );
                             }
@@ -182,7 +190,7 @@ public class WSSecurityUsernameTokenHandler implements SOAPHandler<SOAPMessageCo
         }
         logger.dbg( "results: %s", wsSecurityEngineResults );
 
-        if (null == wsSecurityEngineResults && callback.isInboundHeaderOptional()) {
+        if (null == wsSecurityEngineResults && getWsSecurityUsernameTokenCallback().isInboundHeaderOptional()) {
             logger.wrn( "No username token found on WS-Security header..." );
             return true;
         } else if (null == wsSecurityEngineResults) {

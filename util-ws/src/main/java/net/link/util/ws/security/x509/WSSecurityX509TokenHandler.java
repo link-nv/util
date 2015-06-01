@@ -9,11 +9,11 @@ package net.link.util.ws.security.x509;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import net.link.util.logging.Logger;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import javax.annotation.PostConstruct;
-import javax.naming.*;
 import javax.xml.crypto.dsig.Reference;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
@@ -24,14 +24,23 @@ import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.MessageContext.Scope;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
+import net.link.util.InternalInconsistencyException;
 import net.link.util.common.CertificateChain;
 import net.link.util.common.DomUtils;
-import net.link.util.j2ee.JNDIUtils;
+import net.link.util.logging.Logger;
 import net.link.util.pkix.ClientCrypto;
 import net.link.util.pkix.ServerCrypto;
 import net.link.util.ws.security.SOAPUtils;
-import org.apache.ws.security.*;
-import org.apache.ws.security.message.*;
+import org.apache.ws.security.SOAPConstants;
+import org.apache.ws.security.WSConstants;
+import org.apache.ws.security.WSDataRef;
+import org.apache.ws.security.WSEncryptionPart;
+import org.apache.ws.security.WSSecurityEngine;
+import org.apache.ws.security.WSSecurityEngineResult;
+import org.apache.ws.security.WSSecurityException;
+import org.apache.ws.security.message.WSSecHeader;
+import org.apache.ws.security.message.WSSecSignature;
+import org.apache.ws.security.message.WSSecTimestamp;
 import org.apache.ws.security.message.token.Timestamp;
 import org.apache.ws.security.util.WSSecurityUtil;
 import org.joda.time.Duration;
@@ -61,32 +70,26 @@ public class WSSecurityX509TokenHandler implements SOAPHandler<SOAPMessageContex
         this.configuration = configuration;
     }
 
+    /**
+     * Override this method to supply the WS-Security config
+     */
+    protected WSSecurityConfiguration loadWSSecConfiguration() {
+
+        return null;
+    }
+
     private WSSecurityConfiguration getWSSecConfiguration() {
 
-        if (null == this.configuration) {
-
-            try {
-                Context ctx = new InitialContext();
-                try {
-                    Context env = (Context) ctx.lookup( "java:comp/env" );
-                    String configurationServiceJndiName = (String) env.lookup( "wsSecurityConfigurationServiceJndiName" );
-                    this.configuration = JNDIUtils.getComponent( configurationServiceJndiName, WSSecurityConfiguration.class );
-                }
-                finally {
-                    try {
-                        ctx.close();
-                    }
-                    catch (NamingException e) {
-                        logger.err( e, "While closing: %s", ctx );
-                    }
-                }
-            }
-            catch (NamingException e) {
-                throw new RuntimeException( "'wsSecurityConfigurationServiceJndiName' not specified", e );
-            }
+        if (null == configuration) {
+            configuration = loadWSSecConfiguration();
         }
 
-        return this.configuration;
+        if (null == configuration) {
+            throw new InternalInconsistencyException(
+                    "No WS-Security configuration was found, either install the handler @ runtime to provide one or extend this handler and override the loadWSSecConfiguration method." );
+        }
+
+        return configuration;
     }
 
     @PostConstruct
@@ -332,4 +335,6 @@ public class WSSecurityX509TokenHandler implements SOAPHandler<SOAPMessageContex
 
         return false;
     }
+
+    // abstract methods
 }
