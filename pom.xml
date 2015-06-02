@@ -98,6 +98,17 @@
                 <repo.plugin.url>http://buildserver/maven2</repo.plugin.url>
             </properties>
         </profile>
+        <profile>
+            <id>mac</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                </os>
+            </activation>
+            <properties>
+                <boot.classpath>/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/classes.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/jsse.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/jce.jar:/Library//Java/JavaVirtualMachines/1.6.0_29-b11-402.jdk/Contents/Classes/classes.jar:/Library//Java/JavaVirtualMachines/1.6.0_29-b11-402.jdk/Contents/Classes/jsse.jar:/Library//Java/JavaVirtualMachines/1.6.0_29-b11-402.jdk/Contents/Classes/jce.jar</boot.classpath>
+            </properties>
+        </profile>
     </profiles>
 
     <!-- DEFAULT PROPERTIES -->
@@ -109,6 +120,8 @@
 
         <deploy.url>scpexe://buildserver/Users/devel/maven2/repository</deploy.url>
         <maven-repository.url>file:${basedir}/maven-repository</maven-repository.url>
+
+        <boot.classpath/>
 
         <!-- DEFAULT VERSIONS, SEE PLUGINS -->
         <maven-release-plugin.version>2.1</maven-release-plugin.version>
@@ -268,6 +281,10 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <fork>true</fork>
+                    <!-- fix for building with Java 7 -->
+                    <compilerArguments>
+                        <bootclasspath>${boot.classpath}</bootclasspath>
+                    </compilerArguments>
                     <source>1.6</source>
                     <target>1.6</target>
                     <meminitial>32m</meminitial>
