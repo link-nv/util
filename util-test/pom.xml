@@ -5,7 +5,7 @@
     <parent>
         <groupId>net.lin-k</groupId>
         <artifactId>util</artifactId>
-        <version>GIT-SNAPSHOT</version>
+        <version>1.62</version>
     </parent>
 
     <name>Util Test</name>

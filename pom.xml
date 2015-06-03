@@ -7,7 +7,7 @@
     <inceptionYear>2010</inceptionYear>
     <groupId>net.lin-k</groupId>
     <artifactId>util</artifactId>
-    <version>GIT-SNAPSHOT</version>
+    <version>1.62</version>
     <packaging>pom</packaging>
     <organization>
         <name>Lin.k N.V.</name>
@@ -121,7 +121,7 @@
         <deploy.url>scpexe://buildserver/Users/devel/maven2/repository</deploy.url>
         <maven-repository.url>file:${basedir}/maven-repository</maven-repository.url>
 
-        <boot.classpath/>
+        <boot.classpath />
 
         <!-- DEFAULT VERSIONS, SEE PLUGINS -->
         <maven-release-plugin.version>2.1</maven-release-plugin.version>
