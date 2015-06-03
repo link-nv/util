@@ -7,7 +7,9 @@
 
 package net.link.util.j2ee;
 
-import javax.naming.*;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import org.jetbrains.annotations.Nullable;
 
 
@@ -42,12 +44,12 @@ public abstract class EJBUtils {
         return getEJB( INITIAL_CONTEXT.get(), jndiName, type );
     }
 
-    public static <E> E getEJB(Context context, Class<E> type) {
+    private static <E> E getEJB(Context context, Class<E> type) {
 
         return getEJB( context, null, type );
     }
 
-    public static <E> E getEJB(Context context, @Nullable String jndiName, Class<E> type) {
+    private static <E> E getEJB(Context context, @Nullable String jndiName, Class<E> type) {
 
         if (jndiName == null)
             jndiName = NAMING_STRATEGY.calculateName( type );

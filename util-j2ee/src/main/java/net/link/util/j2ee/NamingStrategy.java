@@ -22,7 +22,7 @@ import java.lang.reflect.Field;
  */
 public interface NamingStrategy extends Serializable {
 
-    public String calculateName(Class<?> ejbType);
+    String calculateName(Class<?> ejbType);
 
-    public boolean isSupported(Field field);
+    boolean isSupported(Field field);
 }

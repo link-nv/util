@@ -12,7 +12,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Throwables;
 import java.lang.reflect.Field;
 import javax.ejb.EJB;
-import net.link.util.logging.Logger;
 import net.link.util.util.ObjectUtils;
 import net.link.util.util.TypeUtils;
 import org.jboss.ejb3.annotation.LocalBinding;
@@ -37,8 +36,6 @@ import org.jetbrains.annotations.Nullable;
  * @author lhunath
  */
 public class FieldNamingStrategy implements NamingStrategy {
-
-    static final Logger logger = Logger.get( FieldNamingStrategy.class );
 
     private static final Function<TypeUtils.LastResult<Class<?>, String>, String> findJNDIBindingFunction = new Function<TypeUtils.LastResult<Class<?>, String>, String>() {
         @Nullable
