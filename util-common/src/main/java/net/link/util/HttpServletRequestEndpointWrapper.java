@@ -5,7 +5,7 @@
  * Lin.k N.V. proprietary/confidential. Use is subject to license terms.
  */
 
-package net.link.util.servlet;
+package net.link.util;
 
 import net.link.util.logging.Logger;
 import java.net.URI;

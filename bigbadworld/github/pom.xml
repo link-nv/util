@@ -62,40 +62,6 @@
         </dependency>
         <dependency>
             <groupId>net.lin-k.util</groupId>
-            <artifactId>util-j2ee</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.lin-k.util</groupId>
-            <artifactId>util-j2ee</artifactId>
-            <classifier>sources</classifier>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.lin-k.util</groupId>
-            <artifactId>util-j2ee</artifactId>
-            <classifier>javadoc</classifier>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.lin-k.util</groupId>
-            <artifactId>util-j2ee-jboss6</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.lin-k.util</groupId>
-            <artifactId>util-j2ee-jboss6</artifactId>
-            <classifier>sources</classifier>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.lin-k.util</groupId>
-            <artifactId>util-j2ee-jboss6</artifactId>
-            <classifier>javadoc</classifier>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.lin-k.util</groupId>
             <artifactId>util-jpa</artifactId>
             <version>${project.version}</version>
         </dependency>

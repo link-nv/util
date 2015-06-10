@@ -4,13 +4,14 @@
  * Copyright 2006-2009 Lin.k N.V. All rights reserved.
  * Lin.k N.V. proprietary/confidential. Use is subject to license terms.
  */
-package net.link.util.servlet;
+package net.link.util;
 
 import com.google.common.base.Throwables;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 import javax.servlet.http.*;
+import net.link.util.common.ErrorMessage;
 import org.jetbrains.annotations.Nullable;
 
 

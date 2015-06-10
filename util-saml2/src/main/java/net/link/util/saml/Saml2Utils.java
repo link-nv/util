@@ -16,7 +16,6 @@ import java.security.cert.X509Certificate;
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import net.link.util.common.CertificateChain;
-import net.link.util.exception.ValidationFailedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;

@@ -30,36 +30,8 @@
             <groupId>net.lin-k.util</groupId>
             <artifactId>util-common</artifactId>
         </dependency>
-        <dependency>
-            <groupId>net.lin-k.util</groupId>
-            <artifactId>util-j2ee</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.lin-k.util</groupId>
-            <artifactId>util-j2ee-jboss6</artifactId>
-        </dependency>
 
-        <!-- JBoss 6 -->
-        <dependency>
-            <groupId>org.jboss.spec.javax.ejb</groupId>
-            <artifactId>jboss-ejb-api_3.1_spec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.spec.javax.jms</groupId>
-            <artifactId>jboss-jms-api_1.1_spec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.spec.javax.security.jacc</groupId>
-            <artifactId>jboss-jacc-api_1.4_spec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.mx</groupId>
-            <artifactId>jboss-j2se</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.picketbox</groupId>
-            <artifactId>jbosssx-client</artifactId>
-        </dependency>
+        <!-- HSQLDB -->
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>

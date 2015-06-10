@@ -22,7 +22,6 @@ import javax.xml.namespace.QName;
 import net.link.util.common.CertificateChain;
 import net.link.util.common.DomUtils;
 import net.link.util.config.KeyProvider;
-import net.link.util.exception.ValidationFailedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;

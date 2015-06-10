@@ -5,7 +5,7 @@
  * Lin.k N.V. proprietary/confidential. Use is subject to license terms.
  */
 
-package net.link.util.exception;
+package net.link.util.saml;
 
 public class ValidationFailedException extends Exception {
 
