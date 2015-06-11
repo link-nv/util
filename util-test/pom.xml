@@ -98,17 +98,7 @@
             <artifactId>derby</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>net.sourceforge</groupId>
-            <artifactId>shiftone-oocjndi</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.sourceforge</groupId>
-            <artifactId>shiftone-arbor</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
+        
         <!-- Test Dependencies -->
         <dependency>
             <groupId>junit</groupId>

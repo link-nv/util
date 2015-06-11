@@ -1,12 +1,13 @@
 package net.link.util.config;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
+import com.google.common.io.ByteSource;
 import com.google.common.io.Closeables;
-import com.google.common.io.InputSupplier;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
@@ -56,10 +57,10 @@ public class KeyStoreKeyProvider extends KeyProviderImpl {
         }
     }
 
-    protected static KeyStore loadKeyStore(InputSupplier<? extends InputStream> streamSupplier, String keyStorePassword) {
+    protected static KeyStore loadKeyStore(ByteSource byteSource, String keyStorePassword) {
 
         try {
-            InputStream stream = streamSupplier.getInput();
+            InputStream stream = byteSource.openStream();
 
             try {
                 return KeyUtils.loadKeyStore( "JKS", checkNotNull( stream, "Keystore input stream cannot be null." ),

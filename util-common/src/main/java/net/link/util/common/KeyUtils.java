@@ -9,26 +9,50 @@ package net.link.util.common;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
-import net.link.util.InternalInconsistencyException;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.URI;
-import java.security.*;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.KeyStore;
 import java.security.KeyStore.PrivateKeyEntry;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
-import java.security.cert.*;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAKeyPairGenerator;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Enumeration;
+import net.link.util.InternalInconsistencyException;
 import org.apache.commons.io.FileUtils;
-import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.KeyPurposeId;
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
@@ -298,20 +322,6 @@ public abstract class KeyUtils {
 
         return generateCertificate( keyPair.getPublic(), dn, keyPair.getPrivate(), null, notBefore, notAfter, signatureAlgorithm, caCert, timeStampingPurpose,
                 null );
-    }
-
-    public static X509Certificate generateCertificate(PKCS10CertificationRequest csr, PrivateKey issuerPrivateKey, X509Certificate issuerCert,
-                                                      DateTime notBefore, DateTime notAfter, String inSignatureAlgorithm, boolean caCert,
-                                                      boolean timeStampingPurpose, URI ocspUri)
-            throws InvalidKeyException, NoSuchAlgorithmException {
-
-        try {
-            return generateCertificate( csr.getPublicKey(), csr.getCertificationRequestInfo().getSubject().toString(), issuerPrivateKey, issuerCert, notBefore,
-                    notAfter, inSignatureAlgorithm, caCert, timeStampingPurpose, ocspUri );
-        }
-        catch (NoSuchProviderException e) {
-            throw new InternalInconsistencyException( e );
-        }
     }
 
     public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn, PrivateKey issuerPrivateKey,

@@ -29,6 +29,6 @@ public class URLKeyStoreKeyProvider extends KeyStoreKeyProvider {
     public URLKeyStoreKeyProvider(@NotNull URL keyStoreURL, @Nullable String keyStorePassword, @Nullable String keyEntryAlias,
                                   @Nullable String keyEntryPassword) {
 
-        super( loadKeyStore( Resources.newInputStreamSupplier( keyStoreURL ), keyStorePassword ), keyEntryAlias, keyEntryPassword );
+        super( loadKeyStore( Resources.asByteSource( keyStoreURL ), keyStorePassword ), keyEntryAlias, keyEntryPassword );
     }
 }

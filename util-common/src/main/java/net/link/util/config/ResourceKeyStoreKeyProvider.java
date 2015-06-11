@@ -1,11 +1,11 @@
 package net.link.util.config;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.io.InputSupplier;
-import net.link.util.logging.Logger;
+import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;
+import net.link.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,9 +29,9 @@ public class ResourceKeyStoreKeyProvider extends KeyStoreKeyProvider {
     public ResourceKeyStoreKeyProvider(@NotNull final String keyStoreResource, @Nullable String keyStorePassword, @Nullable String keyEntryAlias,
                                        @Nullable String keyEntryPassword) {
 
-        super( loadKeyStore( new InputSupplier<InputStream>() {
+        super( loadKeyStore( new ByteSource() {
             @Override
-            public InputStream getInput()
+            public InputStream openStream()
                     throws IOException {
 
                 ClassLoader classLoader = Thread.currentThread().getContextClassLoader();

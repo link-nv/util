@@ -1,7 +1,7 @@
 package net.link.util.util;
 
-import com.google.common.io.ByteStreams;
-import com.google.common.io.InputSupplier;
+import com.google.common.io.ByteSource;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
@@ -48,13 +48,13 @@ public enum MessageDigests {
 
     public byte[] of(final byte[] bytes) {
 
-        return of( IOUtils.supply( bytes ) );
+        return of( new ByteArrayInputStream( bytes ) );
     }
 
-    public byte[] of(final InputSupplier<? extends InputStream> supplier) {
+    public byte[] of(final ByteSource byteSource) {
 
         try {
-            return get().digest( ByteStreams.toByteArray( supplier ) );
+            return get().digest( byteSource.read() );
         }
         catch (final IOException e) {
             throw logger.bug( e );
@@ -63,6 +63,6 @@ public enum MessageDigests {
 
     public byte[] of(final InputStream stream) {
 
-        return of( IOUtils.supply( stream ) );
+        return of( stream );
     }
 }

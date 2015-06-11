@@ -28,6 +28,6 @@ public class FileKeyStoreKeyProvider extends KeyStoreKeyProvider {
     public FileKeyStoreKeyProvider(@NotNull File keyStoreFile, @Nullable String keyStorePassword, @Nullable String keyEntryAlias,
                                    @Nullable String keyEntryPassword) {
 
-        super( loadKeyStore( Files.newInputStreamSupplier( keyStoreFile ), keyStorePassword ), keyEntryAlias, keyEntryPassword );
+        super( loadKeyStore( Files.asByteSource( keyStoreFile ), keyStorePassword ), keyEntryAlias, keyEntryPassword );
     }
 }

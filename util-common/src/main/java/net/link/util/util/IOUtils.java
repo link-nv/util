@@ -1,8 +1,11 @@
 package net.link.util.util;
 
 import com.google.common.io.CharStreams;
-import com.google.common.io.InputSupplier;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.regex.Matcher;
@@ -10,7 +13,6 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import javax.annotation.Nullable;
-import net.link.util.logging.Logger;
 
 
 /**
@@ -20,31 +22,7 @@ import net.link.util.logging.Logger;
  */
 public abstract class IOUtils {
 
-    static final Logger logger = Logger.get( IOUtils.class );
-
     private static final Pattern PATH_SEPARATORS = Pattern.compile( "[\\\\/]+" );
-
-    public static <T> InputSupplier<T> supply(final T supply) {
-
-        return new InputSupplier<T>() {
-            @Override
-            public T getInput() {
-
-                return supply;
-            }
-        };
-    }
-
-    public static InputSupplier<? extends InputStream> supply(final byte[] supply) {
-
-        return new InputSupplier<InputStream>() {
-            @Override
-            public InputStream getInput() {
-
-                return new ByteArrayInputStream( supply );
-            }
-        };
-    }
 
     /**
      * A sane way of retrieving an entry from a {@link ZipFile} based on its /-delimited path name.
