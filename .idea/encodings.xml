@@ -5,14 +5,9 @@
     <file url="file://$PROJECT_DIR$/bigbadworld" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/bigbadworld/github" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/util-common" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/util-j2ee" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/util-j2ee-jboss4" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/util-j2ee-jboss6" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/util-jpa" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/util-saml2" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/util-test" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/util-wicket" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/util-ws" charset="UTF-8" />
   </component>
 </project>
-
