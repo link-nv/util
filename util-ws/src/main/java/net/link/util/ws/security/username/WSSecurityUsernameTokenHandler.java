@@ -171,7 +171,8 @@ public class WSSecurityUsernameTokenHandler implements SOAPHandler<SOAPMessageCo
 
                             String password = getWsSecurityUsernameTokenCallback().handle( wspc.getIdentifier() );
                             if (null == password) {
-                                throw SOAPUtils.createSOAPFaultException( "Username is unknown, invalid security header", "FailedCheck" );
+                                throw SOAPUtils.createSOAPFaultException(
+                                        String.format( "Username \"%s\" is unknown, invalid security header", wspc.getIdentifier() ), "FailedCheck" );
                             }
 
                             wspc.setPassword( password );
