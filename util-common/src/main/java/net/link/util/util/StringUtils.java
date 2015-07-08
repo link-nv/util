@@ -8,7 +8,9 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.net.URL;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.SortedSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
@@ -22,6 +24,37 @@ public abstract class StringUtils {
     private static final Pattern TLD              = Pattern.compile( "^.*?([^\\.]+\\.[^\\.]+)$" );
     private static final Pattern TRAILING_SLASHES = Pattern.compile( "/+$" );
     private static final Pattern NON_FINAL_PATH   = Pattern.compile( "^.*/" );
+
+    /**
+     * Compares specified {@link String}'s in a constant time algorithm, preventing timing attacks
+     *
+     * @param str1 The string to compare from.
+     * @param str2 The string to compare to.
+     *
+     * @return {@code true} if both strings contain the exact same characters.
+     *
+     * @see <a href="http://codahale.com/a-lesson-in-timing-attacks">
+     */
+    public static boolean isEqualConstant(String str1, String str2) {
+
+        if (null == str1 && null == str2)
+            return true;
+
+        if (null == str2 || null == str1)
+            return false;
+
+        if (str1.length() != str2.length())
+            return false;
+
+        byte[] b1 = str1.getBytes();
+        byte[] b2 = str2.getBytes();
+
+        int result = 0;
+        for (int i = 0; i < b1.length; i++)
+            result |= b1[i] ^ b2[i];
+
+        return result == 0;
+    }
 
     /**
      * Convenience shortcut for {@link MessageFormat#format(String, Object...)}.  Great for static imports.
