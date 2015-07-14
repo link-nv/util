@@ -22,6 +22,10 @@
         <!-- Dependencies: Util -->
         <dependency>
             <groupId>net.lin-k.util</groupId>
+            <artifactId>util-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.lin-k.util</groupId>
             <artifactId>util-test</artifactId>
             <scope>test</scope>
         </dependency>
