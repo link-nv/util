@@ -7,7 +7,7 @@
     <inceptionYear>2010</inceptionYear>
     <groupId>net.lin-k</groupId>
     <artifactId>util</artifactId>
-    <version>GIT-SNAPSHOT</version>
+    <version>1.69</version>
     <packaging>pom</packaging>
     <organization>
         <name>Lin.k N.V.</name>
