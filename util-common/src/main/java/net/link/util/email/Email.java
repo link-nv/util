@@ -1,10 +1,5 @@
 package net.link.util.email;
 
-/**
- * Created by wvdhaute
- * Date: 08/07/15
- * Time: 09:35
- */
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -119,7 +114,7 @@ public class Email implements Runnable {
 
             //Add message text
             MimeBodyPart messageBodyPart = new MimeBodyPart();
-            messageBodyPart.setText( text );
+            messageBodyPart.setContent( text, "text/html; charset=utf-8" );
             multipart.addBodyPart( messageBodyPart );
 
             //Add attachements
