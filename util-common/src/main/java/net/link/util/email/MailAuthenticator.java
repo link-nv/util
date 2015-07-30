@@ -17,18 +17,18 @@ import javax.mail.PasswordAuthentication;
  */
 public class MailAuthenticator extends javax.mail.Authenticator {
 
-    String User;
-    String Password;
+    private final String user;
+    private final String password;
 
-    public MailAuthenticator(String user, String password) {
+    public MailAuthenticator( final String user, final String password ) {
 
-        User = user;
-        Password = password;
+        this.user = user;
+        this.password = password;
     }
 
     @Override
     public PasswordAuthentication getPasswordAuthentication() {
 
-        return new javax.mail.PasswordAuthentication( User, Password );
+        return new javax.mail.PasswordAuthentication( user, password );
     }
 }
