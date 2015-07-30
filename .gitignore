@@ -18,6 +18,7 @@
 !/.idea/inspectionProfiles
 !/.idea/projectCodeStyle.xml
 !/.idea/validation.xml
+!/.idea/codeStyleSettings.xml
 *.iml
 /*.ipr
 /*.iws
