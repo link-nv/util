@@ -1,6 +1,8 @@
 package net.link.util.email;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.UUID;
 
 
 /**
@@ -10,15 +12,21 @@ import java.io.Serializable;
  */
 public class MailAttachment implements Serializable {
 
-    private byte[] content;
-    private String mimeType;
-    private String fileName;
+    private static final long serialVersionUID = -8201148905836579566L;
 
-    public MailAttachment(byte[] content, String mimeType, String fileName) {
+    private final String fileName;
+    private final String mimeType;
+    private final byte[] content;
+    private final String contentID;
+
+    public MailAttachment( byte[] content, String mimeType, String fileName ) {
 
         this.content = content;
         this.mimeType = mimeType;
         this.fileName = fileName;
+
+        //Generate content ID
+        this.contentID = String.format( "%s-%s", this.fileName, UUID.randomUUID().toString() );
     }
 
     public byte[] getContent() {
@@ -34,5 +42,21 @@ public class MailAttachment implements Serializable {
     public String getFileName() {
 
         return fileName;
+    }
+
+    public String getContentID() {
+
+        return contentID;
+    }
+
+    @Override
+    public String toString() {
+
+        return "MailAttachment{" +
+                "fileName='" + fileName + '\'' +
+                ", mimeType='" + mimeType + '\'' +
+                ", content=" + Arrays.toString(content) +
+                ", contentID='" + contentID + '\'' +
+                '}';
     }
 }

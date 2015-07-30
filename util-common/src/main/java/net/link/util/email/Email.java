@@ -1,16 +1,17 @@
 package net.link.util.email;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
@@ -20,6 +21,8 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 import net.link.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 
 /**
@@ -27,36 +30,60 @@ import org.apache.commons.lang3.StringUtils;
  * Date: 02/09/13
  * Time: 14:03
  */
-public class Email implements Runnable {
+public class Email implements Callable<Boolean>, Serializable {
 
     private static final Logger logger = Logger.get( Email.class );
 
-    private String               username;
-    private String               password;
-    private String               sender;
-    private String               receiver;
-    private String               subject;
-    private String               text;
+    public static final String MIME_TYPE_HTML_MAIL = "text/html; charset=utf-8";
+
+    private String username;
+    private String password;
+    private String sender;
+    private String receiver;
+    private String subject;
+    private String text;
     private List<MailAttachment> attachments;
-    private String               host;
-    private int                  port;
+    private String host;
+    private int port;
 
     private String replyToAddress;
 
-    public Email(String username, String password, String sender, String receiver, String subject, String text, String host, int port) {
+    public Email( String username,
+                  String password,
+                  String sender,
+                  String receiver,
+                  String subject,
+                  String text,
+                  String host,
+                  int port ) {
 
         this( username, password, sender, receiver, subject, text, new ArrayList<MailAttachment>(), host, port );
     }
 
-    public Email(String username, String password, String sender, String receiver, String subject, String text, MailAttachment attachment, String host,
-                 int port) {
+    public Email( String username,
+                  String password,
+                  String sender,
+                  String receiver,
+                  String subject,
+                  String text,
+                  @Nullable MailAttachment attachment,
+                  String host,
+                  int port ) {
 
-        this( username, password, sender, receiver, subject, text, attachment == null? new ArrayList<MailAttachment>(): Arrays.asList( attachment ), host,
-                port );
+        this( username, password, sender, receiver, subject, text,
+                attachment == null ? new ArrayList<MailAttachment>() : Collections.singletonList(attachment),
+                host, port );
     }
 
-    public Email(String username, String password, String sender, String receiver, String subject, String text, List<MailAttachment> attachments, String host,
-                 int port) {
+    public Email( String username,
+                  String password,
+                  String sender,
+                  String receiver,
+                  String subject,
+                  String text,
+                  @NotNull List<MailAttachment> attachments,
+                  String host,
+                  int port ) {
 
         this.username = username;
         this.password = password;
@@ -71,13 +98,14 @@ public class Email implements Runnable {
         this.replyToAddress = null;
     }
 
-    public void setReplyToAddress(String replyToAddress) {
+    public void setReplyToAddress( String replyToAddress ) {
 
         this.replyToAddress = replyToAddress;
     }
 
     @Override
-    public void run() {
+    public Boolean call()
+            throws Exception {
 
         try {
 
@@ -99,49 +127,83 @@ public class Email implements Runnable {
             //Message
             MimeMessage message = new MimeMessage( session );
             message.setFrom( new InternetAddress( sender ) );
-            message.setRecipients( Message.RecipientType.TO, new InternetAddress[] { new InternetAddress( receiver ) } );
-            if (StringUtils.isNotBlank( this.replyToAddress )) {
+            message.setRecipients( Message.RecipientType.TO, new InternetAddress[]{ new InternetAddress( receiver ) } );
+            if( StringUtils.isNotBlank( this.replyToAddress ) ) {
 
-                message.setReplyTo( new Address[] {
+                message.setReplyTo(
+                        new Address[] {
 
-                        new InternetAddress( this.replyToAddress )
-                } );
+                                new InternetAddress( this.replyToAddress )
+                        }
+                );
             }
-            message.setSubject( subject );
+            message.setSubject( subject, "UTF-8" );
             message.setSentDate( new Date() );
 
-            Multipart multipart = new MimeMultipart();
+            //Cover wrap
+            MimeBodyPart wrap = new MimeBodyPart();
 
-            //Add message text
-            MimeBodyPart messageBodyPart = new MimeBodyPart();
-            messageBodyPart.setContent( text, "text/html; charset=utf-8" );
-            multipart.addBodyPart( messageBodyPart );
+            //Alternative text/html content
+            MimeMultipart cover = new MimeMultipart( "alternative" );
+            MimeBodyPart html = new MimeBodyPart();
+            cover.addBodyPart( html );
 
-            //Add attachements
-            if (attachments != null) {
+            wrap.setContent( cover );
 
-                for (MailAttachment attachment : attachments) {
+            MimeMultipart content = new MimeMultipart( "related" );
+            message.setContent( content );
+            content.addBodyPart( wrap );
 
-                    if (attachment == null)
+            //Set mail content
+            html.setContent( text, MIME_TYPE_HTML_MAIL );
+
+            //Add attachments
+            if( attachments != null ) {
+
+                for( MailAttachment attachment : attachments ) {
+
+                    if( attachment == null )
                         continue;
 
-                    messageBodyPart = new MimeBodyPart();
+                    MimeBodyPart messageBodyPart = new MimeBodyPart();
                     DataSource source = new ByteArrayDataSource( attachment.getContent(), attachment.getMimeType() );
                     messageBodyPart.setDataHandler( new DataHandler( source ) );
                     messageBodyPart.setFileName( attachment.getFileName() );
-                    multipart.addBodyPart( messageBodyPart );
+                    messageBodyPart.setContentID( String.format( "<%s>", attachment.getContentID() ) );
+                    content.addBodyPart( messageBodyPart );
                 }
             }
 
             //Send
-            message.setContent( multipart );
             Transport.send( message );
 
             logger.inf( "Mail has been sent to " + receiver );
+
+            return true;
         }
-        catch (MessagingException ex) {
+        catch( MessagingException ex ) {
 
             logger.err( ex, "Failed to send email to %s", receiver );
+
+            return false;
         }
     }
+
+    @Override
+    public String toString() {
+
+        return "Email{" +
+                "username='" + username + '\'' +
+                ", password='" + String.format( "%" + password.length() + "s", "" ).replace( ' ', '*' ) + '\'' +
+                ", sender='" + sender + '\'' +
+                ", receiver='" + receiver + '\'' +
+                ", subject='" + subject + '\'' +
+                ", text='" + text + '\'' +
+                ", attachments=" + attachments +
+                ", host='" + host + '\'' +
+                ", port=" + port +
+                ", replyToAddress='" + replyToAddress + '\'' +
+                '}';
+    }
 }
+
