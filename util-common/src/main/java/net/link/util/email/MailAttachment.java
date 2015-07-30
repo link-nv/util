@@ -19,7 +19,7 @@ public class MailAttachment implements Serializable {
     private final byte[] content;
     private final String contentID;
 
-    public MailAttachment( byte[] content, String mimeType, String fileName ) {
+    public MailAttachment(byte[] content, String mimeType, String fileName) {
 
         this.content = content;
         this.mimeType = mimeType;
@@ -53,10 +53,10 @@ public class MailAttachment implements Serializable {
     public String toString() {
 
         return "MailAttachment{" +
-                "fileName='" + fileName + '\'' +
-                ", mimeType='" + mimeType + '\'' +
-                ", content=" + Arrays.toString(content) +
-                ", contentID='" + contentID + '\'' +
-                '}';
+               "fileName='" + fileName + '\'' +
+               ", mimeType='" + mimeType + '\'' +
+               ", content=" + Arrays.toString( content ) +
+               ", contentID='" + contentID + '\'' +
+               '}';
     }
 }
