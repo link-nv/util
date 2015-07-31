@@ -36,54 +36,32 @@ public class Email implements Callable<Boolean>, Serializable {
 
     public static final String MIME_TYPE_HTML_MAIL = "text/html; charset=utf-8";
 
-    private String username;
-    private String password;
-    private String sender;
-    private String receiver;
-    private String subject;
-    private String text;
+    private String               username;
+    private String               password;
+    private String               sender;
+    private String               receiver;
+    private String               subject;
+    private String               text;
     private List<MailAttachment> attachments;
-    private String host;
-    private int port;
+    private String               host;
+    private int                  port;
 
     private String replyToAddress;
 
-    public Email( String username,
-                  String password,
-                  String sender,
-                  String receiver,
-                  String subject,
-                  String text,
-                  String host,
-                  int port ) {
+    public Email(String username, String password, String sender, String receiver, String subject, String text, String host, int port) {
 
         this( username, password, sender, receiver, subject, text, new ArrayList<MailAttachment>(), host, port );
     }
 
-    public Email( String username,
-                  String password,
-                  String sender,
-                  String receiver,
-                  String subject,
-                  String text,
-                  @Nullable MailAttachment attachment,
-                  String host,
-                  int port ) {
+    public Email(String username, String password, String sender, String receiver, String subject, String text, @Nullable MailAttachment attachment,
+                 String host, int port) {
 
-        this( username, password, sender, receiver, subject, text,
-                attachment == null ? new ArrayList<MailAttachment>() : Collections.singletonList(attachment),
+        this( username, password, sender, receiver, subject, text, attachment == null? new ArrayList<MailAttachment>(): Collections.singletonList( attachment ),
                 host, port );
     }
 
-    public Email( String username,
-                  String password,
-                  String sender,
-                  String receiver,
-                  String subject,
-                  String text,
-                  @NotNull List<MailAttachment> attachments,
-                  String host,
-                  int port ) {
+    public Email(String username, String password, String sender, String receiver, String subject, String text, @NotNull List<MailAttachment> attachments,
+                 String host, int port) {
 
         this.username = username;
         this.password = password;
@@ -98,7 +76,7 @@ public class Email implements Callable<Boolean>, Serializable {
         this.replyToAddress = null;
     }
 
-    public void setReplyToAddress( String replyToAddress ) {
+    public void setReplyToAddress(String replyToAddress) {
 
         this.replyToAddress = replyToAddress;
     }
@@ -127,15 +105,13 @@ public class Email implements Callable<Boolean>, Serializable {
             //Message
             MimeMessage message = new MimeMessage( session );
             message.setFrom( new InternetAddress( sender ) );
-            message.setRecipients( Message.RecipientType.TO, new InternetAddress[]{ new InternetAddress( receiver ) } );
-            if( StringUtils.isNotBlank( this.replyToAddress ) ) {
+            message.setRecipients( Message.RecipientType.TO, new InternetAddress[] { new InternetAddress( receiver ) } );
+            if (StringUtils.isNotBlank( this.replyToAddress )) {
 
-                message.setReplyTo(
-                        new Address[] {
+                message.setReplyTo( new Address[] {
 
                                 new InternetAddress( this.replyToAddress )
-                        }
-                );
+                        } );
             }
             message.setSubject( subject, "UTF-8" );
             message.setSentDate( new Date() );
@@ -158,11 +134,11 @@ public class Email implements Callable<Boolean>, Serializable {
             html.setContent( text, MIME_TYPE_HTML_MAIL );
 
             //Add attachments
-            if( attachments != null ) {
+            if (attachments != null) {
 
-                for( MailAttachment attachment : attachments ) {
+                for (MailAttachment attachment : attachments) {
 
-                    if( attachment == null )
+                    if (attachment == null)
                         continue;
 
                     MimeBodyPart messageBodyPart = new MimeBodyPart();
@@ -181,7 +157,7 @@ public class Email implements Callable<Boolean>, Serializable {
 
             return true;
         }
-        catch( MessagingException ex ) {
+        catch (MessagingException ex) {
 
             logger.err( ex, "Failed to send email to %s", receiver );
 
@@ -193,17 +169,17 @@ public class Email implements Callable<Boolean>, Serializable {
     public String toString() {
 
         return "Email{" +
-                "username='" + username + '\'' +
-                ", password='" + String.format( "%" + password.length() + "s", "" ).replace( ' ', '*' ) + '\'' +
-                ", sender='" + sender + '\'' +
-                ", receiver='" + receiver + '\'' +
-                ", subject='" + subject + '\'' +
-                ", text='" + text + '\'' +
-                ", attachments=" + attachments +
-                ", host='" + host + '\'' +
-                ", port=" + port +
-                ", replyToAddress='" + replyToAddress + '\'' +
-                '}';
+               "username='" + username + '\'' +
+               ", password='" + String.format( "%" + password.length() + "s", "" ).replace( ' ', '*' ) + '\'' +
+               ", sender='" + sender + '\'' +
+               ", receiver='" + receiver + '\'' +
+               ", subject='" + subject + '\'' +
+               ", text='" + text + '\'' +
+               ", attachments=" + attachments +
+               ", host='" + host + '\'' +
+               ", port=" + port +
+               ", replyToAddress='" + replyToAddress + '\'' +
+               '}';
     }
 }
 
