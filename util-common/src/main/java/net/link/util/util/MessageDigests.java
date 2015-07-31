@@ -1,9 +1,7 @@
 package net.link.util.util;
 
 import com.google.common.io.ByteSource;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import net.link.util.logging.Logger;
@@ -48,7 +46,7 @@ public enum MessageDigests {
 
     public byte[] of(final byte[] bytes) {
 
-        return of( new ByteArrayInputStream( bytes ) );
+        return get().digest( bytes );
     }
 
     public byte[] of(final ByteSource byteSource) {
@@ -59,10 +57,5 @@ public enum MessageDigests {
         catch (final IOException e) {
             throw logger.bug( e );
         }
-    }
-
-    public byte[] of(final InputStream stream) {
-
-        return of( stream );
     }
 }
