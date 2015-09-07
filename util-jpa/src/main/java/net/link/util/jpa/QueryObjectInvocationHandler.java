@@ -13,7 +13,11 @@ import java.lang.reflect.Method;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import net.link.util.jpa.annotation.*;
+import net.link.util.jpa.annotation.FirstResult;
+import net.link.util.jpa.annotation.MaxResults;
+import net.link.util.jpa.annotation.QueryMethod;
+import net.link.util.jpa.annotation.QueryParam;
+import net.link.util.jpa.annotation.UpdateMethod;
 
 
 /**
@@ -103,8 +107,9 @@ public class QueryObjectInvocationHandler implements InvocationHandler {
             return;
 
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-        for (int paramIdx = 0; paramIdx < args.length; paramIdx++)
-            for (Annotation parameterAnnotation : parameterAnnotations[paramIdx])
+        for (int paramIdx = 0; paramIdx < args.length; paramIdx++) {
+            for (Annotation parameterAnnotation : parameterAnnotations[paramIdx]) {
+
                 if (parameterAnnotation instanceof QueryParam) {
                     QueryParam queryParamAnnotation = (QueryParam) parameterAnnotation;
                     String paramName = queryParamAnnotation.value();
@@ -113,5 +118,21 @@ public class QueryObjectInvocationHandler implements InvocationHandler {
                     else
                         query.setParameter( paramName, args[paramIdx] );
                 }
+
+                if (parameterAnnotation instanceof FirstResult) {
+                    int firstResult = (Integer) args[paramIdx];
+                    if (firstResult >= 0) {
+                        query.setFirstResult( firstResult );
+                    }
+                }
+
+                if (parameterAnnotation instanceof MaxResults) {
+                    int maxResults = (Integer) args[paramIdx];
+                    if (maxResults > 0) {
+                        query.setMaxResults( maxResults );
+                    }
+                }
+            }
+        }
     }
 }
