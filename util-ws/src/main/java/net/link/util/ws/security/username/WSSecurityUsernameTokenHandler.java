@@ -192,7 +192,7 @@ public class WSSecurityUsernameTokenHandler implements SOAPHandler<SOAPMessageCo
         logger.dbg( "results: %s", wsSecurityEngineResults );
 
         if (null == wsSecurityEngineResults && getWsSecurityUsernameTokenCallback().isInboundHeaderOptional()) {
-            logger.wrn( "No username token found on WS-Security header..." );
+            logger.dbg( "No username token found on WS-Security header..." );
             return true;
         } else if (null == wsSecurityEngineResults) {
             throw SOAPUtils.createSOAPFaultException( "Missing security header", "FailedCheck" );
