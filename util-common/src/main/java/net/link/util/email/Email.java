@@ -41,34 +41,34 @@ public class Email implements Callable<Boolean>, Serializable {
     private String               sender;
     private String               receiver;
     private String               subject;
-    private String               text;
+    private String               htmlContent;
     private List<MailAttachment> attachments;
     private String               host;
     private int                  port;
 
     private String replyToAddress;
 
-    public Email(String username, String password, String sender, String receiver, String subject, String text, String host, int port) {
+    public Email(String username, String password, String sender, String receiver, String subject, String htmlContent, String host, int port) {
 
-        this( username, password, sender, receiver, subject, text, new ArrayList<MailAttachment>(), host, port );
+        this( username, password, sender, receiver, subject, htmlContent, new ArrayList<MailAttachment>(), host, port );
     }
 
-    public Email(String username, String password, String sender, String receiver, String subject, String text, @Nullable MailAttachment attachment,
+    public Email(String username, String password, String sender, String receiver, String subject, String htmlContent, @Nullable MailAttachment attachment,
                  String host, int port) {
 
-        this( username, password, sender, receiver, subject, text, attachment == null? new ArrayList<MailAttachment>(): Collections.singletonList( attachment ),
-                host, port );
+        this( username, password, sender, receiver, subject, htmlContent,
+                attachment == null? new ArrayList<MailAttachment>(): Collections.singletonList( attachment ), host, port );
     }
 
-    public Email(String username, String password, String sender, String receiver, String subject, String text, @NotNull List<MailAttachment> attachments,
-                 String host, int port) {
+    public Email(String username, String password, String sender, String receiver, String subject, String htmlContent,
+                 @NotNull List<MailAttachment> attachments, String host, int port) {
 
         this.username = username;
         this.password = password;
         this.sender = sender;
         this.receiver = receiver;
         this.subject = subject;
-        this.text = text;
+        this.htmlContent = htmlContent;
         this.attachments = attachments;
         this.host = host;
         this.port = port;
@@ -110,8 +110,8 @@ public class Email implements Callable<Boolean>, Serializable {
 
                 message.setReplyTo( new Address[] {
 
-                                new InternetAddress( this.replyToAddress )
-                        } );
+                        new InternetAddress( this.replyToAddress )
+                } );
             }
             message.setSubject( subject, "UTF-8" );
             message.setSentDate( new Date() );
@@ -131,7 +131,7 @@ public class Email implements Callable<Boolean>, Serializable {
             content.addBodyPart( wrap );
 
             //Set mail content
-            html.setContent( text, MIME_TYPE_HTML_MAIL );
+            html.setContent( htmlContent, MIME_TYPE_HTML_MAIL );
 
             //Add attachments
             if (attachments != null) {
@@ -174,7 +174,7 @@ public class Email implements Callable<Boolean>, Serializable {
                ", sender='" + sender + '\'' +
                ", receiver='" + receiver + '\'' +
                ", subject='" + subject + '\'' +
-               ", text='" + text + '\'' +
+               ", text='" + htmlContent + '\'' +
                ", attachments=" + attachments +
                ", host='" + host + '\'' +
                ", port=" + port +
