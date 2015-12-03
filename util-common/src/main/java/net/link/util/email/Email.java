@@ -19,6 +19,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
+import net.link.util.InternalInconsistencyException;
 import net.link.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -161,7 +162,7 @@ public class Email implements Callable<Boolean>, Serializable {
 
             logger.err( ex, "Failed to send email to %s", receiver );
 
-            return false;
+            throw new InternalInconsistencyException( ex );
         }
     }
 
