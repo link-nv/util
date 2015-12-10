@@ -62,6 +62,8 @@ public class Transaction {
         if (em != null && em.isOpen()) {
             if (em.getTransaction().isActive() && !em.getTransaction().getRollbackOnly()) {
                 em.getTransaction().commit();
+                // start a new transaction
+                em.getTransaction().begin();
             } else if (em.getTransaction().isActive()) {
                 logger.wrn( new IllegalStateException( "Cannot commit transaction" ),
                         "Cannot commit transaction: transaction is rollback-only, performing rollback instead" );
