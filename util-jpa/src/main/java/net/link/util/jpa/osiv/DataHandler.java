@@ -12,6 +12,7 @@ import net.link.util.logging.Logger;
  * Date: 02/09/13
  * Time: 13:39
  */
+@Deprecated
 public class DataHandler {
 
     private static final Logger logger = Logger.get( DataHandler.class );

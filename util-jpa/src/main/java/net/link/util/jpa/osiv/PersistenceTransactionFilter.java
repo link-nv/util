@@ -15,10 +15,9 @@ import net.link.util.logging.Logger;
  * Date: 02/09/13
  * Time: 13:41
  */
-@Deprecated
-public class PersistenceFilter implements Filter {
+public class PersistenceTransactionFilter implements Filter {
 
-    private static final Logger logger = Logger.get( PersistenceFilter.class );
+    private static final Logger logger = Logger.get( PersistenceTransactionFilter.class );
 
     /**
      * Called by the web container to indicate to a filter that it is being placed into
@@ -61,28 +60,31 @@ public class PersistenceFilter implements Filter {
             filterChain.doFilter( servletRequest, servletResponse );
 
             logger.dbg( "commiting" );
-            DataHandler.commit();
+            Transaction.commit();
         }
         catch (IOException e) {
 
             logger.err( e, "rollback" );
-            DataHandler.rollback();
+            Transaction.rollback();
 
             throw e;
         }
         catch (ServletException e) {
 
-            logger.err( "rollback" );
-            DataHandler.rollback();
+            logger.err( e, "rollback" );
+            Transaction.rollback();
 
             throw e;
         }
         catch (Exception e) {
 
-            logger.err( "rollback" );
-            DataHandler.rollback();
+            logger.err( e, "rollback" );
+            Transaction.rollback();
 
             throw new ServletException( e );
+        }
+        finally {
+            Transaction.close();
         }
     }
 
