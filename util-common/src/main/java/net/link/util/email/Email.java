@@ -1,8 +1,7 @@
 package net.link.util.email;
 
+import com.google.common.collect.Lists;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -21,8 +20,6 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 import net.link.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 
 /**
@@ -36,49 +33,115 @@ public class Email implements Callable<Boolean>, Serializable {
 
     public static final String MIME_TYPE_HTML_MAIL = "text/html; charset=utf-8";
 
-    private String               username;
-    private String               password;
-    private String               sender;
-    private String               receiver;
-    private String               subject;
-    private String               htmlContent;
-    private List<MailAttachment> attachments;
-    private String               host;
-    private int                  port;
+    //Mandatory parameters
+    private final String username;
+    private final String password;
+    private final String sender;
+    private final String receiver;
+    private final String subject;
+    private final String htmlContent;
+    private final String host;
+    private final int    port;
 
-    private String replyToAddress;
+    //Optional parameters
+    private final String               senderAlias;
+    private final String               bcc;
+    private final String               cc;
+    private final String               replyToAddress;
+    private final List<MailAttachment> attachments;
 
-    public Email(String username, String password, String sender, String receiver, String subject, String htmlContent, String host, int port) {
+    private Email(final Builder builder) {
 
-        this( username, password, sender, receiver, subject, htmlContent, new ArrayList<MailAttachment>(), host, port );
+        this.username = builder.username;
+        this.password = builder.password;
+        this.sender = builder.sender;
+        this.receiver = builder.receiver;
+        this.subject = builder.subject;
+        this.htmlContent = builder.htmlContent;
+        this.host = builder.host;
+        this.port = builder.port;
+
+        this.senderAlias = builder.senderAlias;
+        this.bcc = builder.bcc;
+        this.cc = builder.cc;
+        this.replyToAddress = builder.replyToAddress;
+        this.attachments = builder.attachments;
     }
 
-    public Email(String username, String password, String sender, String receiver, String subject, String htmlContent, @Nullable MailAttachment attachment,
-                 String host, int port) {
+    //Builder
+    public static class Builder {
 
-        this( username, password, sender, receiver, subject, htmlContent,
-                attachment == null? new ArrayList<MailAttachment>(): Collections.singletonList( attachment ), host, port );
-    }
+        //Mandatory parameters
+        private final String username;
+        private final String password;
+        private final String sender;
+        private final String receiver;
+        private final String subject;
+        private final String htmlContent;
+        private final String host;
+        private final int    port;
 
-    public Email(String username, String password, String sender, String receiver, String subject, String htmlContent,
-                 @NotNull List<MailAttachment> attachments, String host, int port) {
+        //Optional parameters
+        private String               senderAlias    = null;
+        private String               bcc            = null;
+        private String               cc             = null;
+        private String               replyToAddress = null;
+        private List<MailAttachment> attachments    = Lists.newArrayList();
 
-        this.username = username;
-        this.password = password;
-        this.sender = sender;
-        this.receiver = receiver;
-        this.subject = subject;
-        this.htmlContent = htmlContent;
-        this.attachments = attachments;
-        this.host = host;
-        this.port = port;
+        public Email build() {
 
-        this.replyToAddress = null;
-    }
+            return new Email( this );
+        }
 
-    public void setReplyToAddress(String replyToAddress) {
+        //Constructor with mandatory parameters
+        public Builder(final String username, final String password, final String sender, final String receiver, final String subject, final String htmlContent,
+                       final String host, final int port) {
 
-        this.replyToAddress = replyToAddress;
+            this.username = username;
+            this.password = password;
+            this.sender = sender;
+            this.receiver = receiver;
+            this.subject = subject;
+            this.htmlContent = htmlContent;
+            this.host = host;
+            this.port = port;
+        }
+
+        public Builder senderAlias(final String senderAlias) {
+
+            this.senderAlias = senderAlias;
+            return this;
+        }
+
+        public Builder bcc(final String bcc) {
+
+            this.bcc = bcc;
+            return this;
+        }
+
+        public Builder cc(final String cc) {
+
+            this.cc = cc;
+            return this;
+        }
+
+        public Builder replyToAddress(final String replyToAddress) {
+
+            this.replyToAddress = replyToAddress;
+            return this;
+        }
+
+        /**
+         * Adds an attachment, multiple withAttachment() are supported!
+         */
+        public Builder withAttachment(final MailAttachment mailAttachment) {
+
+            if (mailAttachment != null && !this.attachments.contains( mailAttachment )) {
+
+                this.attachments.add( mailAttachment );
+            }
+            return this;
+        }
     }
 
     @Override
@@ -102,17 +165,40 @@ public class Email implements Callable<Boolean>, Serializable {
             MailAuthenticator authentication = new MailAuthenticator( username, password );
             Session session = Session.getDefaultInstance( mailProperties, authentication );
 
-            //Message
+            //Build message
             MimeMessage message = new MimeMessage( session );
-            message.setFrom( new InternetAddress( sender ) );
+
+            //Set alias, if any
+            if (StringUtils.isNotBlank( senderAlias )) {
+
+                message.setFrom( new InternetAddress( sender ) );
+            } else {
+
+                message.setFrom( new InternetAddress( sender, senderAlias ) );
+            }
+
+            //To
             message.setRecipients( Message.RecipientType.TO, new InternetAddress[] { new InternetAddress( receiver ) } );
+
+            //Reply to
             if (StringUtils.isNotBlank( this.replyToAddress )) {
 
-                message.setReplyTo( new Address[] {
-
-                        new InternetAddress( this.replyToAddress )
-                } );
+                message.setReplyTo( new Address[] { new InternetAddress( this.replyToAddress ) } );
             }
+
+            //Bcc
+            if (StringUtils.isNotBlank( bcc )) {
+
+                message.setRecipients( Message.RecipientType.BCC, new InternetAddress[] { new InternetAddress( bcc ) } );
+            }
+
+            //Cc
+            if (StringUtils.isNotBlank( cc )) {
+
+                message.setRecipients( Message.RecipientType.CC, new InternetAddress[] { new InternetAddress( cc ) } );
+            }
+
+            //Data
             message.setSubject( subject, "UTF-8" );
             message.setSentDate( new Date() );
 
@@ -134,12 +220,14 @@ public class Email implements Callable<Boolean>, Serializable {
             html.setContent( htmlContent, MIME_TYPE_HTML_MAIL );
 
             //Add attachments
-            if (attachments != null) {
+            if (attachments != null && !attachments.isEmpty()) {
 
                 for (MailAttachment attachment : attachments) {
 
-                    if (attachment == null)
+                    if (attachment == null) {
+
                         continue;
+                    }
 
                     MimeBodyPart messageBodyPart = new MimeBodyPart();
                     DataSource source = new ByteArrayDataSource( attachment.getContent(), attachment.getMimeType() );
@@ -170,15 +258,18 @@ public class Email implements Callable<Boolean>, Serializable {
 
         return "Email{" +
                "username='" + username + '\'' +
-               ", password='" + String.format( "%" + password.length() + "s", "" ).replace( ' ', '*' ) + '\'' +
+               ", password='" + password + '\'' +
                ", sender='" + sender + '\'' +
                ", receiver='" + receiver + '\'' +
                ", subject='" + subject + '\'' +
-               ", text='" + htmlContent + '\'' +
-               ", attachments=" + attachments +
+               ", htmlContent='" + htmlContent + '\'' +
                ", host='" + host + '\'' +
                ", port=" + port +
+               ", senderAlias='" + senderAlias + '\'' +
+               ", bcc='" + bcc + '\'' +
+               ", cc='" + cc + '\'' +
                ", replyToAddress='" + replyToAddress + '\'' +
+               ", attachments=" + attachments +
                '}';
     }
 }
