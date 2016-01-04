@@ -258,7 +258,7 @@ public class Email implements Callable<Boolean>, Serializable {
 
         return "Email{" +
                "username='" + username + '\'' +
-               ", password='" + password + '\'' +
+               ", password='" + String.format( "%" + password.length() + "s", "" ).replace( ' ', '*' ) + '\'' +
                ", sender='" + sender + '\'' +
                ", receiver='" + receiver + '\'' +
                ", subject='" + subject + '\'' +
