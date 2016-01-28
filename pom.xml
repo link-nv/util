@@ -145,7 +145,7 @@
 
         <wss4j.version>1.6.5</wss4j.version>
         <slf4j.version>1.5.11</slf4j.version>
-        <commons-collections.version>3.2.1</commons-collections.version>
+        <commons-collections.version>4.1</commons-collections.version>
         <junit.version>4.4</junit.version>
         <easymock.version>2.3</easymock.version>
         <easymockclassextension.version>2.2.2</easymockclassextension.version>
@@ -569,11 +569,6 @@
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
                 <version>${hibernate-core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-collections</groupId>
-                <artifactId>commons-collections</artifactId>
-                <version>${commons-collections.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
