@@ -5,7 +5,7 @@
     <parent>
         <groupId>net.lin-k</groupId>
         <artifactId>util</artifactId>
-        <version>GIT-SNAPSHOT</version>
+        <version>1.74</version>
     </parent>
 
     <name>Util SAML v2.0</name>
