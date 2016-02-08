@@ -118,7 +118,7 @@ for file; do
     if [[ ! $classifier ]] || (( ! force )); then classifier=$(ask +"$classifier" 'Classifier (sources/javadoc/none):'); fi
     [[ $classifier = none ]] && classifier=
 
-    mvn2 deploy:deploy-file \
+    mvn deploy:deploy-file \
       -Durl="$url" \
       -Dfile="$file" \
       -DgroupId="$group" \
