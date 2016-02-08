@@ -1,4 +1,4 @@
-package net.link.util.config;
+package net.link.util.keyprovider;
 
 import com.google.common.io.Files;
 import java.io.File;

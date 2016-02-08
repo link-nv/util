@@ -1,4 +1,4 @@
-package net.link.util.config;
+package net.link.util.keyprovider;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

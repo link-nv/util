@@ -1,4 +1,4 @@
-package net.link.util.config;
+package net.link.util.keyprovider;
 
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
