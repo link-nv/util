@@ -3,12 +3,15 @@ package net.link.util.util;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import java.io.UnsupportedEncodingException;
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.util.Formatter;
-import javax.annotation.Nullable;
 import net.link.util.logging.Logger;
+import org.bouncycastle.util.encoders.Base64;
+import org.jetbrains.annotations.Nullable;
 
 
 /**
@@ -16,6 +19,7 @@ import net.link.util.logging.Logger;
  * Date: 12/03/14
  * Time: 13:30
  */
+@SuppressWarnings("unused")
 public abstract class CodeUtils {
 
     static final Logger logger = Logger.get( CodeUtils.class );
@@ -130,7 +134,30 @@ public abstract class CodeUtils {
             return URLEncoder.encode( plainString, encoding.displayName() );
         }
         catch (final UnsupportedEncodingException e) {
+            //noinspection ProhibitedExceptionThrown
             throw logger.bug( e, "Given encoding not supported: %s", encoding );
         }
     }
+
+    public static String decodeBase64(@Nullable final String encoded) {
+
+        return null != encoded? new String( Base64.decode( encoded.getBytes( Charsets.UTF_8 ) ), Charsets.UTF_8 ): null;
+    }
+
+    @Nullable
+    public static byte[] decodeBase64ToBytes(@Nullable final String encoded) {
+
+        return null != encoded? Base64.decode( encoded.getBytes( Charsets.UTF_8 ) ): null;
+    }
+
+    public static String encodeBase64(@Nullable final String content) {
+
+        return null != content? Base64.toBase64String( content.getBytes( Charsets.UTF_8 ) ): null;
+    }
+
+    public static String encodeBase64(@Nullable final byte[] content) {
+
+        return null != content? Base64.toBase64String( content ): null;
+    }
+
 }
