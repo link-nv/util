@@ -53,17 +53,29 @@ public class Transaction {
         return entityManagers.get();
     }
 
+    public static void commit() {
+
+        commit( true );
+    }
+
+    public static void finalCommit() {
+
+        commit( false );
+    }
+
     /**
      * Commit current transaction, optionally start a new one
      */
-    public static void commit() {
+    public static void commit(final boolean startNewTransaction) {
 
         EntityManager em = entityManagers.get();
         if (em != null && em.isOpen()) {
             if (em.getTransaction().isActive() && !em.getTransaction().getRollbackOnly()) {
                 em.getTransaction().commit();
                 // start a new transaction
-                em.getTransaction().begin();
+                if (startNewTransaction) {
+                    em.getTransaction().begin();
+                }
             } else if (em.getTransaction().isActive()) {
                 logger.wrn( new IllegalStateException( "Cannot commit transaction" ),
                         "Cannot commit transaction: transaction is rollback-only, performing rollback instead" );
@@ -72,7 +84,7 @@ public class Transaction {
                 logger.wrn( new IllegalStateException( "Cannot commit transaction: transaction is not active" ),
                         "Cannot commit transaction: transaction is not active" );
             }
-        } else {
+        } else if (em != null) {
             entityManagers.set( null ); // clear current em
             throw new InternalInconsistencyException( "Attempting to commit to a closed entity manager" );
         }

@@ -59,8 +59,7 @@ public class PersistenceTransactionFilter implements Filter {
 
             filterChain.doFilter( servletRequest, servletResponse );
 
-            logger.dbg( "commiting" );
-            Transaction.commit();
+            Transaction.finalCommit();
         }
         catch (IOException e) {
 
