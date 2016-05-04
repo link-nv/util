@@ -2,7 +2,7 @@ package net.link.util.ws;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.sun.xml.internal.ws.developer.JAXWSProperties;
+import com.sun.xml.ws.developer.JAXWSProperties;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -81,10 +81,7 @@ public class AbstractWSClient<P> {
                 getBindingProvider().getRequestContext().put( JAX_WS_RI_HOSTNAME_VERIFIER, new SkipHostnameVerifier() );
             }
         }
-        catch (KeyManagementException e) {
-            throw new InternalInconsistencyException( e );
-        }
-        catch (NoSuchAlgorithmException e) {
+        catch (KeyManagementException | NoSuchAlgorithmException e) {
             throw new InternalInconsistencyException( e );
         }
     }
