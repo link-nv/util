@@ -3,32 +3,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>net.lin-k.util</groupId>
-        <artifactId>bigbadworld</artifactId>
+        <groupId>net.lin-k</groupId>
+        <artifactId>util</artifactId>
         <version>GIT-SNAPSHOT</version>
     </parent>
 
     <!-- PROJECT METADATA -->
-    <name>GitHub Repo</name>
-    <inceptionYear>2010</inceptionYear>
-    <groupId>net.lin-k.util.bigbadworld</groupId>
-    <artifactId>github</artifactId>
+    <name>repo.linkid.be</name>
+    <groupId>net.lin-k.util</groupId>
+    <artifactId>repo.linkid.be</artifactId>
     <packaging>pom</packaging>
-    <organization>
-        <name>Lin.k N.V.</name>
-        <url>http://www.lin-k.net</url>
-    </organization>
-
-    <distributionManagement>
-        <repository>
-            <id>embedded</id>
-            <url>${maven-repository.url}</url>
-        </repository>
-        <snapshotRepository>
-            <id>embedded.snapshot</id>
-            <url>${maven-repository.url}</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <build>
         <plugins>
@@ -41,6 +25,18 @@
             </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <repository>
+            <id>repo.linkid.be</id>
+            <url>s3://repo.linkid.be/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>repo.linkid.be</id>
+            <url>s3://repo.linkid.be/snapshots</url>
+            <uniqueVersion>false</uniqueVersion>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>
@@ -129,4 +125,5 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
+
 </project>

@@ -1,3 +1,0 @@
-[submodule "maven-repository"]
-	path = bigbadworld/github/maven-repository
-	url = git://github.com/link-nv/maven-repository
