@@ -70,7 +70,7 @@ import org.joda.time.DateTime;
 @SuppressWarnings("UnusedDeclaration")
 public abstract class KeyUtils {
 
-    protected static final int RSA_KEYSIZE           = 1024;
+    protected static final int RSA_KEYSIZE           = 4096;
     protected static final int DSA_MODLEN            = 512;
     protected static final int SERIALNUMBER_NUM_BITS = 128;
 
@@ -146,13 +146,7 @@ public abstract class KeyUtils {
         try {
             return (PrivateKeyEntry) keyStore.getEntry( alias, new KeyStore.PasswordProtection( keyEntryPassword ) );
         }
-        catch (UnrecoverableEntryException e) {
-            throw new InternalInconsistencyException( "error retrieving key", e );
-        }
-        catch (NoSuchAlgorithmException e) {
-            throw new InternalInconsistencyException( "error retrieving key", e );
-        }
-        catch (KeyStoreException e) {
+        catch (UnrecoverableEntryException | KeyStoreException | NoSuchAlgorithmException e) {
             throw new InternalInconsistencyException( "error retrieving key", e );
         }
     }
@@ -184,13 +178,7 @@ public abstract class KeyUtils {
         try {
             return (PrivateKeyEntry) keyStore.getEntry( alias, new KeyStore.PasswordProtection( keyEntryPassword ) );
         }
-        catch (UnrecoverableEntryException e) {
-            throw new InternalInconsistencyException( "error retrieving key", e );
-        }
-        catch (NoSuchAlgorithmException e) {
-            throw new InternalInconsistencyException( "error retrieving key", e );
-        }
-        catch (KeyStoreException e) {
+        catch (UnrecoverableEntryException | KeyStoreException | NoSuchAlgorithmException e) {
             throw new InternalInconsistencyException( "error retrieving key", e );
         }
     }
@@ -249,16 +237,7 @@ public abstract class KeyUtils {
 
             return keyStore;
         }
-        catch (IOException e) {
-            throw new InternalInconsistencyException( e );
-        }
-        catch (NoSuchAlgorithmException e) {
-            throw new InternalInconsistencyException( e );
-        }
-        catch (CertificateException e) {
-            throw new InternalInconsistencyException( e );
-        }
-        catch (KeyStoreException e) {
+        catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
             throw new InternalInconsistencyException( e );
         }
     }
@@ -374,10 +353,7 @@ public abstract class KeyUtils {
         catch (CertificateException e) {
             throw new InternalInconsistencyException( "X.509 is not supported.", e );
         }
-        catch (OperatorCreationException e) {
-            throw new InternalInconsistencyException( e );
-        }
-        catch (CertIOException e) {
+        catch (OperatorCreationException | CertIOException e) {
             throw new InternalInconsistencyException( e );
         }
     }
