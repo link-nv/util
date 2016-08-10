@@ -152,9 +152,9 @@
         <cglib.version>2.1_3</cglib.version>
         <objenesis.version>1.3</objenesis.version>
 
-        <hibernate-entitymanager.version>3.6.0.Final</hibernate-entitymanager.version>
-        <hibernate-core.version>3.6.2.Final</hibernate-core.version>
-        <hibernate-jpa2-api.version>1.0.0.Final</hibernate-jpa2-api.version>
+        <hibernate-entitymanager.version>4.3.10.Final</hibernate-entitymanager.version>
+        <hibernate-core.version>4.3.10.Final</hibernate-core.version>
+        <hibernate-jpa2.1-api.version>1.0.0.Final</hibernate-jpa2.1-api.version>
 
         <jetty.version>6.1.7</jetty.version>
         <commons-io.version>1.3.1</commons-io.version>
@@ -552,8 +552,21 @@
             </dependency>
             <dependency>
                 <groupId>org.hibernate.javax.persistence</groupId>
-                <artifactId>hibernate-jpa-2.0-api</artifactId>
-                <version>${hibernate-jpa2-api.version}</version>
+                <artifactId>hibernate-jpa-2.1-api</artifactId>
+                <version>${hibernate-jpa2.1-api.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-core</artifactId>
+                <version>${hibernate-core.version}</version>
+                <scope>compile</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>xml-apis</groupId>
+                        <artifactId>xml-apis</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.hibernate</groupId>
@@ -565,11 +578,6 @@
                         <artifactId>commons-logging</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-core</artifactId>
-                <version>${hibernate-core.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>

@@ -7,13 +7,21 @@
 
 package net.link.util.test.jpa;
 
-import java.lang.reflect.*;
-import java.util.Arrays;
-import java.util.LinkedList;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import javax.annotation.PostConstruct;
-import javax.persistence.*;
-import net.sf.cglib.proxy.*;
-import org.hibernate.ejb.Ejb3Configuration;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
+import javax.persistence.PersistenceContext;
+import net.link.util.InternalInconsistencyException;
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.MethodProxy;
 
 
 public class EntityTestManager {
@@ -22,59 +30,48 @@ public class EntityTestManager {
 
     private EntityManagerFactory entityManagerFactory;
     private EntityManager        entityManager;
-    private Ejb3Configuration    configuration;
+    private Map<String, String>  configuration;
 
     public void configureHSql() {
 
-        configuration = new Ejb3Configuration();
-        configuration.setProperty( "hibernate.dialect", "org.hibernate.dialect.HSQLDialect" );
-        configuration.setProperty( "hibernate.show_sql", "true" );
-        configuration.setProperty( "hibernate.hbm2ddl.auto", "create-drop" );
-        configuration.setProperty( "hibernate.connection.username", "sa" );
-        configuration.setProperty( "hibernate.connection.password", "" );
-        configuration.setProperty( "hibernate.connection.driver_class", "org.hsqldb.jdbcDriver" );
-        configuration.setProperty( "hibernate.connection.url", "jdbc:hsqldb:mem:test" );
+        configuration = new HashMap<>();
+        configuration.put( "hibernate.dialect", "org.hibernate.dialect.HSQLDialect" );
+        configuration.put( "hibernate.show_sql", "true" );
+        configuration.put( "hibernate.hbm2ddl.auto", "create-drop" );
+        configuration.put( "hibernate.connection.username", "sa" );
+        configuration.put( "hibernate.connection.password", "" );
+        configuration.put( "hibernate.connection.driver_class", "org.hsqldb.jdbcDriver" );
+        configuration.put( "hibernate.connection.url", "jdbc:hsqldb:mem:test" );
         // turn off batch processing, gives more informative errors that way
-        configuration.setProperty( "hibernate.jdbc.batch_size", String.valueOf( getBatchSize() ) );
+        configuration.put( "hibernate.jdbc.batch_size", String.valueOf( getBatchSize() ) );
     }
 
+    @SuppressWarnings("unused")
     public void configureMySql(String host, int port, String database, String username, String password, boolean showSql) {
 
-        configuration = new Ejb3Configuration();
-        configuration.setProperty( "hibernate.dialect", "org.hibernate.dialect.MySQLDialect" );
-        configuration.setProperty( "hibernate.show_sql", Boolean.toString( showSql ) );
-        configuration.setProperty( "hibernate.hbm2ddl.auto", "validate" );
-        configuration.setProperty( "hibernate.connection.username", username );
-        configuration.setProperty( "hibernate.connection.password", password );
-        configuration.setProperty( "hibernate.connection.driver_class", "com.mysql.jdbc.Driver" );
-        configuration.setProperty( "hibernate.connection.url", String.format( "jdbc:mysql://%s:%d/%s", host, port, database ) );
+        configuration = new HashMap<>();
+        configuration.put( "hibernate.dialect", "org.hibernate.dialect.MySQLDialect" );
+        configuration.put( "hibernate.show_sql", Boolean.toString( showSql ) );
+        configuration.put( "hibernate.hbm2ddl.auto", "validate" );
+        configuration.put( "hibernate.connection.username", username );
+        configuration.put( "hibernate.connection.password", password );
+        configuration.put( "hibernate.connection.driver_class", "com.mysql.jdbc.Driver" );
+        configuration.put( "hibernate.connection.url", String.format( "jdbc:mysql://%s:%d/%s", host, port, database ) );
         // turn off batch processing, gives more informative errors that way
-        configuration.setProperty( "hibernate.jdbc.batch_size", String.valueOf( getBatchSize() ) );
+        configuration.put( "hibernate.jdbc.batch_size", String.valueOf( getBatchSize() ) );
     }
 
-    @SuppressWarnings("deprecation")
-    public void setUp(Class<?>[] entityArray, Class<?>... entityClasses)
+    public void setUp(String persistenceUnitName)
             throws Exception {
 
-        LinkedList<Class<?>> entities = new LinkedList<Class<?>>( Arrays.asList( entityArray ) );
-        entities.addAll( Arrays.asList( entityClasses ) );
-        setUp( entities.toArray( new Class<?>[entities.size()] ) );
-    }
-
-    @SuppressWarnings("deprecation")
-    public void setUp(Class<?>... entityClasses)
-            throws Exception {
-
-        if (entityClasses == null)
+        if (null == persistenceUnitName) {
             return;
+        }
 
         configureHSql();
         // configureMySql( "localhost", 3306, "safeonline", "safeonline", "safeonline", true );
 
-        for (Class<?> entityClass : entityClasses) {
-            configuration.addAnnotatedClass( entityClass );
-        }
-        entityManagerFactory = configuration.createEntityManagerFactory();
+        entityManagerFactory = Persistence.createEntityManagerFactory( persistenceUnitName, configuration );
         /*
          * createEntityManagerFactory is deprecated, but buildEntityManagerFactory doesn't work because of a bug.
          */
@@ -88,6 +85,7 @@ public class EntityTestManager {
         return batchSize;
     }
 
+    @SuppressWarnings("unused")
     public void setBatchSize(int batchSize) {
 
         this.batchSize = batchSize;
@@ -112,6 +110,7 @@ public class EntityTestManager {
         }
     }
 
+    @SuppressWarnings("unused")
     public EntityManager refreshEntityManager() {
 
         if (entityManager.isOpen()) {
@@ -128,6 +127,7 @@ public class EntityTestManager {
         return entityManager;
     }
 
+    @SuppressWarnings("unused")
     public void newTransaction() {
 
         EntityTransaction transaction = entityManager.getTransaction();
@@ -145,31 +145,31 @@ public class EntityTestManager {
      * Create a new instance of the given class that has the test transaction entity manager handler applied to it. The transaction
      * semantics are:
      * <p/>
-     * <code>@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)</code>
+     * {@code @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)}
      */
-    @SuppressWarnings("unchecked")
-    public <Type> Type newInstance(Class<Type> clazz) {
+    @SuppressWarnings({ "unchecked", "ClassNewInstance", "OverlyBroadCatchBlock" })
+    public <T> T newInstance(Class<T> clazz) {
 
-        Type instance;
+        T instance;
         try {
             instance = clazz.newInstance();
         }
-        catch (InstantiationException e) {
-            throw new RuntimeException( "instantiation error" );
+        catch (InstantiationException ignored) {
+            throw new InternalInconsistencyException( "instantiation error" );
         }
-        catch (IllegalAccessException e) {
-            throw new RuntimeException( "illegal access error" );
+        catch (IllegalAccessException ignored) {
+            throw new InternalInconsistencyException( "illegal access error" );
         }
         TransactionMethodInterceptor transactionInvocationHandler = new TransactionMethodInterceptor( instance, entityManagerFactory );
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass( clazz );
         enhancer.setCallback( transactionInvocationHandler );
-        Type object = (Type) enhancer.create();
+        T object = (T) enhancer.create();
         try {
             init( clazz, object );
         }
-        catch (Exception e) {
-            throw new RuntimeException( "init error" );
+        catch (Exception ignored) {
+            throw new InternalInconsistencyException( "init error" );
         }
         return object;
     }
@@ -182,7 +182,7 @@ public class EntityTestManager {
             PostConstruct postConstruct = method.getAnnotation( PostConstruct.class );
             if (null == postConstruct)
                 continue;
-            method.invoke( bean, new Object[] { } );
+            method.invoke( bean );
         }
     }
 
@@ -194,14 +194,14 @@ public class EntityTestManager {
 
         private final Field field;
 
-        public TransactionMethodInterceptor(Object object, EntityManagerFactory entityManagerFactory) {
+        private TransactionMethodInterceptor(Object object, EntityManagerFactory entityManagerFactory) {
 
             this.object = object;
             this.entityManagerFactory = entityManagerFactory;
             field = getEntityManagerField( object );
         }
 
-        private Field getEntityManagerField(Object target) {
+        private static Field getEntityManagerField(Object target) {
 
             Class<?> clazz = target.getClass();
             Field[] fields = clazz.getDeclaredFields();
@@ -209,14 +209,16 @@ public class EntityTestManager {
                 PersistenceContext persistenceContextAnnotation = currentField.getAnnotation( PersistenceContext.class );
                 if (null == persistenceContextAnnotation)
                     continue;
-                if (false == EntityManager.class.isAssignableFrom( currentField.getType() ))
-                    throw new RuntimeException( "field type not correct" );
+                if (!EntityManager.class.isAssignableFrom( currentField.getType() ))
+                    throw new InternalInconsistencyException( "field type not correct" );
                 currentField.setAccessible( true );
                 return currentField;
             }
-            throw new RuntimeException( "no entity manager field found" );
+            throw new InternalInconsistencyException( "no entity manager field found" );
         }
 
+        @SuppressWarnings({ "OverlyBroadCatchBlock", "ProhibitedExceptionThrown", "CaughtExceptionImmediatelyRethrown" })
+        @Override
         public Object intercept(@SuppressWarnings("unused") Object obj, Method method, Object[] args, @SuppressWarnings("unused") MethodProxy proxy)
                 throws Throwable {
 

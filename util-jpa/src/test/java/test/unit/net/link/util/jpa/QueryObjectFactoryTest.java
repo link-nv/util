@@ -7,14 +7,22 @@
 
 package test.unit.net.link.util.jpa;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.List;
 import java.util.UUID;
-import javax.persistence.*;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.Query;
 import net.link.util.jpa.QueryObjectFactory;
 import net.link.util.test.jpa.EntityTestManager;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 
 public class QueryObjectFactoryTest {
@@ -28,7 +36,7 @@ public class QueryObjectFactoryTest {
             throws Exception {
 
         entityTestManager = new EntityTestManager();
-        entityTestManager.setUp( MyTestEntity.class );
+        entityTestManager.setUp( "UnitTest" );
         entityManager = entityTestManager.getEntityManager();
     }
 
@@ -44,8 +52,7 @@ public class QueryObjectFactoryTest {
             throws Exception {
 
         // Test
-        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager,
-                MyTestEntity.MyQueryTestInterface.class );
+        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager, MyTestEntity.MyQueryTestInterface.class );
 
         // Verify
         assertNotNull( queryObject );
@@ -56,8 +63,7 @@ public class QueryObjectFactoryTest {
             throws Exception {
 
         // Setup Data
-        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager,
-                MyTestEntity.MyQueryTestInterface.class );
+        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager, MyTestEntity.MyQueryTestInterface.class );
 
         // Test
         List<MyTestEntity> result = queryObject.listAll();
@@ -76,8 +82,7 @@ public class QueryObjectFactoryTest {
         MyTestEntity myTestEntity = new MyTestEntity( testName );
         entityManager.persist( myTestEntity );
 
-        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager,
-                MyTestEntity.MyQueryTestInterface.class );
+        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager, MyTestEntity.MyQueryTestInterface.class );
 
         // Test
         List<MyTestEntity> result = queryObject.listAll();
@@ -97,8 +102,7 @@ public class QueryObjectFactoryTest {
         MyTestEntity myTestEntity = new MyTestEntity( testName );
         entityManager.persist( myTestEntity );
 
-        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager,
-                MyTestEntity.MyQueryTestInterface.class );
+        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager, MyTestEntity.MyQueryTestInterface.class );
 
         // Test
         List<MyTestEntity> result = queryObject.listAll( testName );
@@ -125,8 +129,7 @@ public class QueryObjectFactoryTest {
         MyTestEntity myTestEntity = new MyTestEntity( testName );
         entityManager.persist( myTestEntity );
 
-        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager,
-                MyTestEntity.MyQueryTestInterface.class );
+        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager, MyTestEntity.MyQueryTestInterface.class );
 
         // Test
         MyTestEntity result = queryObject.get( testName );
@@ -154,8 +157,7 @@ public class QueryObjectFactoryTest {
         MyTestEntity myTestEntity = new MyTestEntity( testName );
         entityManager.persist( myTestEntity );
 
-        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager,
-                MyTestEntity.MyQueryTestInterface.class );
+        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager, MyTestEntity.MyQueryTestInterface.class );
 
         // Test
         MyTestEntity result = queryObject.get( testName );
@@ -180,8 +182,7 @@ public class QueryObjectFactoryTest {
         MyTestEntity myTestEntity = new MyTestEntity( testName );
         entityManager.persist( myTestEntity );
 
-        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager,
-                MyTestEntity.MyQueryTestInterface.class );
+        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager, MyTestEntity.MyQueryTestInterface.class );
 
         // Test
         queryObject.removeAll();
@@ -200,8 +201,7 @@ public class QueryObjectFactoryTest {
             throws Exception {
 
         // Setup Data
-        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager,
-                MyTestEntity.MyQueryTestInterface.class );
+        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager, MyTestEntity.MyQueryTestInterface.class );
 
         // Test
         Query result = queryObject.listAllQuery();
@@ -215,13 +215,12 @@ public class QueryObjectFactoryTest {
             throws Exception {
 
         // Setup Data
-        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager,
-                MyTestEntity.MyQueryTestInterface.class );
+        MyTestEntity.MyQueryTestInterface queryObject = QueryObjectFactory.createQueryObject( entityManager, MyTestEntity.MyQueryTestInterface.class );
 
         // Test
         long count = queryObject.countAll();
 
         // Verify
-        assertTrue( 0 == count );
+        assertEquals( 0, count );
     }
 }
