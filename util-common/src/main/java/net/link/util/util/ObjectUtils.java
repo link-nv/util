@@ -452,7 +452,7 @@ public abstract class ObjectUtils {
                             if (!usedByType)
                                 return result;
 
-                        return function.apply( new LastResult( field, result ) );
+                        return (R) function.apply( new LastResult( field, result ) );
                     }
                 }, lastTypeResult.getLastResult(), false );
             }
