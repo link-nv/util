@@ -68,9 +68,10 @@ public class EntityTestManager {
             return;
         }
 
-        configureHSql();
-        // configureMySql( "localhost", 3306, "safeonline", "safeonline", "safeonline", true );
-
+        if (configuration == null) {
+            configureHSql();
+        }
+        
         entityManagerFactory = Persistence.createEntityManagerFactory( persistenceUnitName, configuration );
         /*
          * createEntityManagerFactory is deprecated, but buildEntityManagerFactory doesn't work because of a bug.
