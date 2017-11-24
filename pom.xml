@@ -183,7 +183,7 @@
                     <developmentVersion>GIT-SNAPSHOT</developmentVersion>
                     <localCheckout>true</localCheckout>
                     <preparationGoals>clean install</preparationGoals>
-                    <goals>deploy</goals>
+                    <goals>install</goals>
                     <updateBranchVersions>true</updateBranchVersions>
                     <updateWorkingCopyVersions>false</updateWorkingCopyVersions>
                     <branchName>${project.version}-maint</branchName>
